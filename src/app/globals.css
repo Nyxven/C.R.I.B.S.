@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-coral: #F1743E;
+  --color-coral-dark: #D8592A;
+  --color-purple: #8E7BD1;
+  --color-purple-dark: #6E5CB0;
+  --color-sage: #B9CE55;
+  --color-sage-dark: #93A93A;
+  --color-amber: #F2A759;
+  --color-amber-dark: #DE8A34;
+  --color-terracotta: #E96B57;
+  --color-gold: #F0C15C;
+  --color-pink: #EF7E9E;
+  --color-ink: #372F4A;
+  --color-ink-soft: #6C6480;
+  --color-cream: #FFF8F1;
+  --color-line: #F0E6DA;
+  --font-display: var(--font-baloo), "Nunito", sans-serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+}
+
+:root { --accent-a: #8E7BD1; --accent-b: #F1743E; }
+[data-theme="ocean"] { --accent-a: #4E9BC9; --accent-b: #6FD0C4; }
+[data-theme="meadow"] { --accent-a: #7BAE4A; --accent-b: #C7D65B; }
+[data-theme="berry"] { --accent-a: #B0559E; --accent-b: #EF7E9E; }
+
+html, body { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background:
+    radial-gradient(circle at 15% 8%, #F6E2C9 0%, transparent 45%),
+    radial-gradient(circle at 85% 92%, #D9E6C4 0%, transparent 45%),
+    var(--color-cream);
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3 { font-family: var(--font-display); }
+
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 48px; padding: 0 1.75rem; border-radius: 999px; border: 0; font-weight: 800;
+  color: #fff; background: linear-gradient(120deg, var(--accent-a), var(--accent-b));
+  box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent-a) 60%, transparent);
+  cursor: pointer; transition: transform .12s ease, opacity .12s ease;
+}
+.btn-primary:active { transform: scale(.97); }
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+.field {
+  width: 100%; min-height: 48px; border: 2px solid var(--color-line); background: #fff;
+  border-radius: 16px; padding: 0 1rem; font-size: 1rem; color: var(--color-ink); outline: none;
+}
+.field:focus-visible { border-color: var(--accent-a); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-a) 25%, transparent); }
+.card { background: #fff; border-radius: 20px; box-shadow: 0 4px 14px -9px rgba(60, 40, 90, .3); }
+
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes floaty { 50% { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

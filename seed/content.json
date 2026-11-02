@@ -1,0 +1,225 @@
+{
+  "modules": [
+    {
+      "id": "info",
+      "name": "Autism Information Module",
+      "shortName": "Autism Information Module",
+      "description": "The essentials — what ASD is, how it shows up differently in every child, and what the research says about early signs.",
+      "articles": [
+        {
+          "slug": "what-is-autism-spectrum-disorder",
+          "title": "What is Autism Spectrum Disorder?",
+          "readTime": "4 min read",
+          "html": "<p>Autism Spectrum Disorder (ASD) is a neurodevelopmental condition that shapes how a person communicates, interacts socially, and experiences the world around them. \"Spectrum\" is the key word — no two autistic children look or behave the same way, and support needs can range widely from one child to the next.</p>\n<p>Rather than a checklist of deficits, think of ASD as a different way of processing and relating to the world — one shaped by each child's unique wiring, environment, and relationships. Researchers increasingly describe autism as a phenomenon best understood in context: in the home, with family, and across daily routines, not just inside a clinic room.</p>\n<p>What this means for you as a parent: your day-to-day observations at home are genuinely valuable information, not just anecdotes. You know your child's patterns better than a single assessment ever could.</p>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "every-child-is-different",
+          "title": "Every Child is Different",
+          "readTime": "3 min read",
+          "html": "<p>Because ASD affects each child differently, the same strategy that works beautifully for one family may need real adjusting for yours. That's normal, not a sign you're doing something wrong.</p>\n<ul>\n<li>Some children are highly verbal; others communicate mainly through gesture, behavior, or assistive tools.</li>\n<li>Sensory needs vary — a sound that soothes one child may overwhelm another.</li>\n<li>Routines, interests, and comfort levels are deeply individual.</li>\n</ul>\n<p>The goal of this app isn't to hand you a single formula. It's to give you a range of evidence-informed options you can adapt to your own child, your own home, and your own family's rhythm.</p>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "early-signs-to-notice",
+          "title": "Early Signs to Notice",
+          "readTime": "5 min read",
+          "html": "<p>Early signs can include differences in eye contact, delayed or unusual language development, strong preferences for routine, intense focus on specific interests, and distinct responses to sound, texture, or light.</p>\n<p>None of these signs on their own means a diagnosis — children develop at their own pace. But if a pattern feels persistent and you're noticing it across different settings (home, school, with relatives), it's worth raising with a developmental pediatrician.</p>\n<div class=\"disclaimer\">This is general information, not a diagnostic tool. Only a licensed developmental pediatrician or psychologist can assess and diagnose ASD.</div>",
+          "reviewStatus": "prototype-content"
+        }
+      ]
+    },
+    {
+      "id": "comm",
+      "name": "Communication and Sensory Support System",
+      "shortName": "Communication & Sensory Support",
+      "description": "Bridging verbal and non-verbal communication, and understanding sensory sensitivities day to day.",
+      "articles": [
+        {
+          "slug": "visual-supports-that-help",
+          "title": "Visual Supports That Help",
+          "readTime": "4 min read",
+          "html": "<p>Many autistic children process visual information more easily than spoken words alone. Pairing speech with pictures, gestures, or simple signs can make daily instructions land more clearly.</p>\n<ul>\n<li><b>Visual schedules</b> — a simple picture sequence of the day's routine reduces anxiety around \"what's next.\"</li>\n<li><b>First-then boards</b> — \"first brush teeth, then tablet time\" gives a concrete, visible structure.</li>\n<li><b>Gesture + word pairing</b> — pointing while naming an object reinforces meaning for both verbal and non-verbal learners.</li>\n</ul>\n<p>Consistency matters more than complexity — the same handful of visual cues, used daily, tend to work better than an elaborate system used occasionally.</p>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "understanding-sensory-sensitivities",
+          "title": "Understanding Sensory Sensitivities",
+          "readTime": "4 min read",
+          "html": "<p>Many children with ASD experience sound, light, touch, taste, or movement more intensely — or less intensely — than typical. A tag on clothing, fluorescent lighting, or a crowded room can be genuinely distressing, not \"misbehavior.\"</p>\n<p>Small home adjustments can go a long way: noise-reducing headphones for loud events, soft or seamless clothing, a quiet corner to retreat to, and warning your child before a sensory-heavy transition (like leaving a noisy mall).</p>\n<p>Watching for your child's individual sensory patterns — what calms them, what overwhelms them — is one of the most powerful tools a parent has.</p>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "building-two-way-communication",
+          "title": "Building Two-Way Communication",
+          "readTime": "3 min read",
+          "html": "<p>Communication isn't only about your child understanding you — it's also about you learning to read their cues, even non-verbal ones like a shift in posture, a sound, or a change in play.</p>\n<p>Try responding to any communication attempt — a point, a sound, a word approximation — as a real message. This builds your child's confidence that communicating (in any form) gets a response, which encourages more of it over time.</p>",
+          "reviewStatus": "prototype-content"
+        }
+      ]
+    },
+    {
+      "id": "behave",
+      "name": "Child-Raising Behavior and Management Guide",
+      "shortName": "Behavior & Management Guide",
+      "description": "Practical, day-to-day strategies for routines, transitions, and calm responses to big emotions.",
+      "articles": [
+        {
+          "slug": "creating-predictable-routines",
+          "title": "Creating Predictable Routines",
+          "readTime": "4 min read",
+          "html": "<p>Structured, predictable routines help many children with ASD feel safe and reduce daily friction. Predictability lowers the number of unknowns a child has to process, which frees up energy for learning and connection.</p>\n<ul>\n<li>Keep wake-up, meals, and bedtime on a consistent rhythm where possible.</li>\n<li>Give advance warning before transitions (\"five more minutes, then bath time\").</li>\n<li>When routines must change, prepare your child ahead of time rather than surprising them.</li>\n</ul>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "responding-to-meltdowns-with-calm",
+          "title": "Responding to Meltdowns with Calm",
+          "readTime": "5 min read",
+          "html": "<p>A meltdown is not a tantrum aimed at getting something — it's often a nervous system in overload. The most effective first response is usually to lower stimulation, not to add more instructions or discipline in the moment.</p>\n<p>Try: lowering your voice, reducing eye contact if that helps your child, giving space, and waiting for the wave to pass before talking things through. Afterward, a brief, calm conversation about what happened (once your child is regulated) helps more than an in-the-moment lecture.</p>\n<div class=\"disclaimer\">If meltdowns involve risk of harm to your child or others, consult your child's therapist or pediatrician for an individualized safety plan.</div>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "positive-reinforcement-basics",
+          "title": "Positive Reinforcement Basics",
+          "readTime": "3 min read",
+          "html": "<p>Noticing and rewarding the behavior you want to see — specifically and immediately — tends to be more effective than only correcting the behavior you don't want.</p>\n<p>Be specific: \"I love how you used your words to ask for a break\" works better than a generic \"good job.\" Small, consistent, genuine praise builds motivation over time far more reliably than occasional big rewards.</p>",
+          "reviewStatus": "prototype-content"
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "name": "Learning and School Support Section",
+      "shortName": "Learning & School Support",
+      "description": "Home-school collaboration, understanding IEPs, and reducing homework stress.",
+      "articles": [
+        {
+          "slug": "working-with-your-child-s-school",
+          "title": "Working With Your Child's School",
+          "readTime": "4 min read",
+          "html": "<p>Strong home-school collaboration helps strategies stay consistent across both settings — which matters a lot for children who thrive on predictability.</p>\n<ul>\n<li>Share what works at home (calming strategies, communication tools) with teachers directly.</li>\n<li>Ask for regular short check-ins rather than waiting for a crisis to communicate.</li>\n<li>Keep a simple shared notebook or messaging thread between home and the classroom.</li>\n</ul>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "individualized-education-plans-explained",
+          "title": "Individualized Education Plans, Explained",
+          "readTime": "4 min read",
+          "html": "<p>An Individualized Education Plan (or a SPED learning plan) outlines specific goals, accommodations, and support tailored to your child's learning profile. It's a living document — one that should be revisited and adjusted as your child grows.</p>\n<p>You are a core member of this planning team, not just a signatory. Bring your observations from home; they're often the most detailed data anyone has on your child.</p>",
+          "reviewStatus": "prototype-content"
+        },
+        {
+          "slug": "homework-strategies-that-reduce-stress",
+          "title": "Homework Strategies That Reduce Stress",
+          "readTime": "3 min read",
+          "html": "<p>Breaking homework into short, clearly bounded chunks — with visible start and end points — tends to work better than one long unstructured session.</p>\n<p>A consistent homework spot, a visual timer, and a small predictable break routine in between tasks can turn homework from a daily battle into a manageable, structured part of the day.</p>",
+          "reviewStatus": "prototype-content"
+        }
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "q": "Is C.R.I.B.S. a substitute for therapy or diagnosis?",
+      "a": "No. C.R.I.B.S. is a guidance and information tool, not a medical or therapeutic service. It does not diagnose, treat, or replace advice from a licensed developmental pediatrician, therapist, or special education professional."
+    },
+    {
+      "q": "My child was just diagnosed. Where do I even start?",
+      "a": "Start with the Autism Information Module for the basics, then the Professional Support Directory to find a developmental pediatrician or SPED specialist near you. Many parents also find the parent community a helpful place to feel less alone in the first weeks."
+    },
+    {
+      "q": "How was the content in this app put together?",
+      "a": "Content is compiled from published clinical and educational literature on ASD, then reviewed by developmental pediatric specialists, SPED educators, and IT professionals before being simplified for everyday use."
+    },
+    {
+      "q": "Is C.R.I.B.S. only for use in Taguig City?",
+      "a": "The Professional Support Directory currently focuses on Taguig City and nearby areas, since that's where this study was conducted. The guidance content itself is meant to be useful anywhere."
+    },
+    {
+      "q": "What if a strategy in the app doesn't work for my child?",
+      "a": "That's expected — every child on the spectrum is different. Treat each guide as a starting point to adapt, not a strict rulebook. If something consistently isn't working, your child's therapist or SPED educator can help tailor it."
+    },
+    {
+      "q": "Can I talk to other parents through the app?",
+      "a": "Yes — the home screen includes a community feed where you can post a message or question and see posts from other parents and, where noted, from professionals."
+    }
+  ],
+  "directorySample": [
+    {
+      "name": "Dr. Camille Rosario",
+      "role": "Developmental Pediatrician",
+      "loc": "Taguig-Pateros Medical Arts, Taguig City",
+      "note": "Specializes in early ASD assessment and family-centered care planning for children ages 2–10.",
+      "color": "var(--terracotta)"
+    },
+    {
+      "name": "Hazel Villaruel, RPm",
+      "role": "Child Psychologist",
+      "loc": "Bonifacio Global City, Taguig",
+      "note": "Focuses on behavior assessment, coping strategies, and parent coaching sessions.",
+      "color": "var(--purple)"
+    },
+    {
+      "name": "Marc Ibañez, RPT",
+      "role": "Occupational Therapist",
+      "loc": "Western Bicutan, Taguig City",
+      "note": "Sensory integration therapy and daily-living skill-building for young children.",
+      "color": "var(--sage-dark)"
+    },
+    {
+      "name": "Joyce Ferrer, SLP",
+      "role": "Speech-Language Pathologist",
+      "loc": "Upper Bicutan, Taguig City",
+      "note": "Verbal and augmentative communication support, including visual and picture-based systems.",
+      "color": "var(--amber-dark)"
+    },
+    {
+      "name": "Sunshine Learning Center",
+      "role": "SPED Learning Center",
+      "loc": "Central Bicutan, Taguig City",
+      "note": "Small-group and one-on-one special education instruction, IEP-aligned programs.",
+      "color": "var(--gold-dark)"
+    }
+  ],
+  "communitySeed": [
+    {
+      "name": "Grace M.",
+      "init": "GM",
+      "time": "2h ago",
+      "text": "Anyone have tips for grocery store meltdowns? Fluorescent lights seem to be the trigger for my son."
+    },
+    {
+      "name": "Dr. Rosario",
+      "init": "DR",
+      "time": "5h ago",
+      "text": "Shared a new article in the Communication module on visual schedules — a few parents this week asked about mornings specifically."
+    },
+    {
+      "name": "Paolo D.",
+      "init": "PD",
+      "time": "1d ago",
+      "text": "Small win: my daughter used her picture board to ask for a break today instead of shutting down. Celebrating the little things 💛"
+    }
+  ],
+  "notificationsSample": [
+    {
+      "text": "<b>Grace M.</b> liked your message about bedtime routines.",
+      "time": "12m ago"
+    },
+    {
+      "text": "<b>Dr. Rosario</b> suggests an article: \"Understanding Sensory Sensitivities.\"",
+      "time": "1h ago"
+    },
+    {
+      "text": "<b>Paolo D.</b> commented on your post: \"This helped so much, thank you!\"",
+      "time": "3h ago"
+    },
+    {
+      "text": "A new article was added to the Learning and School Support section.",
+      "time": "Yesterday"
+    },
+    {
+      "text": "<b>Joyce Ferrer, SLP</b> reacted to your post.",
+      "time": "2 days ago"
+    }
+  ]
+}
