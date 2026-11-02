@@ -10,6 +10,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  serverExternalPackages: ["@node-rs/argon2"], // native module, must not be bundled
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
