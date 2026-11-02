@@ -2,9 +2,19 @@
 
 > Read this together with `BUILD_CRIBS.md`. Update it at the end of every phase. Rewrite fully at handoff.
 
+## Working agreement (user's rules - follow every session)
+1. **Ask what the user wants** at session start and after each stage.
+2. **Tell the plan first** (files, commits, risks); change nothing until the user says **"go"**.
+3. **Granular commits**, Conventional Commits, short subjects like `feat(auth): add email otp verify` (no whole phrases/sentences).
+4. **No force push**, ever; fix with new commits / `git revert`.
+5. **No secrets in repo**: only `.env.example`; `.gitignore` covers all other env files; gitleaks in hook + CI.
+6. **Logic separated from UI** (layers in BUILD_CRIBS.md 0.4); components never import db/auth/server.
+7. **CI/CD**: GitHub Actions CI + secret scan; Vercel preview per PR, prod on main; migrations via workflow.
+8. **Always deliver handoff files**: CONTEXT.md, BUILD_CRIBS.md (if changed), .env.example, SETUP_GUIDE.md, zip.
+
 ## Status
 - **Current phase:** P2 code written (UNVERIFIED) -> next: install + verify, then P3
-- **Last updated:** 2026-11-02
+- **Last updated:** 2026-11-02 (workflow rules added)
 - **Repo:** local git repo only (1 commit on main); GitHub repo not created (no gh/network in sandbox)
 - **Deployment:** none yet
 - **Database:** Neon (via Vercel Marketplace), not provisioned yet
@@ -57,12 +67,18 @@ The sandbox had no network, so `npm install`, typecheck, build and tests were ne
 `src/config` (brand, nav) · `src/db` (schema: auth tables + profile/child/emergency_contact; neon-http client) · `src/lib` (auth, auth-client, mail with console/Brevo drivers) · `src/content` (typed loader for seed/content.json) · pages: landing, sign-up/in/verify/forgot, (app) layout with session guard, Loader (once per session), AppNav (mobile bottom nav with center Ask + desktop sidebar), home, learn module/article, directory, FAQ, placeholders for ask/settings · CI workflow · security headers.
 Not yet: onboarding (P3, also add redirect in `(app)/layout.tsx`), `/find`, `/onboarding` routes (home links to /find which 404s), search, AI, community, PWA manifest/icons, tests, migrations, seed script.
 
-## Next 5 tasks
-1. `npm install`; fix typecheck/build errors; pin versions; add vitest smoke test.
-2. `npm run auth:generate`, reconcile schema, `db:generate` + `db:migrate` against Neon.
-3. P3: 10-step onboarding quiz -> `child` table; guard in `(app)/layout.tsx`; personalize Home.
-4. P4 leftovers: search, save/read progress, DB seed script, sanitize HTML.
-5. P5: `/api/chat` with grounding, safety layer, rate limit.
+## Known deviations from the rules (existing code, fix first)
+- Components call `authClient` directly and pages query auth/content inline -> move to `src/features/*` hooks and `src/server/*` services (phase P0b).
+- Only 2 coarse commits exist from the first scaffold; all future work must be granular.
+- Missing: Husky, commitlint, lint-staged, ESLint config + import-restriction rules, gitleaks, `secret-scan.yml`, `db-migrate.yml`, PR template, CODEOWNERS, dependabot, tests, `src/config/env.ts`.
+- `.gitignore` already ignores `.env` and `.env.*` except `.env.example` (verify nothing else sensitive is tracked: `git ls-files | grep -i env`).
+
+## Next 5 tasks (each begins with a change plan; wait for "go")
+1. Ask the user what they want; if they say "continue": `npm install`, `npm run typecheck`, `npm run build`, fix errors in small commits.
+2. P0b: add ESLint + import restrictions, Husky, commitlint, lint-staged, gitleaks, workflows (one commit per tool).
+3. P0b: refactor auth forms and pages into features/server layers (one commit per feature slice).
+4. P3: onboarding quiz -> `child` table; guard in `(app)/layout.tsx`.
+5. Update this file, regenerate zip.
 
 ## Resume commands
 ```
@@ -74,3 +90,4 @@ pnpm db:migrate && pnpm db:seed && pnpm dev
 ## Session log
 - 2026-11-02: Build prompt, context, env template, seed content generated.
 - 2026-11-02: P0-P2 scaffold written and committed locally (unverified, no network).
+- 2026-11-02: User added working rules (plan-then-go, granular commits, no force push, no secrets, logic/UI separation, CI/CD, handoff files). BUILD_CRIBS.md sections 0.2-0.4, 5, 10, 11, 12, 14 updated.
