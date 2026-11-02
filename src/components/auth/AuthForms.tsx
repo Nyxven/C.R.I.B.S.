@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
+import { signUpAction, verifyEmailAction, resendCodeAction, signInAction, requestResetAction, resetPasswordAction } from "@/features/auth/actions";
 import { Logo } from "@/components/Logo";
 
 function Shell({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
@@ -27,9 +27,9 @@ export function SignUpForm() {
     if (f.password.length < 10) return setErr("Password must be at least 10 characters.");
     if (!f.consent) return setErr("Please accept the Terms and Privacy Policy to continue.");
     setBusy(true);
-    const { error } = await authClient.signUp.email({ name: f.name.trim(), email: f.email.trim(), password: f.password });
+    const res = await signUpAction({ name: f.name, email: f.email, password: f.password });
     setBusy(false);
-    if (error) return setErr(error.message ?? "Could not create your account. Please try again.");
+    if (!res.ok) return setErr(res.error);
     r.push(`/verify?email=${encodeURIComponent(f.email.trim())}`);
   }
   return (
@@ -56,18 +56,18 @@ export function VerifyForm() {
   const [otp, setOtp] = useState(""); const [err, setErr] = useState(""); const [info, setInfo] = useState(""); const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr(""); setBusy(true);
-    const { error } = await authClient.emailOtp.verifyEmail({ email, otp });
+    const res = await verifyEmailAction({ email, code: otp });
     setBusy(false);
-    if (error) return setErr("That code didn't work. Check it and try again, or request a new one.");
+    if (!res.ok) return setErr(res.error);
     r.push("/home");
   }
   async function resend() {
     setInfo(""); setErr("");
-    const { error } = await authClient.emailOtp.sendVerificationOtp({ email, type: "email-verification" });
-    error ? setErr("Please wait a moment before requesting another code.") : setInfo("A new code is on its way.");
+    const res = await resendCodeAction({ email });
+    res.ok ? setInfo("If that email can be verified, a new code is on its way.") : setErr(res.error);
   }
   return (
-    <Shell title="Check your email" sub={`We sent a 6-digit code to ${email || "your email"}.`}>
+    <Shell title="Check your email" sub={`If ${email || "your email"} can be used, we sent a 6-digit code.`}>
       <form onSubmit={submit} className="space-y-4">
         <input className="field text-center text-2xl tracking-[.5em]" inputMode="numeric" autoComplete="one-time-code" maxLength={6} pattern="\d{6}" required value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} aria-label="6-digit code" />
         <Err m={err} />{info && <p role="status" className="text-sm font-semibold text-sage-dark">{info}</p>}
@@ -84,12 +84,10 @@ export function SignInForm() {
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr(""); setBusy(true);
-    const { error } = await authClient.signIn.email({ email: email.trim(), password });
+    const res = await signInAction({ email, password });
     setBusy(false);
-    if (error) {
-      if (error.status === 403) { await authClient.emailOtp.sendVerificationOtp({ email: email.trim(), type: "email-verification" }); return r.push(`/verify?email=${encodeURIComponent(email.trim())}`); }
-      return setErr("Email or password is incorrect.");
-    }
+    if (!res.ok) return setErr(res.error);
+    if (res.needsVerify) return r.push(`/verify?email=${encodeURIComponent(email.trim())}`);
     r.push("/home");
   }
   return (
@@ -112,22 +110,25 @@ export function ForgotForm() {
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
   async function sendCode(e: React.FormEvent) {
     e.preventDefault(); setErr(""); setBusy(true);
-    await authClient.emailOtp.sendVerificationOtp({ email: email.trim(), type: "forget-password" }); // same response whether or not the email exists
-    setBusy(false); setStep("reset");
+    const res = await requestResetAction({ email }); // same response whether or not the email exists
+    setBusy(false);
+    if (!res.ok) return setErr(res.error);
+    setStep("reset");
   }
   async function reset(e: React.FormEvent) {
     e.preventDefault(); setErr("");
     if (password.length < 10) return setErr("Password must be at least 10 characters.");
     setBusy(true);
-    const { error } = await authClient.emailOtp.resetPassword({ email: email.trim(), otp, password });
+    const res = await resetPasswordAction({ email, code: otp, password });
     setBusy(false);
-    if (error) return setErr("That code didn't work. Check it and try again.");
+    if (!res.ok) return setErr(res.error);
     r.push("/sign-in");
   }
   return step === "email" ? (
     <Shell title="Reset your password" sub="Enter your email and we'll send a 6-digit code.">
       <form onSubmit={sendCode} className="space-y-4">
         <input className="field" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email" />
+        <Err m={err} />
         <button className="btn-primary w-full" disabled={busy}>Send code</button>
       </form>
     </Shell>
