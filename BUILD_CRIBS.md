@@ -12,13 +12,35 @@ You are a senior full-stack engineer building a production-grade web app for a G
 ### 0.1 Credit / token safety protocol (mandatory)
 1. **Work in phases (Section 12).** One phase = one git commit minimum. Never start a phase you cannot finish.
 2. **Be economical:** write whole files in one tool call, batch several files per call, do not re-read files you just wrote, do not paste large outputs (tail logs, `--quiet`), no unrequested refactors.
-3. **After every phase:** run `pnpm typecheck && pnpm lint && pnpm test`, commit, then **update `CONTEXT.md`** (current phase, what's done, what's next, decisions, blockers, exact commands to resume).
+3. **After every phase:** (using the 0.2 propose-then-"go" flow) run `pnpm typecheck && pnpm lint && pnpm test`, commit, then **update `CONTEXT.md`** (current phase, what's done, what's next, decisions, blockers, exact commands to resume).
 4. **Budget tripwire:** when you estimate ~15% of your budget/context remains, STOP building. Finish the file you are on, commit (even as `wip:`), rewrite `CONTEXT.md` completely, regenerate `cribs-handoff.zip` (Section 14), and tell the user: "Handoff ready — start a new chat with BUILD_CRIBS.md + CONTEXT.md."
 5. Never end a session with uncommitted work or a stale `CONTEXT.md`.
 6. Never hard-code secrets. Never commit `.env*` (except `.env.example`).
 
-### 0.2 Ask only when blocked
-Make sensible defaults and record them in `CONTEXT.md` under **Decisions**. Only ask the user for things you cannot do yourself (API keys, Vercel/GitHub logins, Brevo sender verification, expert-review confirmations).
+### 0.2 Working agreement with the user (mandatory, every session)
+1. **Ask first.** At the start of every session and after every stage, ask the user what they want to do next (use the interactive question tool if available; offer 2-4 concrete options such as "Continue with the next stage", "Fix build errors", "Change a feature", "Something else"). Never assume.
+2. **Propose, then wait for "go".** Before changing anything, send a short **change plan**: files you will add/modify/delete, the commits you will make (with their messages), and any risk. **Do not touch files until the user replies "go"** (or an explicit equivalent). Read-only inspection is allowed. If the user says "go" in the same message that requested the work, treat that as approval of the plan you state in your first line, then proceed.
+3. **Ask only when blocked** for things you cannot do yourself (API keys, Vercel/GitHub logins, Brevo sender verification, expert-review confirmations). Otherwise make sensible defaults and log them in `CONTEXT.md` under **Decisions**.
+4. **Always finish with the handoff files** (Section 14): updated `BUILD_CRIBS.md` (only if the spec changed), `CONTEXT.md`, `.env.example`, `SETUP_GUIDE.md`, and a fresh zip. Never end a session without them.
+
+### 0.3 Git, commits and secrets rules (mandatory)
+- **Granular commits.** One logical change per commit (one feature slice, one refactor, one config change). Never bundle a whole phase into one commit. Aim for 5-15 small commits per stage.
+- **Commit message format:** Conventional Commits, short imperative subject, **no full sentences or phrases**: `type(scope): verb object`, max ~50 characters, lowercase, no trailing period. Optional body for the "why".
+  - Good: `feat(auth): add email otp verify`, `fix(nav): center ask button on iphone`, `refactor(profile): move queries to repo`, `test(score): cover heuristic formula`, `chore(ci): add gitleaks scan`, `docs(context): update stage status`.
+  - Bad: `Added the login page and also fixed some bugs and updated styles`, `updates`, `wip stuff`.
+  - Types: feat, fix, refactor, test, docs, chore, ci, build, perf, style. Enforced by commitlint + Husky `commit-msg` hook.
+- **No force pushing. Ever.** Never run `git push --force`, `--force-with-lease`, `git reset --hard` on shared branches, or rewrite published history. Fix mistakes with a new commit or `git revert`. Repo settings must block force pushes and deletion of `main` (Section 11).
+- **No secrets in the repo.** Only `.env.example` (placeholders, no real values) is tracked. `.env`, `.env.*` (except `.env.example`), `.vercel/`, keys, tokens and credentials are in `.gitignore`. Before every commit run a secret scan (gitleaks via pre-commit hook; also in CI). If a secret is ever committed: rotate it immediately, then remove it with a normal commit (do **not** rewrite history without the user's explicit approval) and tell the user. Secrets live only in Vercel env vars, GitHub Actions secrets, and the developer's `.env.local`.
+- Work on short-lived branches (`feat/...`, `fix/...`), merge via Pull Request with passing CI; `main` is always deployable.
+
+### 0.4 Architecture rule: logic is separate from UI (mandatory)
+Strict layers, dependencies point downward only:
+1. **UI** (`src/app/**` pages/layouts, `src/components/**`): rendering, layout, accessibility, event wiring. **No** database, auth-server, fetch-to-third-party, business rules, or data shaping inside components. Pages stay thin: read params, call a service/query, render.
+2. **Feature hooks / client actions** (`src/features/<feature>/hooks`, `actions`): client state and calls to server actions/API routes (e.g., `useSignUp`, `useOnboarding`). Components consume hooks; they don't call `authClient`, `fetch`, or `db` directly.
+3. **Services / domain logic** (`src/server/services`, `src/lib/domain`): pure, framework-free business rules (personalization, scoring, safety checks, rate limiting, token hashing). Fully unit-tested, no React or Next imports.
+4. **Repositories / data access** (`src/server/repositories`, `src/db`): the only place that touches Drizzle/SQL. Services call repositories.
+5. **Integrations** (`src/server/integrations`): Brevo, AI provider, auth config. Behind small interfaces so they can be mocked.
+Enforce with ESLint `no-restricted-imports` (components may not import `@/db`, `@/server/**`, `@/lib/auth`) and a unit test that fails on violations. Validation schemas (Zod) live beside the feature and are shared by client and server.
 
 ---
 
@@ -86,27 +108,27 @@ Always check the **current official docs** for Next.js, Better Auth, Drizzle, Ta
 
 ```
 cribs/
-├─ .github/ (workflows/ci.yml, dependabot.yml, PULL_REQUEST_TEMPLATE.md, CODEOWNERS)
+├─ .github/ (workflows/ci.yml, workflows/db-migrate.yml, workflows/secret-scan.yml, dependabot.yml, PULL_REQUEST_TEMPLATE.md, CODEOWNERS)
+├─ .husky/ (pre-commit: lint-staged + gitleaks, commit-msg: commitlint)
 ├─ drizzle/                      # generated migrations
-├─ public/ (icons, manifest, sw assets, og image)
+├─ public/ (icons, manifest, og image)
 ├─ seed/ (content.json, prototype-reference.html)
 ├─ scripts/ (seed.ts, check-env.ts)
 ├─ src/
-│  ├─ app/
-│  │  ├─ (marketing)/page.tsx            # landing
-│  │  ├─ (auth)/sign-in, sign-up, verify, forgot, reset
-│  │  ├─ (app)/layout.tsx                # shell: nav, session guard, loading
-│  │  ├─ (app)/onboarding/
-│  │  ├─ (app)/home/ learn/[module]/[slug]/ directory/ faq/ ask/ find/ community/ notifications/ settings/ (account, child, privacy, appearance)
-│  │  ├─ f/[token]/page.tsx              # PUBLIC "if found" page (no auth)
-│  │  └─ api/ (auth/[...all], chat, community, profile, found-token, ...)
-│  ├─ components/ (ui/, nav/, onboarding/, ai/, content/)
-│  ├─ config/ (brand.ts, env.ts, nav.ts)
-│  ├─ db/ (schema.ts, index.ts, queries/)
-│  ├─ lib/ (auth.ts, auth-client.ts, brevo.ts, ai/, rate-limit.ts, personalize.ts)
-│  └─ content/ (typed loaders for seed + new content)
-├─ tests/ (unit, e2e)
-├─ .env.example  README.md  SECURITY.md  CONTEXT.md  BUILD_CRIBS.md
+│  ├─ app/                       # UI ONLY: routes, layouts, route handlers (thin)
+│  │  ├─ (marketing)/  (auth)/  (app)/  f/[token]/  api/
+│  ├─ components/                # presentational UI (ui/, nav/, auth/, onboarding/, ai/, content/)
+│  ├─ features/<feature>/        # hooks, client actions, zod schemas, view-models (auth, onboarding, ask, find, ...)
+│  ├─ server/
+│  │  ├─ services/               # business logic (no React/Next)
+│  │  ├─ repositories/           # all Drizzle queries
+│  │  └─ integrations/           # brevo, ai provider, better-auth config
+│  ├─ lib/domain/                # pure functions: personalize, score, safety, token
+│  ├─ db/                        # schema.ts, client
+│  ├─ config/                    # brand.ts, nav.ts, env.ts, safety.ts
+│  └─ content/                   # typed loaders for seed + new content
+├─ tests/ (unit, integration, e2e)
+├─ .env.example  .gitignore  README.md  SECURITY.md  CONTEXT.md  BUILD_CRIBS.md  SETUP_GUIDE.md
 ```
 
 ---
@@ -263,6 +285,8 @@ Indexes on FKs and frequent lookups; `createdAt/updatedAt` everywhere; cascade d
 
 ## 10. Quality bar ("industry standard")
 
+- **CI (GitHub Actions, on every PR and push to main):** install, lint, typecheck, unit tests, build, `npm audit --omit=dev` (fail on high), gitleaks secret scan, commitlint on PR titles/commits, Playwright smoke on PRs. CI must pass to merge.
+- **CD:** Vercel Git integration = preview deployment per PR, production deployment on merge to `main`. Database migrations run via `db-migrate.yml` on `main` (uses GitHub Actions secret `DATABASE_URL_UNPOOLED`, never the repo), before/with the deploy; never at runtime.
 - TypeScript `strict`, no `any`; ESLint + Prettier clean; Conventional Commits; small PRs/commits.
 - Tests: unit (personalization, scoring formula, rate limiter, token hashing, content loaders), integration for API routes, Playwright e2e for: sign-up→OTP→onboarding→home, AI chat (mocked provider), if-found public page, delete account. Axe a11y checks on key pages (0 serious/critical).
 - Performance: Lighthouse mobile ≥ 90 Perf / 100 A11y / ≥ 95 Best Practices & SEO on landing; RSC by default, client components only when needed, images optimized, fonts via `next/font`, route-level code splitting, skeletons for streaming.
@@ -275,8 +299,9 @@ Indexes on FKs and frequent lookups; `createdAt/updatedAt` everywhere; cascade d
 
 ## 11. GitHub & Vercel setup
 
-1. `git init`; default branch `main`; if `gh` CLI is authenticated run `gh repo create cribs-app --private --source=. --remote=origin --push` (ask the user for org/name preference only if auth fails; otherwise output the exact commands for the user to run).
-2. Add LICENSE placeholder (ask team: private/all-rights-reserved vs MIT), `.gitignore`, `.editorconfig`, PR template, CODEOWNERS, issue templates, `ci.yml`, `dependabot.yml`. Protect `main` (PRs + passing CI) — instructions in README if the builder can't set it.
+1. `git init`; default branch `main`; if `gh` CLI is authenticated run `gh repo create cribs-app --private --source=. --remote=origin --push`; otherwise output the exact commands for the user (see `SETUP_GUIDE.md`). Never push with `--force`.
+2. Add LICENSE placeholder (ask team: private/all-rights-reserved vs MIT), `.gitignore` (must cover `.env`, `.env.*` except `.env.example`, `.vercel`, `node_modules`, `.next`, keys/certs), `.editorconfig`, PR template, CODEOWNERS, issue templates, `ci.yml`, `secret-scan.yml`, `db-migrate.yml`, `dependabot.yml`, Husky hooks, commitlint config.
+   **Branch protection / ruleset on `main` (instruct the user if you can't set it):** require pull request, require passing CI + secret scan, require linear history, **block force pushes**, **block branch deletion**, require conversation resolution. Also enable GitHub secret scanning + push protection.
 3. Vercel: `vercel link`; add **Neon** from the Vercel Marketplace/Storage tab (injects `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, etc.); `vercel env pull .env.local`; set remaining vars (see `.env.example`) for Production + Preview; use Neon branching for Preview deployments if enabled.
 4. Brevo: create API key, verify a sender (domain/email) — **the user must do this**; document steps. Until verified, use a console-logging mail transport in development so OTP can still be tested (`MAIL_DRIVER=console`).
 5. Run migrations in CI/deploy step (`drizzle-kit migrate` with unpooled URL), never at runtime.
@@ -287,6 +312,7 @@ Indexes on FKs and frequent lookups; `createdAt/updatedAt` everywhere; cascade d
 
 | Phase | Deliverable | Done when |
 |---|---|---|
+| **P0b Refactor to layers** | Move logic out of components/pages into features/server/lib-domain per 0.4; add ESLint import rules, Husky, commitlint, gitleaks, CD workflow | Lint rule violations = 0; hooks block bad commits |
 | **P0 Scaffold** | Repo, Next+TS+Tailwind v4, tooling, CI, env validation, brand tokens, Drizzle + Neon connection, health route | `pnpm build` green, CI green, deployed preview |
 | **P1 Auth** | Better Auth + Brevo emailOTP, landing, sign-up/in/verify/forgot/reset, route guards | New user can register, verify by emailed OTP, sign in/out |
 | **P2 Shell** | App layout, bottom nav (AI center), desktop sidebar, loader animation, PWA basics, theming | Navigation works on mobile + desktop, loader per 6.2 |
@@ -314,10 +340,13 @@ If budget is tight, **P0–P5 is the minimum viable product**; ship that, then c
 
 ---
 
-## 14. Handoff protocol (run when finishing OR at the 15% budget tripwire)
+## 14. Handoff protocol (run when finishing a stage OR at the 15% budget tripwire)
 
-1. Commit everything (`wip:` if needed).
-2. Overwrite `CONTEXT.md`: phase status table, decisions, env vars set/missing, deployment URLs, known bugs, **next 5 concrete tasks**, resume commands.
-3. Regenerate the zip (exclude `node_modules`, `.next`, `.env*` except `.env.example`):
-   `zip -r cribs-handoff.zip BUILD_CRIBS.md CONTEXT.md .env.example seed/ -x "*/node_modules/*"` (add `README.md`, `docs/` when they exist).
-4. Final message to the user: what's done, what's next, and "Start a new chat with BUILD_CRIBS.md + CONTEXT.md".
+Required handoff files, every time, in `/mnt/user-data/outputs` (or the repo root if no such folder):
+1. `CONTEXT.md` (rewritten; includes stage status, decisions, env vars set/missing, deployment URLs, known bugs, **next 5 tasks**, resume commands, the session log, and the user's last answer to "what do you want next?").
+2. `BUILD_CRIBS.md` (only if the spec changed; otherwise unchanged).
+3. `.env.example` (placeholders only, in sync with `src/config/env.ts`).
+4. `SETUP_GUIDE.md` (update if a new service/variable was introduced).
+5. A fresh zip: `zip -r cribs-app.zip . -x "node_modules/*" ".next/*" ".env" ".env.*" "!.env.example"` (never include real `.env` files in the zip; the user keeps their own `.env.local`).
+
+Steps: (a) all work committed in granular commits (no `wip:` pile; if budget forces it, one `chore(wip): ...` commit at most, and note it in CONTEXT.md); (b) update files above; (c) present the files; (d) final message: what's done, what's next, "Start a new chat with BUILD_CRIBS.md + CONTEXT.md"; (e) ask the user what they want next.
