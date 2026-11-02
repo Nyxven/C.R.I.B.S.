@@ -11,13 +11,11 @@
     "test": "vitest run --passWithNoTests",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "auth:generate": "npx @better-auth/cli generate",
     "check-env": "tsx scripts/check-env.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.0",
     "@node-rs/argon2": "2.2.2",
-    "better-auth": "1.7.15",
     "drizzle-orm": "0.45.4",
     "lucide-react": "1.66.0",
     "motion": "14.9.0",
