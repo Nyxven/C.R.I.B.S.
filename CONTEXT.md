@@ -3,19 +3,19 @@
 > Read this together with `BUILD_CRIBS.md`. Update it at the end of every phase. Rewrite fully at handoff.
 
 ## Status
-- **Current phase:** P0 (not started)
+- **Current phase:** P2 code written (UNVERIFIED) -> next: install + verify, then P3
 - **Last updated:** 2026-11-02
-- **Repo:** not created yet
+- **Repo:** local git repo only (1 commit on main); GitHub repo not created (no gh/network in sandbox)
 - **Deployment:** none yet
 - **Database:** Neon (via Vercel Marketplace), not provisioned yet
 
 | Phase | Status |
 |---|---|
-| P0 Scaffold | todo |
-| P1 Auth | todo |
-| P2 Shell | todo |
+| P0 Scaffold | code written, NOT built (no network to install) |
+| P1 Auth | code written, NOT tested |
+| P2 Shell | code written, NOT tested |
 | P3 Onboarding + Profile | todo |
-| P4 Content | todo |
+| P4 Content | partial: modules, article, directory, FAQ pages read seed/content.json; search/progress/DB seed todo |
 | P5 AI Guide | todo |
 | P6 Find + If-found | todo |
 | P7 Community/Notifs/Settings | todo |
@@ -50,12 +50,19 @@ Set: none yet. Missing: all except generated BETTER_AUTH_SECRET in local `.env`.
 4. AI provider key.
 5. Confirm tag name (D1) and verified local crisis hotline numbers for `src/config/safety.ts`.
 
+## IMPORTANT: unverified code
+The sandbox had no network, so `npm install`, typecheck, build and tests were never run. First task in the next session: `npm install`, `npm run typecheck`, `npm run build`, fix errors. Verify against current docs: Better Auth emailOTP API (sendVerificationOtp / verifyEmail / resetPassword names, `allowedAttempts`, `rateLimit.storage`), `nextCookies` import path, `@better-auth/cli generate` vs hand-written auth tables in `src/db/schema.ts`, Next.js params typing and middleware/proxy naming, Tailwind v4 `@theme`. `package.json` uses "latest" - pin exact versions after install.
+
+## What exists in the repo
+`src/config` (brand, nav) · `src/db` (schema: auth tables + profile/child/emergency_contact; neon-http client) · `src/lib` (auth, auth-client, mail with console/Brevo drivers) · `src/content` (typed loader for seed/content.json) · pages: landing, sign-up/in/verify/forgot, (app) layout with session guard, Loader (once per session), AppNav (mobile bottom nav with center Ask + desktop sidebar), home, learn module/article, directory, FAQ, placeholders for ask/settings · CI workflow · security headers.
+Not yet: onboarding (P3, also add redirect in `(app)/layout.tsx`), `/find`, `/onboarding` routes (home links to /find which 404s), search, AI, community, PWA manifest/icons, tests, migrations, seed script.
+
 ## Next 5 tasks
-1. P0: scaffold Next.js + Tailwind v4 + tooling + CI; create GitHub repo.
-2. P0: Drizzle + Neon connection, `lib/env.ts` validation, `/api/health`.
-3. P1: Better Auth with emailOTP + Brevo mail driver (`MAIL_DRIVER=console` for dev).
-4. P1: landing + sign-up/in/verify/forgot/reset pages.
-5. Update this file and commit.
+1. `npm install`; fix typecheck/build errors; pin versions; add vitest smoke test.
+2. `npm run auth:generate`, reconcile schema, `db:generate` + `db:migrate` against Neon.
+3. P3: 10-step onboarding quiz -> `child` table; guard in `(app)/layout.tsx`; personalize Home.
+4. P4 leftovers: search, save/read progress, DB seed script, sanitize HTML.
+5. P5: `/api/chat` with grounding, safety layer, rate limit.
 
 ## Resume commands
 ```
@@ -65,4 +72,5 @@ pnpm db:migrate && pnpm db:seed && pnpm dev
 ```
 
 ## Session log
-- 2026-11-02: Build prompt, context, env template and seed content generated. No code written yet.
+- 2026-11-02: Build prompt, context, env template, seed content generated.
+- 2026-11-02: P0-P2 scaffold written and committed locally (unverified, no network).
