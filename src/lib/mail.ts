@@ -21,17 +21,28 @@ export async function sendMail({ to, subject, html }: Mail) {
 }
 
 const titles = {
-  "sign-in": "Your sign-in code",
-  "email-verification": "Verify your email",
-  "forget-password": "Reset your password",
+  verify: "Verify your email",
+  reset: "Reset your password",
 } as const;
+export type CodePurpose = keyof typeof titles;
 
-export function otpEmail(type: keyof typeof titles, otp: string) {
+const wrap = (inner: string) =>
+  `<div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;color:#372F4A"><h2 style="color:#F1743E">C.R.I.B.S.</h2>${inner}</div>`;
+
+export function codeEmail(purpose: CodePurpose, code: string) {
   return {
-    subject: `${titles[type]} — C.R.I.B.S.`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;color:#372F4A">
-      <h2 style="color:#F1743E">C.R.I.B.S.</h2><p>${titles[type]}:</p>
-      <p style="font-size:32px;letter-spacing:8px;font-weight:bold">${otp}</p>
-      <p>This code expires in 10 minutes. If you didn't request it, you can ignore this email.</p></div>`,
+    subject: `${titles[purpose]} — C.R.I.B.S.`,
+    html: wrap(`<p>${titles[purpose]}:</p>
+      <p style="font-size:32px;letter-spacing:8px;font-weight:bold">${code}</p>
+      <p>This code expires in 10 minutes. If you didn't request it, you can ignore this email.</p>`),
+  };
+}
+
+// Sent instead of a code when someone signs up with an email that already has an account (prevents account enumeration).
+export function existingAccountEmail() {
+  return {
+    subject: "You already have a C.R.I.B.S. account",
+    html: wrap(`<p>Someone tried to create a C.R.I.B.S. account with this email, but you already have one.</p>
+      <p>If it was you, just sign in (or use "Forgot password?"). If not, you can ignore this email.</p>`),
   };
 }
