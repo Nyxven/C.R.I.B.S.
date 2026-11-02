@@ -1,11 +1,10 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/server/auth/session";
 import { AppNav } from "@/components/nav/AppNav";
 import { Loader } from "@/components/Loader";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   if (!session) redirect("/sign-in");
   // TODO(P3): if profile.onboardingCompletedAt is null -> redirect("/onboarding")
   return (

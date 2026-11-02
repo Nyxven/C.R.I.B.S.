@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/server/auth/session";
 import { modules } from "@/content";
 import { brand } from "@/config/brand";
 
 const grad = ["from-sage to-sage-dark text-ink", "from-purple to-purple-dark text-white", "from-amber to-amber-dark text-ink", "from-gold to-amber-dark text-ink"];
 
 export default async function Home() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   const first = session?.user.name.split(" ")[0] ?? "friend";
   return (
     <div className="space-y-6">
