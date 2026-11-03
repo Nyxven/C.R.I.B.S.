@@ -1,5 +1,5 @@
 # C.R.I.B.S. web app
-Next.js (App Router) + Tailwind v4 + Better Auth + Drizzle/Neon + Brevo. See `BUILD_CRIBS.md` (spec) and `CONTEXT.md` (state).
+Next.js (App Router) + Tailwind v4 + own auth (argon2id, Neon) + Drizzle/Neon + Brevo. See `BUILD_CRIBS.md` (spec) and `CONTEXT.md` (state).
 
 ## Setup
 ```

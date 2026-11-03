@@ -36,7 +36,7 @@ You are a senior full-stack engineer building a production-grade web app for a G
 ### 0.4 Architecture rule: logic is separate from UI (mandatory)
 Strict layers, dependencies point downward only:
 1. **UI** (`src/app/**` pages/layouts, `src/components/**`): rendering, layout, accessibility, event wiring. **No** database, auth-server, fetch-to-third-party, business rules, or data shaping inside components. Pages stay thin: read params, call a service/query, render.
-2. **Feature hooks / client actions** (`src/features/<feature>/hooks`, `actions`): client state and calls to server actions/API routes (e.g., `useSignUp`, `useOnboarding`). Components consume hooks; they don't call `authClient`, `fetch`, or `db` directly.
+2. **Feature hooks / client actions** (`src/features/<feature>/hooks`, `actions`): client state and calls to server actions/API routes (e.g., `useSignUp`, `useOnboarding`). Components consume hooks; they don't call server code, `fetch`, or `db` directly.
 3. **Services / domain logic** (`src/server/services`, `src/lib/domain`): pure, framework-free business rules (personalization, scoring, safety checks, rate limiting, token hashing). Fully unit-tested, no React or Next imports.
 4. **Repositories / data access** (`src/server/repositories`, `src/db`): the only place that touches Drizzle/SQL. Services call repositories.
 5. **Integrations** (`src/server/integrations`): Brevo, AI provider, auth config. Behind small interfaces so they can be mocked.
@@ -74,7 +74,7 @@ Hard limits (state in-app): not a diagnostic or therapeutic tool; does not repla
 
 | # | Item | Decision |
 |---|------|----------|
-| D1 | Tag name: prototype says **"Cribsy"**, October paper says **"Cribseer"** | Single config constant `TAG_NAME` in `src/config/brand.ts`, default `"Cribseer"`. Never hard-code the name in copy. Team to confirm. |
+| D1 | Tag name: prototype says **"Cribsy"**, October paper says **"Cribseer"** | Single config constant `TAG_NAME` in `src/config/brand.ts`, default `"CRIBS"` (confirmed by the user in session 2). Never hard-code the name in copy. |
 | D2 | Paper says "GPS tag + geofence + Firebase"; the real design is an AirTag-style tracker using **Apple Find My / Google Find Hub**, which have **no public API** | The web app **cannot read the tag's location or do geofencing**. It deep-links to the network, shows the if-found card, and the QR page. Keep the honest disclaimer from the prototype. Do **not** fake live maps. Use Neon, not Firebase. Flag in `CONTEXT.md` for the team's paper (tests 4.1 and 4.3 assume capabilities the app does not have). |
 | D3 | Directory names in the seed are **sample/fictional** | Label "Sample listings — verify directly" in UI. Build the data model so real, verified listings can be added (`verifiedAt`, `source`). |
 | D4 | New content beyond the seed | Every article has `reviewStatus`: `prototype-content` \| `draft` \| `expert-reviewed`. Show a small "Reviewed by experts" badge only for `expert-reviewed`. |
@@ -92,7 +92,7 @@ Hard limits (state in-app): not a diagnostic or therapeutic tool; does not repla
 | Hosting | **Vercel** |
 | Database | **Neon Postgres via the Vercel Marketplace/Store integration** (gives `DATABASE_URL`; use pooled for runtime, unpooled for migrations) |
 | ORM / migrations | **Drizzle ORM + drizzle-kit** with `@neondatabase/serverless` |
-| Auth | **Better Auth** (email+password, `emailOTP` plugin for verification/reset, secure cookie sessions) |
+| Auth | **Own implementation on Neon** (session 2: Better Auth removed). Email + password (argon2id + secret pepper) in Neon, 6-digit email OTP via **Brevo** for verification/reset, hashed server-side sessions in a httpOnly cookie. Code: `src/server/auth/*`, UI boundary `src/features/auth/actions.ts` |
 | OTP / email | **Brevo** transactional email API (server-side, `BREVO_API_KEY`) |
 | AI | **Vercel AI SDK** with provider switch via env. Default: **Anthropic Claude Haiku-class** model (cheap, fast; `AI_MODEL` env, e.g. `claude-haiku-5-5`). Fallback: OpenAI `gpt-4o-mini`-class. |
 | Validation | Zod everywhere (env, API inputs, forms) |
@@ -100,7 +100,7 @@ Hard limits (state in-app): not a diagnostic or therapeutic tool; does not repla
 | Tooling | pnpm, ESLint, Prettier, Husky + lint-staged, commitlint (Conventional Commits) |
 | CI | GitHub Actions (typecheck, lint, test, build, e2e smoke) + Dependabot |
 
-Always check the **current official docs** for Next.js, Better Auth, Drizzle, Tailwind v4, Vercel AI SDK, and Brevo before coding against them; APIs change (e.g., Next's `middleware`/`proxy` naming, Better Auth plugin options).
+Always check the **current official docs** for Next.js, Drizzle, Tailwind v4, Vercel AI SDK, and Brevo before coding against them; APIs change (e.g., Next's `middleware`/`proxy` naming).
 
 ---
 
@@ -122,7 +122,7 @@ cribs/
 │  ├─ server/
 │  │  ├─ services/               # business logic (no React/Next)
 │  │  ├─ repositories/           # all Drizzle queries
-│  │  └─ integrations/           # brevo, ai provider, better-auth config
+│  │  └─ integrations/           # brevo, ai provider
 │  ├─ lib/domain/                # pure functions: personalize, score, safety, token
 │  ├─ db/                        # schema.ts, client
 │  ├─ config/                    # brand.ts, nav.ts, env.ts, safety.ts
@@ -250,7 +250,7 @@ Supports the team's study: consent screen → **pre-test** (knowledge/confidence
 
 ## 8. Data model (Drizzle / Postgres)
 
-Better Auth core tables (`user`, `session`, `account`, `verification`) generated by its CLI/schema; plus:
+Auth tables (hand-written in `src/db/schema.ts`): `user` (password_hash, email_verified_at), `session` (token_hash), `login_code` (code_hash, attempts, one live code per email+purpose), `rate_limit`; plus:
 
 - `profile` (userId PK/FK, displayName, relationship, language, theme, textSize, sensoryMode, notifOn, onboardingCompletedAt)
 - `child` (id, userId FK, nickname, ageYears|birthYear, journeyStage, communicationLevel, commTools[], sensory jsonb, calming text, interests text, challenges[], school, hasTherapist, wanderingRisk, avoid text, wearsTag bool, tagNetwork enum, createdAt, updatedAt)
@@ -272,7 +272,7 @@ Indexes on FKs and frequent lookups; `createdAt/updatedAt` everywhere; cascade d
 ## 9. Security, privacy, compliance (non-negotiable)
 
 - Philippines **Data Privacy Act of 2012 (RA 10173)** mindset: collect the minimum, explicit consent, purpose limitation, access/export/delete rights, retention limits, clear privacy notice. Child health-related data counts as sensitive personal information; the parent consents on the child's behalf. The team should confirm requirements with their adviser/school before real-user pilots.
-- Auth hardening: scrypt hashed passwords (Better Auth default), email verification required, OTP rate limits and attempt caps, secure+httpOnly+sameSite cookies, CSRF protection, rate limiting on auth/chat/community/public-token routes (Better Auth rate limiter + DB/KV-backed limiter).
+- Auth hardening: argon2id passwords with an HMAC pepper held only in Vercel (`PASSWORD_PEPPER`, rotatable via `_PREVIOUS`), email verification required, OTP and sessions stored as keyed hashes, OTP 10-min expiry + 5 attempts, DB-backed rate limits (`rate_limit` table) on sign-in/sign-up/codes, secure+httpOnly+sameSite cookies, server actions (Next built-in origin checks), same-response for unknown/known emails, all sessions revoked on password reset. TODO: rate limiting on chat/community/public-token routes.
 - Zod validation on every route/server action; parameterized queries only; output encoding; sanitize any rich text.
 - Security headers via Next config: strict CSP (allow only needed origins), HSTS, `X-Content-Type-Options`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `frame-ancestors 'none'`.
 - Authorization checks on every query (row ownership); no IDOR; public `/f/[token]` exposes only opted-in fields.
@@ -314,7 +314,7 @@ Indexes on FKs and frequent lookups; `createdAt/updatedAt` everywhere; cascade d
 |---|---|---|
 | **P0b Refactor to layers** | Move logic out of components/pages into features/server/lib-domain per 0.4; add ESLint import rules, Husky, commitlint, gitleaks, CD workflow | Lint rule violations = 0; hooks block bad commits |
 | **P0 Scaffold** | Repo, Next+TS+Tailwind v4, tooling, CI, env validation, brand tokens, Drizzle + Neon connection, health route | `pnpm build` green, CI green, deployed preview |
-| **P1 Auth** | Better Auth + Brevo emailOTP, landing, sign-up/in/verify/forgot/reset, route guards | New user can register, verify by emailed OTP, sign in/out |
+| **P1 Auth** | Own auth (Neon) + Brevo OTP, landing, sign-up/in/verify/forgot/reset, route guards | New user can register, verify by emailed OTP, sign in/out |
 | **P2 Shell** | App layout, bottom nav (AI center), desktop sidebar, loader animation, PWA basics, theming | Navigation works on mobile + desktop, loader per 6.2 |
 | **P3 Onboarding + Profile** | 10-step quiz, `child` persistence, resume, edit in Settings | Profile saved; Home personalizes |
 | **P4 Content** | Seed script, modules/articles/FAQ/directory UIs, search, progress/save | All seed content visible, searchable |
@@ -333,7 +333,7 @@ If budget is tight, **P0–P5 is the minimum viable product**; ship that, then c
 
 - [ ] All requested features: landing + accounts with passwords, loading animation, onboarding quiz → child profile, improved UI from the HTML with all seed info preserved, navbar with AI in the center, AI chat grounded on app content.
 - [ ] Works great on phones (primary) and desktop.
-- [ ] Deployed on Vercel, Neon connected, Better Auth + Brevo OTP working in production.
+- [ ] Deployed on Vercel, Neon connected, Own auth + Brevo OTP working in production.
 - [ ] GitHub repo with CI passing, README, SECURITY.md, ADRs.
 - [ ] Section 9 requirements verified; Section 10 metrics met.
 - [ ] `CONTEXT.md` current; `cribs-handoff.zip` regenerated.
