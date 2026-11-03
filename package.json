@@ -11,7 +11,9 @@
     "test": "vitest run --passWithNoTests",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "check-env": "tsx scripts/check-env.ts"
+    "check-env": "tsx scripts/check-env.ts",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "check-secrets": "node scripts/check-secrets.mjs --all"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.0",
