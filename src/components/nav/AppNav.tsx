@@ -14,7 +14,7 @@ export function AppNav() {
     <>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col gap-2 border-r border-line bg-white/80 p-5 backdrop-blur lg:flex">
-        <div className="mb-4 flex items-center gap-2"><Logo size={36} /><span className="font-display text-xl font-bold">C.R.I.B.S.</span></div>
+        <div className="mb-4 flex items-center gap-2"><Logo size={52} /><span className="font-display text-xl font-bold">C.R.I.B.S.</span></div>
         <Link href="/ask" className="btn-primary mb-3 w-full"><Sparkles size={18} /> Ask CRIBS</Link>
         {navItems.filter((n) => !("center" in n)).map((n) => {
           const Icon = icons[n.icon];

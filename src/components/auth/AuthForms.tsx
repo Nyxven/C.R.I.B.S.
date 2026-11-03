@@ -8,7 +8,7 @@ import { Logo } from "@/components/Logo";
 function Shell({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 py-10">
-      <Link href="/" className="mb-6 flex items-center gap-2"><Logo size={36} /><span className="font-display text-xl font-bold">C.R.I.B.S.</span></Link>
+      <Link href="/" className="mb-6 flex items-center gap-2"><Logo size={52} /><span className="font-display text-xl font-bold">C.R.I.B.S.</span></Link>
       <h1 className="text-3xl font-extrabold">{title}</h1>
       {sub && <p className="mb-5 mt-1 text-ink-soft">{sub}</p>}
       <div className="mt-4 space-y-4">{children}</div>

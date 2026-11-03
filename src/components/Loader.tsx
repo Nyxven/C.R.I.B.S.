@@ -18,7 +18,7 @@ export function Loader({ children }: { children: React.ReactNode }) {
   if (phase === "done") return <>{children}</>;
   return (
     <div role="status" aria-live="polite" className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-cream">
-      {phase === "loading" && (<><Logo size={140} animate /><p className="font-display text-lg font-semibold text-ink-soft">{lines[i]}</p></>)}
+      {phase === "loading" && (<><Logo size={200} animate /><p className="font-display text-lg font-semibold text-ink-soft">{lines[i]}</p></>)}
     </div>
   );
 }

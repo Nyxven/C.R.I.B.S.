@@ -13,7 +13,7 @@ export default function Landing() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-5xl flex-col px-5 pb-16 pt-6">
       <header className="flex items-center justify-between">
-        <div className="flex items-center gap-2"><Logo size={36} /><span className="font-display text-xl font-bold">{brand.name}</span></div>
+        <div className="flex items-center gap-2"><Logo size={52} /><span className="font-display text-xl font-bold">{brand.name}</span></div>
         <Link href="/sign-in" className="font-bold text-ink-soft underline underline-offset-4">Sign in</Link>
       </header>
 
