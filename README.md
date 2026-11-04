@@ -1,12 +1,33 @@
-# C.R.I.B.S. web app
-Next.js (App Router) + Tailwind v4 + own auth (argon2id, Neon) + Drizzle/Neon + Brevo. See `BUILD_CRIBS.md` (spec) and `CONTEXT.md` (state).
+# C.R.I.B.S.
 
-## Setup
+**Child Raising Information Basis System**: a mobile-first web app that gives parents of children with autism one organized, trustworthy place for guidance, an AI guide, a directory, FAQs and community.
+
+Built by the Taguig Science High School STEM team.
+
+**Stack:** Next.js (App Router) · Tailwind v4 · Neon (Postgres) + Drizzle · own email/password auth · Brevo (email codes) · Vercel
+
+## Run locally
+```bash
+npm ci
+cp .env.example .env.local   # fill in the values
+npm run dev                  # http://localhost:3000
 ```
-npm install
-cp .env.example .env.local      # fill values (vercel env pull .env.local after adding Neon)
-npm run auth:generate           # compare generated auth schema with src/db/schema.ts
-npm run db:generate && npm run db:migrate
-npm run dev
-```
-Dev OTP emails print to the server console while `MAIL_DRIVER=console`.
+With `MAIL_DRIVER=console`, sign-up codes print in the terminal instead of being emailed.
+
+## Deploy
+Follow [`SETUP_GUIDE.md`](SETUP_GUIDE.md). Environment variables are listed in [`VERCEL_ENV.md`](VERCEL_ENV.md).
+
+## Useful commands
+| Command | What it does |
+|---|---|
+| `npm run dev` | start the app |
+| `npm test` | run tests |
+| `npm run typecheck` | check types |
+| `npm run db:migrate` | create/update database tables |
+| `npm run check-secrets` | scan the repo for leaked secrets |
+
+## Secrets
+Never commit real keys. Only `.env.example` (empty values) is tracked. Real values live in Vercel. A pre-commit hook and CI both scan for secrets.
+
+## More
+[`BUILD_CRIBS.md`](BUILD_CRIBS.md) is the full spec and [`CONTEXT.md`](CONTEXT.md) is the current project state.
