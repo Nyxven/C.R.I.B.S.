@@ -13,16 +13,17 @@
 8. **Always deliver handoff files**: CONTEXT.md, BUILD_CRIBS.md (if changed), .env.example, SETUP_GUIDE.md, VERCEL_ENV.md, zip.
 
 ## Status
-- **Current phase:** first deploy prep done (session 2) -> next: user pushes + deploys, then P3
-- **Last updated:** 2026-11-03 (session 2)
-- **Repo:** local git repo, granular commits on `main`; GitHub `Nyxven/C.R.I.B.S` NOT pushed yet (sandbox has no GitHub login). Local commits use placeholder identity "CRIBS Dev <dev@cribs.local>".
-- **Deployment:** none yet (user does Vercel import; see SETUP_GUIDE.md)
-- **Database:** Neon via Vercel Storage, not provisioned yet. `drizzle/0000_*.sql` applied OK to a local Postgres 16 in the sandbox.
+- **Current phase:** first deploy LIVE (session 2). OPEN BUG: sign-up shows "Something went wrong. Please try again." -> diagnose first, then P3
+- **Last updated:** 2026-11-04 (end of session 2)
+- **Repo:** GitHub `Nyxven` (private), pushed by the user from their Windows/PowerShell machine. The user's push may be behind the newest zip (README + Windows doc fixes). Sandbox commits use placeholder identity "CRIBS Dev <dev@cribs.local>"; the sandbox has no GitHub/Vercel access, so the user pushes.
+- **Deployment:** Vercel, live at `https://cribs-ecru.vercel.app` (project domains also `cribs-git-main-gabaii.vercel.app`). Landing/pages load (a 404 earlier was a project-settings issue the user fixed). Deployment was from commit 694a953.
+- **Database:** Neon connected via Vercel Storage by the user. UNKNOWN whether `drizzle/0000_*.sql` has been run on it (GitHub Action "DB migrate" needs the `production` environment secret `DATABASE_URL_UNPOOLED`). Migration SQL was checked on local Postgres 16 only.
+- **AI guide:** NOT built (P5). `/ask` is a placeholder page; no AI SDK installed; `AI_*` vars exist only in `.env.example`.
 
 | Phase | Status |
 |---|---|
 | P0 Scaffold | installed, pinned, typecheck + build pass (Google Fonts can't load in sandbox; fine on Vercel) |
-| P1 Auth | own auth done: 24 unit tests pass; NOT tested end-to-end against Neon/Brevo |
+| P1 Auth | own auth done, 24 unit tests pass. LIVE sign-up fails with the generic error (see Open bug). Not yet verified against Neon/Brevo |
 | P2 Shell | builds; smoke-tested (/, /sign-in, /sign-up, /api/health, manifest, icons = 200; /home redirects to /sign-in when signed out) |
 | P3 Onboarding + Profile | todo (add redirect in `(app)/layout.tsx`) |
 | P4 Content | partial: modules, article, directory, FAQ read seed/content.json; search/progress/DB seed todo |
@@ -61,14 +62,24 @@ Node.js + Next.js 16 (App Router, TS) · Tailwind v4 · Vercel · Neon via Verce
 - Seed content: `seed/content.json`. Visual reference: `seed/prototype-reference.html`.
 - Brand palette: coral #F1743E, purple #8E7BD1, sage #B9CE55, amber #F2A759, terracotta #E96B57, gold #F0C15C, pink #EF7E9E, ink #372F4A, cream #FFF8F1. Fonts: Baloo 2 + Nunito. Nav (mobile): Home · Directory · **Ask (AI, center)** · FAQ · Settings. Desktop: sidebar.
 
+## User environment
+Windows + PowerShell. Keep commands PowerShell-safe (no `openssl`, `source`, `unzip`; avoid `&&`). The user asked for simpler, shorter instructions: keep steps short and avoid long option lists.
+
 ## Env vars
 Full copy-paste list and secret/non-secret split: `VERCEL_ENV.md`; template: `.env.example`. Used by code today: NEXT_PUBLIC_APP_URL, TAG_NAME, AUTH_SECRET(+_PREVIOUS), PASSWORD_PEPPER(+_PREVIOUS), DATABASE_URL, DATABASE_URL_UNPOOLED, MAIL_DRIVER, BREVO_API_KEY, MAIL_FROM_EMAIL, MAIL_FROM_NAME. AI/role vars are for later phases. In production `MAIL_DRIVER` must be `brevo` or sign-up email fails by design.
 
+## Open bug: sign-up returns "Something went wrong. Please try again."
+That message comes from `safe()` in `src/features/auth/actions.ts`, which catches any unexpected exception and logs only `[auth] unexpected error: <error name>` (Vercel > project > Logs). Reading the name:
+- `NeonDbError` -> database problem, most likely tables missing (migration not run) or wrong DATABASE_URL.
+- plain `Error` -> usually `Invalid auth env` (AUTH_SECRET / PASSWORD_PEPPER missing, under 32 chars, or not applied to Production) or `DATABASE_URL is not set`. Env changes in Vercel only apply to a NEW deployment, so redeploy after changing them.
+- Brevo failures do NOT hit this message: they return "We couldn't send the email...".
+First task next session: ask the user for that log line (and whether the DB migrate action ran). Improve the log to `name: message` (messages contain no secrets; env errors list names only) in a small commit, and consider a clearer message for the "tables missing" case.
+
 ## Blockers / needs from the user
-1. Push to GitHub (`Nyxven/C.R.I.B.S`, private) and import in Vercel.
-2. Add Neon from Vercel Storage; run the migration (SETUP_GUIDE step 6).
-3. Brevo: verified sender + API key (put directly into Vercel, never in chat).
-4. Generate `AUTH_SECRET` and `PASSWORD_PEPPER` and put them in Vercel (Sensitive).
+1. Vercel log line for the sign-up error; confirm the DB migrate workflow ran (SETUP_GUIDE step 6).
+2. Brevo: verified sender + API key in Vercel (never in chat); `MAIL_FROM_EMAIL` real.
+3. Confirm `AUTH_SECRET` / `PASSWORD_PEPPER` exist in Production scope, then redeploy.
+4. Push the newest zip's commits (README, Windows-friendly docs).
 5. Later: AI provider key (P5); verified local crisis hotline numbers for `src/config/safety.ts`.
 
 ## Known deviations / todo (hardening)
@@ -77,7 +88,7 @@ Full copy-paste list and secret/non-secret split: `VERCEL_ENV.md`; template: `.e
 - Auth service is tested with a faked repo; real SQL (migration + rate-limit upsert + code upsert) was checked by hand on Postgres 16, not through the Neon HTTP driver.
 
 ## Next 5 tasks (each begins with a change plan; wait for "go")
-1. Ask the user what they want; check deploy result (health, sign-up, email) and fix issues in small commits.
+1. Ask the user what they want; fix the sign-up bug above (plan first, wait for "go"), then verify sign-up > email code > verify > /home end to end.
 2. P3: onboarding quiz -> `child` table; guard in `(app)/layout.tsx`.
 3. Settings page: sign-out button, change password, sign out other devices.
 4. Hardening todo above (ESLint import rules, Playwright e2e for auth, dependabot).
@@ -94,4 +105,5 @@ npm run dev
 ## Session log
 - 2026-11-02: Build prompt, context, env template, seed content generated; P0-P2 scaffold written (unverified).
 - 2026-11-02: User added working rules (plan-then-go, granular commits, no force push, no secrets, logic/UI separation, CI/CD, handoff files).
+- 2026-11-04: user deployed to Vercel (cribs-ecru.vercel.app), fixed a 404 via project settings; sign-up errors with generic message; asked if AI is integrated (no, P5). User is on Windows PowerShell (no openssl; docs now use a Node one-liner; no `&&` in docs).
 - 2026-11-03 (session 2): installed + pinned deps; removed Better Auth; built own Neon auth (argon2id + pepper, Brevo OTP, hashed sessions, rate limits, rotation) with 24 tests; applied the logo (assets, Logo component, icons, manifest); tag name set to CRIBS; env docs (VERCEL_ENV.md), secret scanner + hook + CI scan, db-migrate workflow, SETUP_GUIDE.md. Deploy itself is for the user (sandbox can't reach Vercel/GitHub).
