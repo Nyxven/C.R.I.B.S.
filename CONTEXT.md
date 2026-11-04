@@ -87,7 +87,7 @@ Full copy-paste list and secret/non-secret split: `VERCEL_ENV.md`; template: `.e
 ```
 npm ci && cp .env.example .env.local   # fill values (see VERCEL_ENV.md)
 vercel link && vercel env pull .env.local
-set -a; source .env.local; set +a; npm run db:migrate
+# migrations run via the GitHub 'DB migrate' workflow (see SETUP_GUIDE.md)
 npm run dev
 ```
 

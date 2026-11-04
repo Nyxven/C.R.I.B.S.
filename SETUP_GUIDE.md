@@ -4,17 +4,18 @@ Time: about 20 minutes. Everything marked **YOU** needs your logins.
 
 ## 1. Open the project locally
 ```bash
-unzip cribs-app.zip && cd cribs-app      # the zip includes the git history
+# unzip cribs-app.zip (right-click > Extract All), open a terminal inside the folder
 npm ci
-git config user.name "Your Name" && git config user.email "you@example.com"   # future commits use your identity
+git config user.name "Your Name"
+git config user.email "you@example.com"   # future commits use your identity
 ```
 `npm ci` also turns on the pre-commit secret scan (`.githooks/pre-commit`).
 
 ## 2. Local run (optional but recommended)
 ```bash
-cp .env.example .env.local
-openssl rand -base64 32     # paste as AUTH_SECRET
-openssl rand -base64 32     # paste as PASSWORD_PEPPER
+copy .env.example .env.local   # (macOS/Linux: cp)
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"     # AUTH_SECRET
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"     # PASSWORD_PEPPER (different value)
 ```
 Set `DATABASE_URL` to a Neon dev branch (step 5), keep `MAIL_DRIVER=console` (codes print in the terminal), then `npm run dev`.
 
@@ -35,13 +36,7 @@ Then in the repo: Settings > Environments > New environment `production`, and ad
 Vercel project > Storage > Create > **Neon** > connect to this project (Production + Preview). It adds `DATABASE_URL` and `DATABASE_URL_UNPOOLED`. Redeploy once after connecting.
 
 ## 6. Create the tables (one time, then automatic)
-Option A (recommended): copy `DATABASE_URL_UNPOOLED` into the GitHub `production` environment secret, then GitHub > Actions > **DB migrate** > Run workflow. It also runs on its own whenever `drizzle/**` changes on `main`.
-
-Option B (local):
-```bash
-npm i -g vercel && vercel link && vercel env pull .env.local
-set -a; source .env.local; set +a; npm run db:migrate
-```
+Copy `DATABASE_URL_UNPOOLED` into the GitHub `production` environment secret, then GitHub > Actions > **DB migrate** > Run workflow. It also runs on its own whenever `drizzle/**` changes on `main`.
 
 ## 7. YOU: Brevo
 Brevo > Senders, domains > add and verify the sender address (or domain). Put that address in `MAIL_FROM_EMAIL`. Create an API key (SMTP & API > API keys) and put it in `BREVO_API_KEY` in Vercel only. Redeploy.

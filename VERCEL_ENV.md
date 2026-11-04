@@ -17,7 +17,7 @@ RESEARCH_MODE=false
 ## B. Secrets (toggle **Sensitive** on each; scope: Production + Preview)
 Generate the two auth secrets yourself, a different value each, on your own computer:
 ```
-openssl rand -base64 32
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 ```
 AUTH_SECRET=<paste output 1>
