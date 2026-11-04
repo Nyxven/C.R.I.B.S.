@@ -10,7 +10,9 @@ async function ip() {
 }
 async function safe(fn: () => Promise<AuthResult>): Promise<AuthResult> {
   try { return await fn(); }
-  catch (e) { console.error("[auth] unexpected error:", e instanceof Error ? e.name : "unknown"); return { ok: false, error: "Something went wrong. Please try again." }; }
+  catch (e) { // Name + message only (never the stack or inputs). Env errors list variable NAMES, never values.
+    const detail = e instanceof Error ? `${e.name}: ${e.message}`.slice(0, 300) : "unknown";
+    console.error("[auth] unexpected error:", detail); return { ok: false, error: "Something went wrong. Please try again." }; }
 }
 
 export const signUpAction = async (input: unknown) => safe(async () => auth.signUp(input, await ip()));
