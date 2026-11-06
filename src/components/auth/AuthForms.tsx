@@ -137,21 +137,33 @@ export function ForgotForm() {
   const r = useRouter();
   const [step, setStep] = useState<"email" | "reset">("email");
   const [email, setEmail] = useState(""); const [otp, setOtp] = useState(""); const [password, setPassword] = useState("");
-  const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(""); const [info, setInfo] = useState(""); const [busy, setBusy] = useState(false);
+  const [boxKey, setBoxKey] = useState(0); const [sending, setSending] = useState(false); const [codeBad, setCodeBad] = useState(false);
+  const cooldown = useCooldown(60);
   async function sendCode(e: React.FormEvent) {
     e.preventDefault(); setErr(""); setBusy(true);
     const res = await requestResetAction({ email }); // same response whether or not the email exists
     setBusy(false);
     if (!res.ok) return setErr(res.error);
-    setStep("reset");
+    cooldown.restart(); setStep("reset");
+  }
+  async function resend() {
+    if (cooldown.active || sending) return;
+    setErr(""); setInfo(""); setSending(true);
+    const res = await requestResetAction({ email });
+    setSending(false);
+    if (!res.ok) return setErr(res.error);
+    cooldown.restart(); setOtp(""); setBoxKey((k) => k + 1);
+    setInfo(`A new code is on its way to ${email.trim()}.`);
   }
   async function reset(e: React.FormEvent) {
-    e.preventDefault(); setErr("");
+    e.preventDefault(); setErr(""); setInfo("");
+    if (otp.length !== 6) { setCodeBad(true); return setErr("Please enter all 6 digits of the code."); }
     if (password.length < 10) return setErr("Password must be at least 10 characters.");
     setBusy(true);
     const res = await resetPasswordAction({ email, code: otp, password });
+    if (!res.ok) { setBusy(false); setErr(res.error); setCodeBad(true); setOtp(""); setBoxKey((k) => k + 1); return; }
     setBusy(false);
-    if (!res.ok) return setErr(res.error);
     r.push("/sign-in");
   }
   return step === "email" ? (
@@ -163,13 +175,19 @@ export function ForgotForm() {
       </form>
     </Shell>
   ) : (
-    <Shell title="Enter your code" sub="If that email has an account, a code is on its way.">
+    <Shell title="Enter your code" sub={`If ${email.trim()} has an account, a 6-digit code is on its way. It lasts 10 minutes. Check your spam folder too.`}>
       <form onSubmit={reset} className="space-y-4">
-        <input className="field text-center text-2xl tracking-[.5em]" inputMode="numeric" maxLength={6} required value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} aria-label="6-digit code" />
+        <p className="text-center text-sm">Code for <b>{email.trim()}</b>. <button type="button" className="font-bold underline" onClick={() => { setStep("email"); setErr(""); setInfo(""); setOtp(""); setBoxKey((k) => k + 1); }}>Wrong email?</button></p>
+        <OtpInput key={boxKey} label="6-digit code" onComplete={setOtp} onChange={(c) => { setOtp(c); setErr(""); setCodeBad(false); }} disabled={busy} invalid={codeBad} describedBy={err ? "reset-error" : undefined} />
         <input className="field" type="password" required minLength={10} placeholder="New password (10+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" aria-label="New password" />
-        <Err m={err} />
-        <button className="btn-primary w-full" disabled={busy}>Reset password</button>
+        <Err m={err} id="reset-error" />
+        {info && <p role="status" className="text-center text-sm font-semibold text-sage-dark">{info}</p>}
+        <button className="btn-primary w-full" disabled={busy}>{busy ? "Saving…" : "Reset password"}</button>
       </form>
+      <button type="button" onClick={resend} disabled={cooldown.active || sending}
+        className="min-h-11 w-full rounded-full text-center text-sm font-bold underline disabled:cursor-not-allowed disabled:text-ink-soft disabled:no-underline">
+        {cooldown.active ? `Send a new code in ${formatClock(cooldown.left)}` : sending ? "Sending…" : "Send a new code"}
+      </button>
     </Shell>
   );
 }
