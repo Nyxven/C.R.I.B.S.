@@ -7,17 +7,26 @@ export async function sendMail({ to, subject, html }: Mail) {
     console.log(`[mail:console] to=${to} subject=${subject}\n${html.replace(/<[^>]+>/g, " ")}`);
     return;
   }
+  const apiKey = process.env.BREVO_API_KEY;
+  const from = process.env.MAIL_FROM_EMAIL;
+  if (!apiKey) throw new Error("BREVO_API_KEY is not set");
+  if (!from) throw new Error("MAIL_FROM_EMAIL is not set");
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
-    headers: { "api-key": process.env.BREVO_API_KEY ?? "", "content-type": "application/json", accept: "application/json" },
+    headers: { "api-key": apiKey, "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
-      sender: { email: process.env.MAIL_FROM_EMAIL, name: process.env.MAIL_FROM_NAME ?? "C.R.I.B.S." },
+      sender: { email: from, name: process.env.MAIL_FROM_NAME ?? "C.R.I.B.S." },
       to: [{ email: to }],
       subject,
       htmlContent: html,
     }),
   });
-  if (!res.ok) throw new Error(`Brevo error ${res.status}`);
+  if (!res.ok) {
+    // Brevo replies {"code": "...", "message": "..."}: safe to log (no key, no recipient).
+    let why = "";
+    try { const j = (await res.json()) as { code?: string; message?: string }; why = [j.code, j.message].filter(Boolean).join(": "); } catch {}
+    throw new Error(`Brevo error ${res.status}${why ? ` (${why})` : ""}`.slice(0, 300));
+  }
 }
 
 const titles = {
