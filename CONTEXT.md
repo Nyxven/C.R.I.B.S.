@@ -13,17 +13,18 @@
 8. **Always deliver handoff files**: CONTEXT.md, BUILD_CRIBS.md (if changed), .env.example, SETUP_GUIDE.md, VERCEL_ENV.md, zip.
 
 ## Status
-- **Current phase:** first deploy LIVE (session 2). OPEN BUG: sign-up shows "Something went wrong. Please try again." -> diagnose first, then P3
-- **Last updated:** 2026-11-04 (end of session 2)
+- **Current phase:** deployed and auth working (user confirmed end to end at close of session 2/3) -> next: **P2.5 UX pass** (Nielsen audit, 6-box OTP, main-app redesign), then P3
+- **Last updated:** 2026-11-05 (end of session 3)
 - **Repo:** GitHub `Nyxven` (private), pushed by the user from their Windows/PowerShell machine. The user's push may be behind the newest zip (README + Windows doc fixes). Sandbox commits use placeholder identity "CRIBS Dev <dev@cribs.local>"; the sandbox has no GitHub/Vercel access, so the user pushes.
 - **Deployment:** Vercel, live at `https://cribs-ecru.vercel.app` (project domains also `cribs-git-main-gabaii.vercel.app`). Landing/pages load (a 404 earlier was a project-settings issue the user fixed). Deployment was from commit 694a953.
-- **Database:** Neon connected via Vercel Storage by the user. UNKNOWN whether `drizzle/0000_*.sql` has been run on it (GitHub Action "DB migrate" needs the `production` environment secret `DATABASE_URL_UNPOOLED`). Migration SQL was checked on local Postgres 16 only.
+- **Database:** Neon via Vercel Storage (the user briefly had two Neon DBs connected and kept the old one). Tables were created by running `drizzle/0000_*.sql` (also exported as `create_tables.sql`) in Neon's SQL Editor; the GitHub "DB migrate" workflow exists but is not what was used. FUTURE schema changes need a new drizzle migration: generate with `npm run db:generate`, then apply (SQL Editor or the workflow with the `production` environment secret `DATABASE_URL_UNPOOLED`).
 - **AI guide:** NOT built (P5). `/ask` is a placeholder page; no AI SDK installed; `AI_*` vars exist only in `.env.example`.
 
 | Phase | Status |
 |---|---|
 | P0 Scaffold | installed, pinned, typecheck + build pass (Google Fonts can't load in sandbox; fine on Vercel) |
-| P1 Auth | own auth done, 24 unit tests pass. LIVE sign-up fails with the generic error (see Open bug). Not yet verified against Neon/Brevo |
+| P1 Auth | live and working (sign-up, emailed code, verify; user-confirmed). 26 unit tests pass |
+| P2.5 UX pass | NEXT (see "Session 4 agenda") |
 | P2 Shell | builds; smoke-tested (/, /sign-in, /sign-up, /api/health, manifest, icons = 200; /home redirects to /sign-in when signed out) |
 | P3 Onboarding + Profile | todo (add redirect in `(app)/layout.tsx`) |
 | P4 Content | partial: modules, article, directory, FAQ read seed/content.json; search/progress/DB seed todo |
@@ -68,19 +69,24 @@ Windows + PowerShell. Keep commands PowerShell-safe (no `openssl`, `source`, `un
 ## Env vars
 Full copy-paste list and secret/non-secret split: `VERCEL_ENV.md`; template: `.env.example`. Used by code today: NEXT_PUBLIC_APP_URL, TAG_NAME, AUTH_SECRET(+_PREVIOUS), PASSWORD_PEPPER(+_PREVIOUS), DATABASE_URL, DATABASE_URL_UNPOOLED, MAIL_DRIVER, BREVO_API_KEY, MAIL_FROM_EMAIL, MAIL_FROM_NAME. AI/role vars are for later phases. In production `MAIL_DRIVER` must be `brevo` or sign-up email fails by design.
 
-## Open bug: sign-up returns "Something went wrong. Please try again."
-That message comes from `safe()` in `src/features/auth/actions.ts`, which catches any unexpected exception and logs only `[auth] unexpected error: <error name>` (Vercel > project > Logs). Reading the name:
-- `NeonDbError` -> database problem, most likely tables missing (migration not run) or wrong DATABASE_URL.
-- plain `Error` -> usually `Invalid auth env` (AUTH_SECRET / PASSWORD_PEPPER missing, under 32 chars, or not applied to Production) or `DATABASE_URL is not set`. Env changes in Vercel only apply to a NEW deployment, so redeploy after changing them.
-- Brevo failures do NOT hit this message: they return "We couldn't send the email...".
-First task next session: ask the user for that log line (and whether the DB migrate action ran). Improve the log to `name: message` (messages contain no secrets; env errors list names only) in a small commit, and consider a clearer message for the "tables missing" case.
+## Resolved in session 3 (lessons)
+- Sign-up failed with the generic message. Causes were, in order: tables not created on the DB that Production used (drizzle wraps DB errors as plain `Error`, hiding the cause), then an invalid `BREVO_API_KEY` (Brevo replied `401 unauthorized: Key not found`; needs an **API key `xkeysib-...`** from SMTP & API > API keys, not an SMTP key).
+- Logging now shows causes: `[auth] unexpected error: <name>: <message>` and `[mail] send failed: ... Brevo error <status> (<code>: <message>)` (no keys, no recipient). Keep that pattern for new code.
+- Vercel "Needs Attention" on `DATABASE_URL*` is only a nudge to mark them Sensitive, not an error. Env changes only apply after a redeploy.
+- The user applied some fixes by copying single files; their GitHub history may differ from the zip's. The zip's working tree is the source of truth. Check `git ls-files` for stray root-level `.ts` files (a misplaced `service.ts` once broke the build).
+- Brevo is used through its HTTP API only (no SMTP settings needed).
+
+## Session 4 agenda: P2.5 UX pass (user's request, before P3)
+Start by asking questions + a plan; wait for "go". Three items:
+1. **Nielsen's 10 usability heuristics audit** of every existing screen (landing, sign-up, verify, sign-in, forgot/reset, loader, home, learn module/article, directory, FAQ, nav, settings placeholder, error/404 states). Deliver a findings table (screen, heuristic, problem, severity 0-4, fix), get the user's OK, then fix in granular commits. Especially: visibility of system status (loading/sending states), error prevention and recovery (clear messages, inline validation, password rules shown up front, resend cooldown), consistency, recognition over recall, flexibility, minimalist design, help. Audience is stressed parents of children with ASD: keep cognitive load low, language plain and kind.
+2. **OTP screen: 6 individual digit boxes**, based on common UI/UX practice: 6 separate inputs, `inputmode="numeric"`, `autocomplete="one-time-code"` (first box, also enables SMS/email autofill), auto-focus on the first box, auto-advance on typing, Backspace moves back, arrow keys navigate, paste of a 6-digit code fills all boxes, only digits accepted, auto-submit when the 6th digit is entered (with a visible loading state), clear error state (shake/red outline plus text, not color alone) that clears and refocuses the first box, "Resend code" with a visible cooldown timer, shows which email the code went to with a "wrong email?" link, large touch targets (min 44px, ~48-56px boxes), accessible (group `role="group"` + `aria-label`, each box labelled "Digit 1 of 6"), reduced-motion respected. Build as a reusable `OtpInput` component in `src/components/` (UI only, no server imports); used by verify and reset-password steps. Add a unit/component test for paste, backspace and auto-advance.
+3. **Redesign the main app (the (app) shell and its pages)**: "scratch the old idea, but keep it the same": new visual design concept, SAME features, content, information architecture and navigation (Home, Directory, Ask center tab, FAQ, Settings; desktop sidebar). Keep logo, name and the warm brand feel. Ask the user before starting: preferred direction (e.g. calmer/minimal vs playful), whether to keep the current palette/themes, any reference apps they like. Must meet WCAG AA, 360px mobile first, reduced motion and sensory-friendly mode intact. Do the redesign after the heuristics audit so findings feed into it. Treat `seed/prototype-reference.html` as no longer binding.
+Then P3 (onboarding + profile).
 
 ## Blockers / needs from the user
-1. Vercel log line for the sign-up error; confirm the DB migrate workflow ran (SETUP_GUIDE step 6).
-2. Brevo: verified sender + API key in Vercel (never in chat); `MAIL_FROM_EMAIL` real.
-3. Confirm `AUTH_SECRET` / `PASSWORD_PEPPER` exist in Production scope, then redeploy.
-4. Push the newest zip's commits (README, Windows-friendly docs).
-5. Later: AI provider key (P5); verified local crisis hotline numbers for `src/config/safety.ts`.
+1. Answers about the redesign direction (Session 4 agenda item 3) and which screens matter most.
+2. Push the newest commits to GitHub (zip contains them; user pushes from their Windows machine).
+3. Later: AI provider key (P5); verified local crisis hotline numbers for `src/config/safety.ts`.
 
 ## Known deviations / todo (hardening)
 - Missing: ESLint config + import-restriction rules, commitlint, lint-staged, PR template, CODEOWNERS, dependabot, Playwright e2e, seed script (`db:seed` does not exist), `src/config/env.ts` only covers auth vars.
@@ -88,8 +94,8 @@ First task next session: ask the user for that log line (and whether the DB migr
 - Auth service is tested with a faked repo; real SQL (migration + rate-limit upsert + code upsert) was checked by hand on Postgres 16, not through the Neon HTTP driver.
 
 ## Next 5 tasks (each begins with a change plan; wait for "go")
-1. Ask the user what they want; fix the sign-up bug above (plan first, wait for "go"), then verify sign-up > email code > verify > /home end to end.
-2. P3: onboarding quiz -> `child` table; guard in `(app)/layout.tsx`.
+1. Ask the user what they want; run the P2.5 UX pass (Session 4 agenda), plan first, wait for "go".
+2. P3: onboarding quiz -> `child` table; guard in `(app)/layout.tsx` (needs a drizzle migration only if the schema changes).
 3. Settings page: sign-out button, change password, sign out other devices.
 4. Hardening todo above (ESLint import rules, Playwright e2e for auth, dependabot).
 5. Update this file, regenerate zip.
@@ -105,5 +111,6 @@ npm run dev
 ## Session log
 - 2026-11-02: Build prompt, context, env template, seed content generated; P0-P2 scaffold written (unverified).
 - 2026-11-02: User added working rules (plan-then-go, granular commits, no force push, no secrets, logic/UI separation, CI/CD, handoff files).
+- 2026-11-05 (session 3): fixed live sign-up (tables missing on the DB in use, then invalid Brevo API key); added cause logging for auth and mail (+ mail test, 26 tests); user confirmed everything works. User queued the P2.5 UX pass (Nielsen audit, 6-box OTP, main-app redesign) before P3.
 - 2026-11-04: user deployed to Vercel (cribs-ecru.vercel.app), fixed a 404 via project settings; sign-up errors with generic message; asked if AI is integrated (no, P5). User is on Windows PowerShell (no openssl; docs now use a Node one-liner; no `&&` in docs).
 - 2026-11-03 (session 2): installed + pinned deps; removed Better Auth; built own Neon auth (argon2id + pepper, Brevo OTP, hashed sessions, rate limits, rotation) with 24 tests; applied the logo (assets, Logo component, icons, manifest); tag name set to CRIBS; env docs (VERCEL_ENV.md), secret scanner + hook + CI scan, db-migrate workflow, SETUP_GUIDE.md. Deploy itself is for the user (sandbox can't reach Vercel/GitHub).
