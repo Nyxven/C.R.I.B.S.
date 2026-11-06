@@ -1,29 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --color-coral: #F1743E;
-  --color-coral-dark: #D8592A;
+  /* Logo palette (the rainbow loop): periwinkle, mint, yellow, orange, coral. */
   --color-purple: #8E7BD1;
-  --color-purple-dark: #6E5CB0;
+  --color-mint: #7FD6C2;
   --color-sage: #B9CE55;
-  --color-sage-dark: #93A93A;
-  --color-amber: #F2A759;
-  --color-amber-dark: #DE8A34;
-  --color-terracotta: #E96B57;
   --color-gold: #F0C15C;
+  --color-amber: #F2A759;
+  --color-coral: #F1743E;
+  --color-terracotta: #E96B57;
   --color-pink: #EF7E9E;
+
+  /* Text-safe darker shades (4.5:1 or more on white and cream). Use these for words. */
+  --color-brand: #5B49A8;
+  --color-purple-dark: #5B49A8;
+  --color-coral-dark: #B8441A;
+  --color-sage-dark: #3F6212;
+  --color-amber-dark: #8A4B0B;
+  --color-mint-dark: #1E6B58;
+  --color-pink-dark: #A12A55;
+
+  /* Soft tints for cards. Dark ink text sits on these. */
+  --color-tint-purple: #E4DEFA;
+  --color-tint-mint: #D5F2E3;
+  --color-tint-yellow: #FFF0B8;
+  --color-tint-coral: #FFDCCB;
+  --color-tint-pink: #FFD9E3;
+  --color-tint-sage: #E4EFC0;
+
   --color-ink: #372F4A;
-  --color-ink-soft: #6C6480;
+  --color-ink-soft: #5A5270;
   --color-cream: #FFF8F1;
-  --color-line: #F0E6DA;
+  --color-line: #EADFD3;   /* dividers only */
+  --color-field: #8A819C;  /* input borders: 3:1 or more against the page */
+
   --font-display: var(--font-baloo), "Nunito", sans-serif;
   --font-sans: var(--font-nunito), system-ui, sans-serif;
 }
 
-:root { --accent-a: #8E7BD1; --accent-b: #F1743E; }
-[data-theme="ocean"] { --accent-a: #4E9BC9; --accent-b: #6FD0C4; }
-[data-theme="meadow"] { --accent-a: #7BAE4A; --accent-b: #C7D65B; }
-[data-theme="berry"] { --accent-a: #B0559E; --accent-b: #EF7E9E; }
+/* Button gradient: purple to coral, dark enough at every point for white text. */
+:root { --accent-a: #5B49A8; --accent-b: #B8441A; --ribbon: linear-gradient(90deg, #8E7BD1, #7FD6C2, #F0C15C, #F2A759, #E96B57); }
 
 html, body { height: 100%; }
 body {
