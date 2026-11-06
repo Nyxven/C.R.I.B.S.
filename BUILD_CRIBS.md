@@ -238,6 +238,7 @@ Supports the team's study: consent screen → **pre-test** (knowledge/confidence
 
 ## 7. Design system
 
+- **Session 3 redesign (P2.5):** the prototype's look is no longer a binding reference. Keep the features, content, information architecture and brand identity (logo, name, calm/warm feel); the visual treatment gets redesigned. Sections below describe the original system and may be revised by that pass.
 - Keep the prototype's palette as brand tokens: coral `#F1743E`, purple `#8E7BD1`, sage `#B9CE55`, amber `#F2A759`, terracotta `#E96B57`, gold `#F0C15C`, pink `#EF7E9E`, ink `#372F4A`, ink-soft `#6C6480`, cream `#FFF8F1`, line `#F0E6DA`. Define in Tailwind v4 `@theme` + CSS variables so the 4 themes swap via `data-theme`.
 - **Fix contrast:** white text on sage/gold gradients fails WCAG AA — use ink text or darker shades on those cards. Meet AA everywhere (target AAA for article body).
 - Shape language: rounded (16–24px), soft shadows, generous spacing, large touch targets, friendly Baloo 2 headings, Nunito body 16px+ base.
@@ -316,6 +317,7 @@ Indexes on FKs and frequent lookups; `createdAt/updatedAt` everywhere; cascade d
 | **P0 Scaffold** | Repo, Next+TS+Tailwind v4, tooling, CI, env validation, brand tokens, Drizzle + Neon connection, health route | `pnpm build` green, CI green, deployed preview |
 | **P1 Auth** | Own auth (Neon) + Brevo OTP, landing, sign-up/in/verify/forgot/reset, route guards | New user can register, verify by emailed OTP, sign in/out |
 | **P2 Shell** | App layout, bottom nav (AI center), desktop sidebar, loader animation, PWA basics, theming | Navigation works on mobile + desktop, loader per 6.2 |
+| **P2.5 UX pass (user request, before P3)** | (1) Nielsen's 10 heuristics audit of every existing screen with a severity-rated findings list, then fixes; (2) OTP screen with 6 individual digit boxes (see CONTEXT.md for the spec); (3) visual redesign of the main app: new look, same features, content and navigation | Audit fixes applied, OTP boxes work on mobile + desktop, redesigned shell passes AA contrast and 360px check |
 | **P3 Onboarding + Profile** | 10-step quiz, `child` persistence, resume, edit in Settings | Profile saved; Home personalizes |
 | **P4 Content** | Seed script, modules/articles/FAQ/directory UIs, search, progress/save | All seed content visible, searchable |
 | **P5 AI Guide** | `/api/chat`, grounding, citations, safety layer, rate limit, UI | Cited answers; emergency path works; PII never sent |
