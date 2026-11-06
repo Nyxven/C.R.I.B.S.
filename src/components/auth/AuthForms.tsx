@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signUpAction, verifyEmailAction, resendCodeAction, signInAction, requestResetAction, resetPasswordAction } from "@/features/auth/actions";
 import { Logo } from "@/components/Logo";
+import { OtpInput } from "@/components/ui/OtpInput";
+import { formatClock, useCooldown } from "@/features/auth/useCooldown";
 
 function Shell({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
@@ -15,7 +17,7 @@ function Shell({ title, sub, children }: { title: string; sub?: string; children
     </main>
   );
 }
-const Err = ({ m }: { m: string }) => (m ? <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{m}</p> : null);
+const Err = ({ m, id }: { m: string; id?: string }) => (m ? <p id={id} role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{m}</p> : null);
 
 export function SignUpForm() {
   const r = useRouter();
@@ -52,28 +54,56 @@ export function SignUpForm() {
 }
 
 export function VerifyForm() {
-  const r = useRouter(); const email = useSearchParams().get("email") ?? "";
-  const [otp, setOtp] = useState(""); const [err, setErr] = useState(""); const [info, setInfo] = useState(""); const [busy, setBusy] = useState(false);
-  async function submit(e: React.FormEvent) {
-    e.preventDefault(); setErr(""); setBusy(true);
-    const res = await verifyEmailAction({ email, code: otp });
-    setBusy(false);
-    if (!res.ok) return setErr(res.error);
-    r.push("/home");
+  const r = useRouter();
+  const params = useSearchParams();
+  const email = params.get("email") ?? "";
+  const fromSignIn = params.get("from") === "signin";
+  const [err, setErr] = useState(""); const [info, setInfo] = useState("");
+  const [busy, setBusy] = useState(false); const [sending, setSending] = useState(false);
+  const [boxKey, setBoxKey] = useState(0);
+  const working = useRef(false);
+  const cooldown = useCooldown(60);
+
+  async function verify(code: string) {
+    if (working.current) return;
+    working.current = true; setErr(""); setInfo(""); setBusy(true);
+    const res = await verifyEmailAction({ email, code });
+    if (!res.ok) { working.current = false; setBusy(false); setErr(res.error); setBoxKey((k) => k + 1); return; }
+    r.push("/home"); // stay in the "Verifying…" state while the next page loads
   }
   async function resend() {
-    setInfo(""); setErr("");
+    if (cooldown.active || sending) return;
+    setErr(""); setInfo(""); setSending(true);
     const res = await resendCodeAction({ email });
-    res.ok ? setInfo("If that email can be verified, a new code is on its way.") : setErr(res.error);
+    setSending(false);
+    if (!res.ok) return setErr(res.error);
+    cooldown.restart(); setBoxKey((k) => k + 1);
+    setInfo(`A new code is on its way to ${email}.`);
   }
+
+  if (!email) {
+    return (
+      <Shell title="Let's find your code" sub="We lost track of your email address.">
+        <Link href="/sign-in" className="btn-primary w-full">Go to sign in</Link>
+        <p className="text-center text-sm text-ink-soft">Sign in with your email and password and we'll send you a new code.</p>
+      </Shell>
+    );
+  }
+  const sub = fromSignIn
+    ? `Let's finish verifying your email. Enter the 6-digit code we emailed to ${email}.`
+    : `If ${email} is right, a 6-digit code is on its way. It lasts 10 minutes. Check your spam folder too.`;
   return (
-    <Shell title="Check your email" sub={`If ${email || "your email"} can be used, we sent a 6-digit code.`}>
-      <form onSubmit={submit} className="space-y-4">
-        <input className="field text-center text-2xl tracking-[.5em]" inputMode="numeric" autoComplete="one-time-code" maxLength={6} pattern="\d{6}" required value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} aria-label="6-digit code" />
-        <Err m={err} />{info && <p role="status" className="text-sm font-semibold text-sage-dark">{info}</p>}
-        <button className="btn-primary w-full" disabled={busy || otp.length !== 6}>{busy ? "Verifying…" : "Verify"}</button>
-      </form>
-      <button onClick={resend} className="w-full text-center text-sm font-bold underline">Send a new code</button>
+    <Shell title="Check your email" sub={sub}>
+      <p className="text-center text-sm">Code for <b>{email}</b>. <Link className="font-bold underline" href="/sign-up">Wrong email?</Link></p>
+      <OtpInput key={boxKey} label="6-digit code" onComplete={verify} onChange={() => setErr("")} disabled={busy} invalid={!!err} describedBy={err ? "otp-error" : undefined} />
+      <div aria-live="polite" className="min-h-6 text-center">{busy && <p role="status" className="font-bold text-ink-soft">Verifying…</p>}</div>
+      <Err m={err} id="otp-error" />
+      {info && <p role="status" className="text-center text-sm font-semibold text-sage-dark">{info}</p>}
+      <button type="button" onClick={resend} disabled={cooldown.active || sending}
+        className="min-h-11 w-full rounded-full text-center text-sm font-bold underline disabled:cursor-not-allowed disabled:text-ink-soft disabled:no-underline">
+        {cooldown.active ? `Send a new code in ${formatClock(cooldown.left)}` : sending ? "Sending…" : "Send a new code"}
+      </button>
+      <p className="text-center text-sm text-ink-soft">No code? If you already have an account, <Link className="font-bold underline" href="/sign-in">sign in</Link> or <Link className="font-bold underline" href="/forgot">reset your password</Link>.</p>
     </Shell>
   );
 }
@@ -87,7 +117,7 @@ export function SignInForm() {
     const res = await signInAction({ email, password });
     setBusy(false);
     if (!res.ok) return setErr(res.error);
-    if (res.needsVerify) return r.push(`/verify?email=${encodeURIComponent(email.trim())}`);
+    if (res.needsVerify) return r.push(`/verify?email=${encodeURIComponent(email.trim())}&from=signin`);
     r.push("/home");
   }
   return (
