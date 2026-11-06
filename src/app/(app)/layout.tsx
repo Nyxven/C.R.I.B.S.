@@ -1,16 +1,19 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth/session";
 import { AppNav } from "@/components/nav/AppNav";
 import { Loader } from "@/components/Loader";
+import { LOADER_COOKIE } from "@/config/ui";
 import { Logo } from "@/components/Logo";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session) redirect("/sign-in");
+  const seen = (await cookies()).has(LOADER_COOKIE);
   // TODO(P3): if profile.onboardingCompletedAt is null -> redirect("/onboarding")
   return (
-    <Loader>
+    <Loader seen={seen}>
       <a href="#content" className="skip-link">Skip to content</a>
       <AppNav />
       <header className="sticky top-0 z-10 bg-cream/90 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
