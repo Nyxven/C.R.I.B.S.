@@ -15,6 +15,9 @@ const TOO_MANY = "Too many attempts. Please wait a few minutes and try again.";
 const BAD_CODE = "That code didn't work. Check it and try again, or request a new one.";
 const BAD_LOGIN = "Email or password is incorrect.";
 
+const logMail = (e: unknown) =>
+  console.error("[mail] send failed:", e instanceof Error ? `${e.name}: ${e.message}`.slice(0, 300) : "unknown");
+
 const tooMany = async (key: string, limit: number, sec: number) => !(await repo.hitRateLimit(key, limit, sec)).allowed;
 
 async function issueCode(email: string, purpose: repo.Purpose) {
@@ -42,13 +45,13 @@ export async function signUp(input: unknown, ip: string): Promise<AuthResult> {
   const existing = await repo.findUserByEmail(email);
   if (existing?.emailVerifiedAt) {
     // Same response as a new sign-up, so the form can't be used to discover who has an account.
-    await sendMail({ to: email, ...existingAccountEmail() }).catch(() => {});
+    await sendMail({ to: email, ...existingAccountEmail() }).catch(logMail);
     return ok();
   }
   const passwordHash = await hashPassword(password);
   if (existing) await repo.resetUnverifiedUser(existing.id, { name, passwordHash });
   else await repo.insertUser({ id: randomUUID(), name, email, passwordHash });
-  try { await issueCode(email, "verify"); } catch { return fail("We couldn't send the email. Please try again in a moment."); }
+  try { await issueCode(email, "verify"); } catch (e) { logMail(e); return fail("We couldn't send the email. Please try again in a moment."); }
   return ok();
 }
 
@@ -58,7 +61,7 @@ export async function resendVerification(input: unknown): Promise<AuthResult> {
   const { email } = p.data;
   if (await tooMany(`code:${email}`, 3, 600)) return fail(TOO_MANY);
   const u = await repo.findUserByEmail(email);
-  if (u && !u.emailVerifiedAt) await issueCode(email, "verify").catch(() => {});
+  if (u && !u.emailVerifiedAt) await issueCode(email, "verify").catch(logMail);
   return ok();
 }
 
@@ -86,7 +89,7 @@ export async function signIn(input: unknown, ip: string): Promise<AuthResult> {
   if (!v.ok) return fail(BAD_LOGIN);
 
   if (!u.emailVerifiedAt) {
-    if (!(await tooMany(`code:${email}`, 3, 600))) await issueCode(email, "verify").catch(() => {});
+    if (!(await tooMany(`code:${email}`, 3, 600))) await issueCode(email, "verify").catch(logMail);
     return ok({ needsVerify: true });
   }
   if (v.needsRehash) await repo.setPasswordHash(u.id, await hashPassword(password)); // silent upgrade after pepper/param rotation
@@ -99,7 +102,7 @@ export async function requestPasswordReset(input: unknown, ip: string): Promise<
   if (!p.success) return ok(); // never reveal anything
   const { email } = p.data;
   if ((await tooMany(`reset:ip:${ip}`, 10, 3600)) || (await tooMany(`code:${email}`, 3, 600))) return fail(TOO_MANY);
-  if (await repo.findUserByEmail(email)) await issueCode(email, "reset").catch(() => {});
+  if (await repo.findUserByEmail(email)) await issueCode(email, "reset").catch(logMail);
   return ok();
 }
 
