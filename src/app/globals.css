@@ -62,3 +62,11 @@ h1, h2, h3 { font-family: var(--font-display); }
 .logo-float { animation: logo-in .6s ease both, floaty 2.4s ease-in-out .6s infinite; }
 @keyframes logo-in { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .logo-float { animation: none; } }
+
+@keyframes otp-shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+.otp-shake { animation: otp-shake .5s ease both; }
