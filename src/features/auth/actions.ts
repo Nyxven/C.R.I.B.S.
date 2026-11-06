@@ -1,5 +1,6 @@
 "use server";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import * as auth from "@/server/auth/service";
 import type { AuthResult } from "@/server/auth/service";
 
@@ -21,4 +22,4 @@ export const resendCodeAction = async (input: unknown) => safe(() => auth.resend
 export const signInAction = async (input: unknown) => safe(async () => auth.signIn(input, await ip()));
 export const requestResetAction = async (input: unknown) => safe(async () => auth.requestPasswordReset(input, await ip()));
 export const resetPasswordAction = async (input: unknown) => safe(async () => auth.resetPassword(input, await ip()));
-export async function signOutAction() { await auth.signOut(); }
+export async function signOutAction() { await auth.signOut(); redirect("/sign-in"); }
