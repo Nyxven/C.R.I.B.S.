@@ -70,7 +70,7 @@ export function OtpInput({ label, onComplete, onChange, disabled, invalid, descr
           onPaste={(e) => { e.preventDefault(); go(applyPaste(s, i, e.clipboardData.getData("text"))); }}
           onFocus={(e) => e.currentTarget.select()}
           className={`h-14 w-11 rounded-2xl border-2 bg-white text-center font-display text-2xl font-bold text-ink outline-none transition focus:ring-4 disabled:opacity-60 sm:h-16 sm:w-14 ${
-            invalid ? "border-red-600 bg-red-50 focus:ring-red-600/30" : "border-line focus:border-purple-dark focus:ring-purple/40"
+            invalid ? "border-red-700 bg-red-50 focus:ring-red-700/30" : "border-field focus:border-brand focus:ring-brand/30"
           }`}
         />
       ))}
