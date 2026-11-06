@@ -13,7 +13,7 @@ export default function Landing() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-5xl flex-col px-5 pb-16 pt-6">
       <header className="flex items-center justify-between">
-        <div className="flex items-center gap-2"><Logo size={52} /><span className="font-display text-xl font-bold">{brand.name}</span></div>
+        <div className="flex items-center gap-2"><Logo size={52} alt="" /><span className="font-display text-xl font-bold">{brand.name}</span></div>
         <Link href="/sign-in" className="font-bold text-ink-soft underline underline-offset-4">Sign in</Link>
       </header>
 
@@ -25,7 +25,7 @@ export default function Landing() {
           <p className="max-w-md text-lg text-ink-soft">{brand.name} brings guidance, everyday routines and a caring community into one place.</p>
           <div className="flex flex-wrap gap-3">
             <Link href="/sign-up" className="btn-primary">Create your account</Link>
-            <Link href="/sign-in" className="inline-flex min-h-12 items-center rounded-full border-2 border-line bg-white px-6 font-bold">I have an account</Link>
+            <Link href="/sign-in" className="btn-secondary">I have an account</Link>
           </div>
         </div>
         <div className="mx-auto"><Logo size={220} animate /></div>
@@ -47,6 +47,7 @@ export default function Landing() {
       </section>
 
       <footer className="mt-auto text-sm text-ink-soft">
+        <p className="mb-3"><Link className="font-bold underline" href="/privacy">Privacy Policy</Link> · <Link className="font-bold underline" href="/terms">Terms of Use</Link></p>
         <p>{brand.name} is a guidance tool, not a medical service. It does not diagnose or replace licensed professionals. Supports SDG 3 (Good Health and Well-being) and SDG 10 (Reduced Inequalities).</p>
       </footer>
     </main>
