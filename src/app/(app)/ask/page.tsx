@@ -1,5 +1,7 @@
 import { ComingSoon } from "@/components/ui/ComingSoon";
 
+export const metadata = { title: "Ask CRIBS" };
+
 export default function Page() {
   return (
     <ComingSoon title="Ask CRIBS is on its way" links={[{ href: "/home", label: "Browse the guides" }, { href: "/faq", label: "Read the FAQ" }]}>

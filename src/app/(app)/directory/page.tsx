@@ -1,6 +1,8 @@
 import { MapPin } from "lucide-react";
 import { directory } from "@/content";
 
+export const metadata = { title: "Directory" };
+
 export default function Directory() {
   return (
     <div className="space-y-5">

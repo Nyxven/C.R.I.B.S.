@@ -6,7 +6,7 @@ const baloo = Baloo_2({ subsets: ["latin"], weight: ["500", "600", "700", "800"]
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" });
 
 export const metadata: Metadata = {
-  title: "C.R.I.B.S. — Child Raising Information Basis System",
+  title: { default: "C.R.I.B.S. — Child Raising Information Basis System", template: "%s · C.R.I.B.S." },
   description: "A centralized guide for parents of children with Autism Spectrum Disorder.",
   applicationName: "C.R.I.B.S.",
 };

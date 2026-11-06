@@ -4,6 +4,11 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { modules } from "@/content";
 import { moduleLook } from "@/components/content/moduleStyle";
 
+export async function generateMetadata({ params }: { params: Promise<{ module: string }> }) {
+  const { module } = await params;
+  return { title: modules.find((x) => x.id === module)?.shortName ?? "Guides" };
+}
+
 export default async function ModulePage({ params }: { params: Promise<{ module: string }> }) {
   const { module } = await params;
   const m = modules.find((x) => x.id === module);

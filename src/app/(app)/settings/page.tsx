@@ -1,6 +1,8 @@
 import { getSession } from "@/server/auth/session";
 import { signOutAction } from "@/features/auth/actions";
 
+export const metadata = { title: "Settings" };
+
 export default async function Page() {
   const session = await getSession();
   return (

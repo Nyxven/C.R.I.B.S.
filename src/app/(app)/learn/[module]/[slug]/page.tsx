@@ -3,6 +3,11 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { modules } from "@/content";
 
+export async function generateMetadata({ params }: { params: Promise<{ module: string; slug: string }> }) {
+  const { module, slug } = await params;
+  return { title: modules.find((x) => x.id === module)?.articles.find((x) => x.slug === slug)?.title ?? "Guide" };
+}
+
 // Seed HTML is trusted, static, first-party content. Sanitize before rendering any user/AI-authored HTML (see BUILD §6.6).
 export default async function Article({ params }: { params: Promise<{ module: string; slug: string }> }) {
   const { module, slug } = await params;

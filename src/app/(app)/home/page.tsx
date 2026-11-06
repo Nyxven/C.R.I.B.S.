@@ -5,6 +5,8 @@ import { modules } from "@/content";
 import { brand } from "@/config/brand";
 import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleStyle";
 
+export const metadata = { title: "Home" };
+
 const rows = [
   { href: "/directory", title: "Professional Support Directory", sub: "Specialists near Taguig (sample listings)", look: directoryLook },
   { href: "/faq", title: "Frequently Asked Questions", sub: "Quick answers to common questions", look: faqLook },

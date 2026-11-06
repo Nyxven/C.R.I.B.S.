@@ -1,6 +1,8 @@
 import { ChevronDown } from "lucide-react";
 import { faqs } from "@/content";
 
+export const metadata = { title: "FAQ" };
+
 export default function Faq() {
   return (
     <div className="space-y-5">
