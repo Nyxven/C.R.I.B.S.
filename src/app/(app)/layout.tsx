@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth/session";
 import { AppNav } from "@/components/nav/AppNav";
 import { Loader } from "@/components/Loader";
+import { Logo } from "@/components/Logo";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -9,8 +11,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // TODO(P3): if profile.onboardingCompletedAt is null -> redirect("/onboarding")
   return (
     <Loader>
+      <a href="#content" className="skip-link">Skip to content</a>
       <AppNav />
-      <div className="mx-auto min-h-dvh max-w-2xl px-5 pb-32 pt-6 lg:ml-64 lg:max-w-3xl lg:pb-12">{children}</div>
+      <header className="sticky top-0 z-10 bg-cream/90 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-2xl items-center px-5 py-2">
+          <Link href="/home" className="flex items-center gap-2"><Logo size={44} alt="" /><span className="font-display text-lg font-bold">C.R.I.B.S.</span></Link>
+        </div>
+        <div className="ribbon-bar" aria-hidden="true" />
+      </header>
+      <div className="lg:pl-64">
+        <main id="content" tabIndex={-1} className="mx-auto max-w-2xl px-5 pb-40 pt-6 outline-none lg:max-w-3xl lg:px-8 lg:pb-12 lg:pt-10">{children}</main>
+      </div>
     </Loader>
   );
 }
