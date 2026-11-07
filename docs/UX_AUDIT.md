@@ -91,3 +91,9 @@ H1 Visibility of system status · H2 Match with the real world · H3 User contro
 40 findings: 1 catastrophe (sev 4), 12 major (sev 3), 20 minor (sev 2), 7 cosmetic (sev 1).
 By plan: 9 fixed by the OTP screen, 15 by the redesign, 15 by small fix commits, 1 left for P4 (D2). Spec items for later phases are listed in the LATER row.
 Items marked sev 3 or 4 should be done before any real parent uses the app.
+
+## Status after session 4
+Done: every finding marked OTP, Redesign or Fix, except the two notes below. D2 stays for P4.
+- S2 (field-level errors): done on sign-up, where there are four fields. Sign-in and forgot-password keep one message box because they have one or two fields. Server errors on every form still show in one box.
+- L1: `/privacy` and `/terms` are **draft placeholders**. The team must replace them with reviewed text before real families use the app.
+- Not verified yet: the sandbox had no network, so typecheck, the full test run and `next build` were not run here. Run them locally (see CONTEXT.md, Resume commands) before deploying.
