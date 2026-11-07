@@ -47,12 +47,14 @@ export const profile = pgTable("profile", {
   textSize: integer("text_size").notNull().default(100),
   sensoryMode: boolean("sensory_mode").notNull().default(false),
   notifOn: boolean("notif_on").notNull().default(true),
+  onboardingStep: integer("onboarding_step").notNull().default(0), // next quiz step to show (resume)
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
 });
 export const child = pgTable("child", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   nickname: text("nickname").notNull(),
+  pronouns: text("pronouns"), // optional: "she" | "he" | "they"
   ageYears: integer("age_years"),
   journeyStage: text("journey_stage"),
   communicationLevel: text("communication_level"),
