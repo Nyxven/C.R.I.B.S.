@@ -97,3 +97,7 @@ Done: every finding marked OTP, Redesign or Fix, except the two notes below. D2 
 - S2 (field-level errors): done on sign-up, where there are four fields. Sign-in and forgot-password keep one message box because they have one or two fields. Server errors on every form still show in one box.
 - L1: `/privacy` and `/terms` are **draft placeholders**. The team must replace them with reviewed text before real families use the app.
 - Not verified yet: the sandbox had no network, so typecheck, the full test run and `next build` were not run here. Run them locally (see CONTEXT.md, Resume commands) before deploying.
+
+## Update, session 5
+- The Ask button in the mobile bottom nav and the desktop sidebar now shows the C.R.I.B.S. logo instead of the sparkle icon (user request after the phone check). The accessible name is unchanged ("Ask CRIBS, the AI guide") and the logo is decorative (empty alt).
+- User check: typecheck, tests and build passed on the user's machine; the redesign looked good on a phone.
