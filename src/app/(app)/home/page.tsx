@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, MapPin } from "lucide-react";
 import { getSession } from "@/server/auth/session";
+import { getGreeting } from "@/server/onboarding/service";
 import { modules } from "@/content";
 import { brand } from "@/config/brand";
 import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleStyle";
@@ -14,12 +15,13 @@ const rows = [
 
 export default async function Home() {
   const session = await getSession();
-  const first = session?.user.name.split(" ")[0] ?? "friend";
+  const g = session ? await getGreeting(session.user.id) : { parent: "", child: "" };
+  const first = (g.parent || session?.user.name || "friend").trim().split(" ")[0];
   return (
     <div className="space-y-8">
       <header className="space-y-2">
         <h1 className="text-3xl font-extrabold">Hello, {first}!</h1>
-        <p className="text-lg font-bold text-coral-dark">You and your little one</p>
+        <p className="text-lg font-bold text-coral-dark">{g.child ? `You and ${g.child}!` : "You and your little one"}</p>
         <div className="ribbon-bar w-24" aria-hidden="true" />
       </header>
 
