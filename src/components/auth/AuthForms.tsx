@@ -131,6 +131,7 @@ export function VerifyForm() {
 
 export function SignInForm() {
   const r = useRouter();
+  const justReset = useSearchParams().get("reset") === "1";
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
@@ -143,9 +144,13 @@ export function SignInForm() {
   }
   return (
     <Shell title="Welcome back" sub="Sign in to continue.">
+      {justReset && <p role="status" className="rounded-xl bg-tint-sage p-3 text-sm font-bold">Password updated. Sign in with your new password.</p>}
       <form onSubmit={submit} className="space-y-4">
-        <label className="block text-sm font-bold">Email<input className="field mt-1" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>
-        <label className="block text-sm font-bold">Password<input className="field mt-1" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" /></label>
+        <div>
+          <label htmlFor="si-email" className="block text-sm font-bold">Email</label>
+          <input id="si-email" className="field mt-1" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+        </div>
+        <PasswordField id="si-password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
         <Err m={err} />
         <button className="btn-primary w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
       </form>
