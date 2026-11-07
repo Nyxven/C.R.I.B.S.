@@ -38,6 +38,14 @@ Vercel project > Storage > Create > **Neon** > connect to this project (Producti
 ## 6. Create the tables (one time, then automatic)
 Copy `DATABASE_URL_UNPOOLED` into the GitHub `production` environment secret, then GitHub > Actions > **DB migrate** > Run workflow. It also runs on its own whenever `drizzle/**` changes on `main`.
 
+### Your database was set up by hand (SQL Editor)? Add the Phase 3 columns by hand too
+The tables on the live database were created in Neon's SQL Editor, so the DB migrate workflow does not know they exist. If it runs after a push and fails with "already exists", that is expected and harmless. Do this instead, **before** you push the Phase 3 code (Neon > SQL Editor > paste > Run):
+```sql
+ALTER TABLE "profile" ADD COLUMN IF NOT EXISTS "onboarding_step" integer DEFAULT 0 NOT NULL;
+ALTER TABLE "child" ADD COLUMN IF NOT EXISTS "pronouns" text;
+```
+It is safe to run twice. If you push first, every signed-in page errors until the columns exist.
+
 ## 7. YOU: Brevo
 Brevo > Senders, domains > add and verify the sender address (or domain). Put that address in `MAIL_FROM_EMAIL`. Create an API key (SMTP & API > API keys) and put it in `BREVO_API_KEY` in Vercel only. Redeploy.
 
