@@ -195,9 +195,12 @@ export function ForgotForm() {
   return step === "email" ? (
     <Shell title="Reset your password" sub="Enter your email and we'll send a 6-digit code.">
       <form onSubmit={sendCode} className="space-y-4">
-        <input className="field" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} aria-label="Email" />
+        <div>
+          <label htmlFor="fg-email" className="block text-sm font-bold">Email</label>
+          <input id="fg-email" className="field mt-1" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+        </div>
         <Err m={err} />
-        <button className="btn-primary w-full" disabled={busy}>Send code</button>
+        <button className="btn-primary w-full" disabled={busy}>{busy ? "Sending…" : "Send code"}</button>
       </form>
     </Shell>
   ) : (
