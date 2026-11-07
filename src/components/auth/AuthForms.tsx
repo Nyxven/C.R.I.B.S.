@@ -6,7 +6,7 @@ import { signUpAction, verifyEmailAction, resendCodeAction, signInAction, reques
 import { Logo } from "@/components/Logo";
 import { OtpInput } from "@/components/ui/OtpInput";
 import { PasswordField } from "@/components/auth/PasswordField";
-import { checkSignUp, type FieldErrors } from "@/lib/formChecks";
+import { checkSignUp, PASSWORD_MIN, type FieldErrors } from "@/lib/formChecks";
 import { formatClock, useCooldown } from "@/features/auth/useCooldown";
 
 function Shell({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
@@ -164,7 +164,7 @@ export function ForgotForm() {
   const [step, setStep] = useState<"email" | "reset">("email");
   const [email, setEmail] = useState(""); const [otp, setOtp] = useState(""); const [password, setPassword] = useState("");
   const [err, setErr] = useState(""); const [info, setInfo] = useState(""); const [busy, setBusy] = useState(false);
-  const [boxKey, setBoxKey] = useState(0); const [sending, setSending] = useState(false); const [codeBad, setCodeBad] = useState(false);
+  const [boxKey, setBoxKey] = useState(0); const [sending, setSending] = useState(false); const [codeBad, setCodeBad] = useState(false); const [pwErr, setPwErr] = useState("");
   const cooldown = useCooldown(60);
   async function sendCode(e: React.FormEvent) {
     e.preventDefault(); setErr(""); setBusy(true);
@@ -183,14 +183,14 @@ export function ForgotForm() {
     setInfo(`A new code is on its way to ${email.trim()}.`);
   }
   async function reset(e: React.FormEvent) {
-    e.preventDefault(); setErr(""); setInfo("");
+    e.preventDefault(); setErr(""); setInfo(""); setPwErr("");
     if (otp.length !== 6) { setCodeBad(true); return setErr("Please enter all 6 digits of the code."); }
-    if (password.length < 10) return setErr("Password must be at least 10 characters.");
+    if (password.length < PASSWORD_MIN) { setPwErr(`Please use at least ${PASSWORD_MIN} characters.`); return document.getElementById("fg-password")?.focus(); }
     setBusy(true);
     const res = await resetPasswordAction({ email, code: otp, password });
     if (!res.ok) { setBusy(false); setErr(res.error); setCodeBad(true); setOtp(""); setBoxKey((k) => k + 1); return; }
     setBusy(false);
-    r.push("/sign-in");
+    r.push("/sign-in?reset=1");
   }
   return step === "email" ? (
     <Shell title="Reset your password" sub="Enter your email and we'll send a 6-digit code.">
@@ -208,7 +208,7 @@ export function ForgotForm() {
       <form onSubmit={reset} className="space-y-4">
         <p className="text-center text-sm">Code for <b>{email.trim()}</b>. <button type="button" className="font-bold underline" onClick={() => { setStep("email"); setErr(""); setInfo(""); setOtp(""); setBoxKey((k) => k + 1); }}>Wrong email?</button></p>
         <OtpInput key={boxKey} label="6-digit code" onComplete={setOtp} onChange={(c) => { setOtp(c); setErr(""); setCodeBad(false); }} disabled={busy} invalid={codeBad} describedBy={err ? "reset-error" : undefined} />
-        <input className="field" type="password" required minLength={10} placeholder="New password (10+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" aria-label="New password" />
+        <PasswordField id="fg-password" label="New password" value={password} onChange={(v) => { setPassword(v); setPwErr(""); }} autoComplete="new-password" showRule error={pwErr} />
         <Err m={err} id="reset-error" />
         {info && <p role="status" className="text-center text-sm font-semibold text-sage-dark">{info}</p>}
         <button className="btn-primary w-full" disabled={busy}>{busy ? "Saving…" : "Reset password"}</button>
