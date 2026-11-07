@@ -21,15 +21,20 @@ function Shell({ title, sub, children }: { title: string; sub?: string; children
 }
 const Err = ({ m, id }: { m: string; id?: string }) => (m ? <p id={id} role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{m}</p> : null);
 
+const FieldError = ({ id, m }: { id: string; m?: string }) => (m ? <p id={id} role="alert" className="mt-1 text-sm font-semibold text-red-700">{m}</p> : null);
+
 export function SignUpForm() {
   const r = useRouter();
   const [f, setF] = useState({ name: "", email: "", password: "", consent: false });
+  const [errs, setErrs] = useState<FieldErrors>({});
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
-  const [show, setShow] = useState(false);
+  const clear = (k: keyof FieldErrors) => setErrs((e) => ({ ...e, [k]: undefined }));
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr("");
-    if (f.password.length < 10) return setErr("Password must be at least 10 characters.");
-    if (!f.consent) return setErr("Please accept the Terms and Privacy Policy to continue.");
+    const found = checkSignUp(f);
+    setErrs(found);
+    const first = (["name", "email", "password", "consent"] as const).find((k) => found[k]);
+    if (first) { document.getElementById(`su-${first}`)?.focus(); return; }
     setBusy(true);
     const res = await signUpAction({ name: f.name, email: f.email, password: f.password });
     setBusy(false);
@@ -38,15 +43,29 @@ export function SignUpForm() {
   }
   return (
     <Shell title="Create your account" sub="It takes a minute. We'll email you a 6-digit code.">
-      <form onSubmit={submit} className="space-y-4">
-        <label className="block text-sm font-bold">Your name<input className="field mt-1" required maxLength={60} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} autoComplete="name" /></label>
-        <label className="block text-sm font-bold">Email<input className="field mt-1" type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} autoComplete="email" /></label>
-        <label className="block text-sm font-bold">Password (10+ characters)
-          <div className="relative mt-1"><input className="field pr-20" type={show ? "text" : "password"} required minLength={10} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete="new-password" />
-            <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-3 text-sm font-bold text-ink-soft">{show ? "Hide" : "Show"}</button></div>
-        </label>
-        <label className="flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 h-5 w-5" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
-          <span>I'm a parent/guardian aged 18+, and I accept the Terms and Privacy Policy.</span></label>
+      <form onSubmit={submit} noValidate className="space-y-4">
+        <div>
+          <label htmlFor="su-name" className="block text-sm font-bold">Your name</label>
+          <input id="su-name" className="field mt-1" maxLength={60} value={f.name} autoComplete="name" aria-invalid={errs.name ? true : undefined} aria-describedby={errs.name ? "su-name-error" : undefined}
+            onChange={(e) => { setF({ ...f, name: e.target.value }); clear("name"); }} />
+          <FieldError id="su-name-error" m={errs.name} />
+        </div>
+        <div>
+          <label htmlFor="su-email" className="block text-sm font-bold">Email</label>
+          <input id="su-email" className="field mt-1" type="email" value={f.email} autoComplete="email" aria-invalid={errs.email ? true : undefined} aria-describedby={errs.email ? "su-email-error" : undefined}
+            onChange={(e) => { setF({ ...f, email: e.target.value }); clear("email"); }} />
+          <FieldError id="su-email-error" m={errs.email} />
+        </div>
+        <PasswordField id="su-password" label="Password" value={f.password} autoComplete="new-password" showRule error={errs.password}
+          onChange={(v) => { setF({ ...f, password: v }); clear("password"); }} />
+        <div>
+          <label className="flex min-h-11 items-start gap-3 text-sm">
+            <input id="su-consent" type="checkbox" className="mt-0.5 h-6 w-6 shrink-0 accent-[#5B49A8]" checked={f.consent} aria-invalid={errs.consent ? true : undefined} aria-describedby={errs.consent ? "su-consent-error" : undefined}
+              onChange={(e) => { setF({ ...f, consent: e.target.checked }); clear("consent"); }} />
+            <span>I'm a parent/guardian aged 18+, and I accept the <Link className="font-bold underline" href="/terms" target="_blank" rel="noopener">Terms of Use</Link> and <Link className="font-bold underline" href="/privacy" target="_blank" rel="noopener">Privacy Policy</Link><span className="sr-only"> (open in a new tab)</span>.</span>
+          </label>
+          <FieldError id="su-consent-error" m={errs.consent} />
+        </div>
         <Err m={err} />
         <button className="btn-primary w-full" disabled={busy}>{busy ? "Creating…" : "Create account"}</button>
       </form>
