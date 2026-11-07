@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth/session";
+import { isOnboarded } from "@/server/onboarding/service";
 import { AppNav } from "@/components/nav/AppNav";
 import { Loader } from "@/components/Loader";
 import { LOADER_COOKIE } from "@/config/ui";
@@ -11,7 +12,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await getSession();
   if (!session) redirect("/sign-in");
   const seen = (await cookies()).has(LOADER_COOKIE);
-  // TODO(P3): if profile.onboardingCompletedAt is null -> redirect("/onboarding")
+  // New accounts build their child profile first.
+  if (!(await isOnboarded(session.user.id))) redirect("/onboarding");
   return (
     <Loader seen={seen}>
       <a href="#content" className="skip-link">Skip to content</a>
