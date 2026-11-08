@@ -1,5 +1,5 @@
 import {
-  CALMING_IDEAS, CHALLENGES, COMM_LEVELS, COMM_TOOLS, JOURNEY_STAGES, MAX_CHALLENGES, PRONOUNS, RELATIONSHIPS,
+  CALMING_IDEAS, CHALLENGES, INTEREST_IDEAS, appendIdea, COMM_LEVELS, COMM_TOOLS, JOURNEY_STAGES, MAX_CHALLENGES, PRONOUNS, RELATIONSHIPS,
   SCHOOL_SETTINGS, SENSORY_KEYS, SENSORY_MODES, TAG_NETWORKS, THERAPIST, WANDERING, toggleValue,
   type DataStepId, type OnboardingData, type Option,
 } from "@/lib/domain/onboarding";
@@ -19,6 +19,20 @@ function Radios({ name, list, value, onPick, optional = true, cols = 1 }: {
       {list.map((o) => (
         <Choice key={o.value} type="radio" name={name} value={o.value} label={o.label} checked={value === o.value}
           onChange={() => onPick(o.value)} onClear={optional ? () => onPick("") : undefined} />
+      ))}
+    </div>
+  );
+}
+
+/** Tap-to-add suggestion chips under a text box. */
+function IdeaChips({ label, ideas, onAdd }: { label: string; ideas: readonly string[]; onAdd: (idea: string) => void }) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+      {ideas.map((idea) => (
+        <button key={idea} type="button" onClick={() => onAdd(idea)} aria-label={`Add ${idea.toLowerCase()}`}
+          className="min-h-11 rounded-full border-2 border-field bg-white px-4 text-sm font-bold text-ink active:scale-[.97]">
+          + {idea}
+        </button>
       ))}
     </div>
   );
@@ -81,7 +95,7 @@ export function StepFields({ id, data, update, tagName }: Props) {
         <>
           {SENSORY_KEYS.map((k) => (
             <Group key={k.value} legend={k.label}>
-              <div className="grid grid-cols-3 gap-2" role="presentation">
+              <div className="grid grid-cols-3 gap-2">
                 {SENSORY_MODES.map((m) => (
                   <Choice key={m.value} compact type="radio" name={`sensory-${k.value}`} value={m.value} label={SENSORY_SHORT[m.value] ?? m.label}
                     checked={(data.sensory[k.value] ?? "none") === m.value}
@@ -94,26 +108,16 @@ export function StepFields({ id, data, update, tagName }: Props) {
       );
 
     case "calming": {
-      const addIdea = (idea: string) => {
-        const cur = data.calming.trim();
-        if (cur.toLowerCase().includes(idea.toLowerCase())) return;
-        const next = cur ? `${cur}, ${idea.toLowerCase()}` : idea;
-        if (next.length <= 300) update({ calming: next });
-      };
       return (
         <>
           <div className="space-y-3">
             <TextField id="calming" multiline label="What helps your child calm down?" value={data.calming} maxLength={300} onChange={(calming) => update({ calming })} />
-            <div role="group" aria-label="Ideas to add" className="flex flex-wrap gap-2">
-              {CALMING_IDEAS.map((idea) => (
-                <button key={idea} type="button" onClick={() => addIdea(idea)} aria-label={`Add ${idea.toLowerCase()}`}
-                  className="min-h-11 rounded-full border-2 border-field bg-white px-4 text-sm font-bold text-ink active:scale-[.97]">
-                  + {idea}
-                </button>
-              ))}
-            </div>
+            <IdeaChips label="Ideas to add" ideas={CALMING_IDEAS} onAdd={(idea) => update({ calming: appendIdea(data.calming, idea, 300) })} />
           </div>
-          <TextField id="interests" label="What does your child love?" hint="Favorite toys, shows, songs, places." value={data.interests} maxLength={300} onChange={(interests) => update({ interests })} />
+          <div className="space-y-3">
+            <TextField id="interests" label="What does your child love?" hint="Favorite toys, shows, songs, places." value={data.interests} maxLength={300} onChange={(interests) => update({ interests })} />
+            <IdeaChips label="Ideas to add for what they love" ideas={INTEREST_IDEAS} onAdd={(idea) => update({ interests: appendIdea(data.interests, idea, 300) })} />
+          </div>
         </>
       );
     }
