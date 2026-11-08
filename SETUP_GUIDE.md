@@ -36,7 +36,7 @@ Then in the repo: Settings > Environments > New environment `production`, and ad
 Vercel project > Storage > Create > **Neon** > connect to this project (Production + Preview). It adds `DATABASE_URL` and `DATABASE_URL_UNPOOLED`. Redeploy once after connecting.
 
 ## 6. Create the tables (one time, then automatic)
-Copy `DATABASE_URL_UNPOOLED` into the GitHub `production` environment secret, then GitHub > Actions > **DB migrate** > Run workflow. It also runs on its own whenever `drizzle/**` changes on `main`.
+Copy `DATABASE_URL_UNPOOLED` into the GitHub `production` environment secret (Settings > Environments > production), then GitHub > Actions > **DB migrate** > Run workflow. It runs only when you start it by hand. If it fails with `url: ''`, the secret is missing or empty.
 
 ### Your database was set up by hand (SQL Editor)? Add the Phase 3 columns by hand too
 The tables on the live database were created in Neon's SQL Editor, so the DB migrate workflow does not know they exist. If it runs after a push and fails with "already exists", that is expected and harmless. Do this instead, **before** you push the Phase 3 code (Neon > SQL Editor > paste > Run):
@@ -45,6 +45,15 @@ ALTER TABLE "profile" ADD COLUMN IF NOT EXISTS "onboarding_step" integer DEFAULT
 ALTER TABLE "child" ADD COLUMN IF NOT EXISTS "pronouns" text;
 ```
 It is safe to run twice. If you push first, every signed-in page errors until the columns exist.
+
+### Phase 4 (guides, search, progress): two steps **before** you push
+1. **Tables.** Neon > SQL Editor > paste the whole file `drizzle/0002_warm_catseye.sql` > Run. Safe to run twice.
+2. **Content.** Load the guides, FAQs and listings into the database. In Neon, open Connect and copy the **unpooled** connection string. Then in PowerShell, inside the project folder:
+```powershell
+$env:DATABASE_URL_UNPOOLED = "PASTE-THE-UNPOOLED-STRING-HERE"
+npm run db:seed
+```
+It prints `Seeded 4 modules, 12 guides, 6 FAQs, 5 listings.` Safe to run again: it updates by id, never deletes, and keeps review status. The string only lives in that PowerShell window. Close the window when done. If you push before seeding, Home shows "Guides are being set up" until you run it.
 
 ## 7. YOU: Brevo
 Brevo > Senders, domains > add and verify the sender address (or domain). Put that address in `MAIL_FROM_EMAIL`. Create an API key (SMTP & API > API keys) and put it in `BREVO_API_KEY` in Vercel only. Redeploy.
