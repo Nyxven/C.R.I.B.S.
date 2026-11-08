@@ -29,3 +29,11 @@ export const isSampleListing = (p: { verifiedAt: Date | null }) => p.verifiedAt 
 export function slugify(text: string): string {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
+
+/** Roles in the order they first appear, no repeats. */
+export const rolesOf = (list: readonly { role: string }[]): string[] => [...new Set(list.map((p) => p.role))];
+
+/** Keep one role. An unknown or empty role keeps everyone. */
+export function filterByRole<T extends { role: string }>(list: readonly T[], role: string | undefined): T[] {
+  return role && rolesOf(list).includes(role) ? list.filter((p) => p.role === role) : [...list];
+}
