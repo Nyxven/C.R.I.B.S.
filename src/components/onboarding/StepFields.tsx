@@ -135,7 +135,7 @@ export function StepFields({ id, data, update, tagName }: Props) {
               );
             })}
           </div>
-          <p aria-live="polite" className="text-sm font-bold text-ink-soft">{data.challenges.length} of {MAX_CHALLENGES} chosen</p>
+          <p aria-live="polite" className="text-sm font-bold text-ink-soft">{data.challenges.length} of {MAX_CHALLENGES} chosen{data.challenges.length >= MAX_CHALLENGES ? ". Untick one to pick another." : ""}</p>
         </Group>
       );
 
