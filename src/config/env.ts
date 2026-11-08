@@ -23,3 +23,18 @@ export function getAuthEnv(): AuthEnv {
   return (cached = parsed.data);
 }
 export const resetAuthEnvCache = () => { cached = undefined; };
+
+// ---------- AI guide (optional: without a key the chat shows "not available" and search still works) ----------
+const aiEnv = z.object({
+  ANTHROPIC_API_KEY: z.preprocess(blank, z.string().min(20).optional()),
+  AI_MODEL: z.preprocess(blank, z.string().min(1).default("claude-haiku-5-5")),
+  AI_RATE_LIMIT_PER_HOUR: z.preprocess(blank, z.coerce.number().int().min(1).max(1000).default(30)),
+});
+export type AiConfig = { apiKey: string | undefined; model: string; ratePerHour: number };
+
+/** Never throws: a bad value falls back to the safe default and the key is simply treated as missing. */
+export function getAiConfig(env: Record<string, string | undefined> = process.env): AiConfig {
+  const parsed = aiEnv.safeParse(env);
+  if (parsed.success) return { apiKey: parsed.data.ANTHROPIC_API_KEY, model: parsed.data.AI_MODEL, ratePerHour: parsed.data.AI_RATE_LIMIT_PER_HOUR };
+  return { apiKey: undefined, model: "claude-haiku-5-5", ratePerHour: 30 };
+}

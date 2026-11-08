@@ -61,3 +61,17 @@ export function buildChildContext(c: ChildContextInput): string {
 }
 
 export const buildSystemPrompt = (knowledge: string, childContext: string) => `${SYSTEM_PROMPT}\n\n${knowledge}\n\n${childContext}`;
+
+/** Picks only the allowed fields from a stored child row. Everything else (nickname, ids, dates) is left behind. */
+export function pickChildContext(row: {
+  ageYears?: number | null; communicationLevel?: string | null; sensory?: Record<string, string> | null;
+  challenges?: readonly string[] | null; school?: string | null;
+}): ChildContextInput {
+  return {
+    ageYears: row.ageYears ?? null,
+    communicationLevel: row.communicationLevel ?? null,
+    sensory: row.sensory ?? {},
+    challenges: row.challenges ?? [],
+    school: row.school ?? null,
+  };
+}
