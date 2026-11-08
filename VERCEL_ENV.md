@@ -34,13 +34,16 @@ DATABASE_URL_UNPOOLED    (direct, migrations)
 ```
 Do not copy these by hand. Neon also adds `POSTGRES_*` / `PG*` variables; they are unused and can stay.
 
-## D. Not needed yet (phase P5 AI guide)
+## D. AI guide (phase P5): one secret turns Ask CRIBS on
 ```
-AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=<secret, toggle Sensitive; scope: Production + Preview>
+```
+Create the key in the Anthropic Console. Never paste it in chat, issues or git. Optional, plain (defaults shown, only add to change them):
+```
 AI_MODEL=claude-haiku-5-5
 AI_RATE_LIMIT_PER_HOUR=30
-ANTHROPIC_API_KEY=<secret, Sensitive>
 ```
+Without the key the Ask tab says "The guide is not available right now" and search keeps working. Redeploy after adding it.
 
 ## E. GitHub Actions secret (only for the migration workflow)
 Repo > Settings > Environments > New environment `production` > add secret:

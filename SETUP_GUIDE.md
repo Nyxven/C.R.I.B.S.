@@ -58,9 +58,16 @@ It prints `Seeded 4 modules, 12 guides, 6 FAQs, 5 listings.` Safe to run again: 
 ## 7. YOU: Brevo
 Brevo > Senders, domains > add and verify the sender address (or domain). Put that address in `MAIL_FROM_EMAIL`. Create an API key (SMTP & API > API keys) and put it in `BREVO_API_KEY` in Vercel only. Redeploy.
 
+## 7b. YOU: Turn on Ask CRIBS (the AI guide)
+1. Anthropic Console > API keys > create a key. Copy it once.
+2. Vercel > Project > Settings > Environment Variables > add `ANTHROPIC_API_KEY`, toggle **Sensitive**, scope Production + Preview. Redeploy.
+3. Open the Ask tab. Without the key it shows "not available" and nothing breaks.
+Emergency numbers live in `src/config/safety.ts`. Only 911 is set. Add a support line there only after you checked it on an official site.
+
 ## 8. Check it works
 - `https://YOUR-PROJECT.vercel.app/api/health` returns `{"ok":true,...}`
 - Landing page shows the new logo; the tab icon and "Add to Home Screen" use it
+- Ask tab: tap a question idea, the answer streams in with source chips. Type "my son is not breathing": you get the 911 message at once.
 - Sign up > the 6-digit email arrives > verify > you land on `/home` > Forgot password flow works
 
 ## Keeping secrets out of the repo
