@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, jsonb, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, jsonb, uniqueIndex, primaryKey, index } from "drizzle-orm/pg-core";
 
 // --- Auth tables (own implementation; secrets live in env, never in the DB) ---
 export const user = pgTable("user", {
@@ -79,3 +79,52 @@ export const emergencyContact = pgTable("emergency_contact", {
   phone: text("phone").notNull(),
   isPublic: boolean("is_public").notNull().default(true),
 });
+
+// ---------- content (seeded by `npm run db:seed`, never written by users) ----------
+export const contentModule = pgTable("module", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  shortName: text("short_name").notNull(),
+  description: text("description").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const article = pgTable("article", {
+  slug: text("slug").primaryKey(),
+  moduleId: text("module_id").notNull().references(() => contentModule.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  readTime: text("read_time").notNull(),
+  html: text("html").notNull(), // trusted first-party seed HTML; sanitize before storing anything user-written
+  reviewStatus: text("review_status").notNull().default("draft"), // prototype-content | draft | expert-reviewed
+  sources: jsonb("sources").$type<string[]>().notNull().default([]),
+  sortOrder: integer("sort_order").notNull().default(0),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [index("article_module_idx").on(t.moduleId)]);
+
+export const faq = pgTable("faq", {
+  id: text("id").primaryKey(),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const professional = pgTable("professional", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  location: text("location").notNull(),
+  note: text("note").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  verifiedAt: timestamp("verified_at"), // empty = "Sample listing"
+  source: text("source"),
+});
+
+// ---------- per-user reading state ----------
+export const articleProgress = pgTable("article_progress", {
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  articleSlug: text("article_slug").notNull().references(() => article.slug, { onDelete: "cascade" }),
+  saved: boolean("saved").notNull().default(false),
+  read: boolean("read").notNull().default(false),
+  readAt: timestamp("read_at"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.articleSlug] })]);
