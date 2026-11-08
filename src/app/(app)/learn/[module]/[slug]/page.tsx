@@ -2,6 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getArticleBySlug } from "@/server/content/service";
+import { getSession } from "@/server/auth/session";
+import { getEntryFor } from "@/server/progress/service";
+import { ArticleActions } from "@/components/content/ArticleActions";
 import { isExpertReviewed } from "@/lib/domain/content";
 
 export async function generateMetadata({ params }: { params: Promise<{ module: string; slug: string }> }) {
@@ -12,8 +15,9 @@ export async function generateMetadata({ params }: { params: Promise<{ module: s
 // Seed HTML is trusted, static, first-party content. Sanitize before rendering any user/AI-authored HTML (see BUILD §6.6).
 export default async function Article({ params }: { params: Promise<{ module: string; slug: string }> }) {
   const { module, slug } = await params;
-  const a = await getArticleBySlug(module, slug);
-  if (!a) notFound();
+  const [a, session] = await Promise.all([getArticleBySlug(module, slug), getSession()]);
+  if (!a || !session) notFound();
+  const entry = await getEntryFor(session.user.id, a.slug);
   return (
     <article className="space-y-6">
       <Link href={`/learn/${a.moduleId}`} className="inline-flex min-h-11 items-center gap-1 font-bold text-brand"><ArrowLeft size={18} aria-hidden="true" /> {a.moduleShortName}</Link>
@@ -23,6 +27,7 @@ export default async function Article({ params }: { params: Promise<{ module: st
         <div className="ribbon-bar w-24" aria-hidden="true" />
       </header>
       <div className="prose-cribs" dangerouslySetInnerHTML={{ __html: a.html }} />
+      <ArticleActions slug={a.slug} initial={entry} />
       <p className="rounded-2xl bg-tint-yellow p-4 text-sm font-semibold text-ink">General guidance only. It does not replace advice from a licensed professional.</p>
       <Link href={`/learn/${a.moduleId}`} className="btn-secondary w-full">Back to {a.moduleShortName}</Link>
     </article>
