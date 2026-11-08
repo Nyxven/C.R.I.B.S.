@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight, MapPin } from "lucide-react";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
-import { modules } from "@/content";
+import { getModules } from "@/server/content/service";
 import { brand } from "@/config/brand";
 import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleStyle";
 
@@ -14,7 +14,7 @@ const rows = [
 ];
 
 export default async function Home() {
-  const session = await getSession();
+  const [session, modules] = await Promise.all([getSession(), getModules()]);
   const g = session ? await getGreeting(session.user.id) : { parent: "", child: "" };
   const first = (g.parent || session?.user.name || "friend").trim().split(" ")[0];
   return (
@@ -37,6 +37,7 @@ export default async function Home() {
 
       <section aria-labelledby="guides-title">
         <h2 id="guides-title" className="mb-3 text-xl font-bold">Your guides</h2>
+        {modules.length === 0 && <p className="card p-4 text-ink-soft">Guides are being set up. Please check back soon.</p>}
         <ul className="grid grid-cols-2 gap-3">
           {modules.map((m) => {
             const { box, Icon } = moduleLook(m.id);
