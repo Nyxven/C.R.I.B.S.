@@ -2,6 +2,56 @@
 
 Time: about 20 minutes. Everything marked **YOU** needs your logins.
 
+## 0. Update checklist for the latest zip (session 6). Do these in order
+Already set up from the steps below? Then this is all you need. One step at a time.
+
+1. **Unzip** `cribs-app.zip` into a new folder (right-click > Extract All). Open PowerShell inside that folder, then:
+```powershell
+npm ci
+npm run typecheck
+npm test
+npm run build
+```
+Expect: no type errors, `277 passed`, and a finished build (this is the real build with Google Fonts). If one fails, send me the first error.
+
+2. **Tables (Neon).** Neon > SQL Editor > paste the whole file `drizzle/0002_warm_catseye.sql` > Run. Safe to run twice.
+
+3. **Content (seed).** In Neon, click Connect, copy the **unpooled** connection string. In the same PowerShell window:
+```powershell
+$env:DATABASE_URL_UNPOOLED = "PASTE-THE-UNPOOLED-STRING-HERE"
+npm run db:seed
+```
+Expect: `Seeded 4 modules, 12 guides, 6 FAQs, 5 listings.` Then close that window (the string only lived there).
+
+4. **Push to GitHub** (open a fresh PowerShell inside the folder). Your GitHub has one merge commit this folder lacks, so merge first. Never use `--force`.
+```powershell
+git status
+git remote -v
+```
+If `git remote -v` prints nothing, add the remote (copy the exact URL from your repo page):
+```powershell
+git remote add origin https://github.com/Nyxven/C.R.I.B.S.
+```
+Then:
+```powershell
+git fetch origin
+git merge origin/main -m "Merge origin/main"
+git push origin main
+```
+If Git says "refusing to merge unrelated histories", run `git merge origin/main --allow-unrelated-histories -m "Merge origin/main"` and push again. If it reports conflicts, stop and send me the message.
+
+5. **GitHub.** The red "DB migrate" check no longer runs by itself (it is manual now), so nothing to fix there. Only the CI and secret-scan checks run on a push.
+
+6. **Vercel.** Wait until the new deployment says Ready. Then Settings > Environment Variables > add `ANTHROPIC_API_KEY` (toggle **Sensitive**, Production + Preview), and Deployments > the latest > Redeploy. Get the key from the Anthropic Console > API keys. Never paste it in chat.
+
+7. **Try it on your phone** and tell me what feels wrong:
+- Quiz: Continue bar stays visible, Skip is top-right, steps fade in, tap ideas for Calming and Interests.
+- Home: search box, "Recommended for ..." row, "x of y read" on the cards, Saved guides.
+- Open a guide: Mark as read and Save for later. Check Saved guides and the search page.
+- Ask tab: tap a question idea, watch the answer stream in with a source chip. Type `my son is not breathing`: you should get the 911 message at once. Does the question box overlap the bottom bar?
+
+Still needed from you: verified Philippine hotline numbers for `src/config/safety.ts` (only 911 is shown now).
+
 ## 1. Open the project locally
 ```bash
 # unzip cribs-app.zip (right-click > Extract All), open a terminal inside the folder
@@ -82,3 +132,9 @@ Emergency numbers live in `src/config/safety.ts`. Only 911 is set. Add a support
 | 500 on sign-up / sign-in | Migration not run yet (step 6), or `AUTH_SECRET` / `PASSWORD_PEPPER` missing or under 32 characters |
 | Everyone suddenly can't sign in | `PASSWORD_PEPPER` was changed without keeping the old one in `PASSWORD_PEPPER_PREVIOUS` |
 | Build fails on `@node-rs/argon2` | Make sure `next.config.ts` still lists it in `serverExternalPackages` |
+| `relation "module" does not exist` when seeding, or pages error after the push | `drizzle/0002_warm_catseye.sql` was not run in Neon yet (step 0.2) |
+| Home says "Guides are being set up" | `npm run db:seed` was not run, or it ran against another database (step 0.3) |
+| `Missing DATABASE_URL_UNPOOLED` when seeding | Set `$env:DATABASE_URL_UNPOOLED` in that same PowerShell window first |
+| Ask says "The guide is not available right now" | `ANTHROPIC_API_KEY` is missing, or you did not redeploy after adding it |
+| Ask says "You have asked a lot of questions this hour" | The hourly limit (30) was reached; wait, or raise `AI_RATE_LIMIT_PER_HOUR` |
+| GitHub "DB migrate" failed with `url: ''` | Expected if run by hand without the `DATABASE_URL_UNPOOLED` secret; the workflow is manual-only now, ignore it |
