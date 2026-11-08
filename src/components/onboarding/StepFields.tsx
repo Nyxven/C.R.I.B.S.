@@ -5,6 +5,9 @@ import {
 } from "@/lib/domain/onboarding";
 import { Choice, Group, TextField } from "./controls";
 
+// Short button text for the sensory rows (the saved values and review wording do not change).
+const SENSORY_SHORT: Record<string, string> = { none: "Fine", avoids: "Avoids", seeks: "Seeks" };
+
 type Props = { id: DataStepId; data: OnboardingData; update: (patch: Partial<OnboardingData>) => void; tagName: string };
 
 /** One single-choice question. Tapping the chosen answer again clears it when `optional`. */
@@ -78,9 +81,9 @@ export function StepFields({ id, data, update, tagName }: Props) {
         <>
           {SENSORY_KEYS.map((k) => (
             <Group key={k.value} legend={k.label}>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2" role="presentation">
                 {SENSORY_MODES.map((m) => (
-                  <Choice key={m.value} compact type="radio" name={`sensory-${k.value}`} value={m.value} label={m.label}
+                  <Choice key={m.value} compact type="radio" name={`sensory-${k.value}`} value={m.value} label={SENSORY_SHORT[m.value] ?? m.label}
                     checked={(data.sensory[k.value] ?? "none") === m.value}
                     onChange={() => update({ sensory: { ...data.sensory, [k.value]: m.value } })} />
                 ))}
