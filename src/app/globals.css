@@ -129,3 +129,7 @@ h1, h2, h3 { font-family: var(--font-display); }
 /* Finish screen of the onboarding quiz: the check mark pops in once. */
 @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
 .pop-in { animation: pop .5s ease both; }
+
+/* Quiz steps fade and slide in a little. Off under reduced motion (rule above). */
+@keyframes step-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.step-in { animation: step-in .25s ease both; }

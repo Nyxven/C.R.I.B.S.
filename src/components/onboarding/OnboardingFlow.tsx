@@ -17,7 +17,8 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
   const isReview = o.step.id === "review";
 
   // Move focus to the new question so screen readers announce it.
-  useEffect(() => { headingRef.current?.focus(); }, [o.index]);
+  // Start each new step at the top of the screen.
+  useEffect(() => { window.scrollTo({ top: 0 }); headingRef.current?.focus({ preventScroll: true }); }, [o.index]);
 
   // Short celebration, then Home.
   useEffect(() => {
@@ -66,6 +67,7 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
       </header>
 
       <form noValidate onSubmit={(e) => { e.preventDefault(); void (isReview ? o.finish() : o.next()); }}>
+        <div key={o.index} className="step-in">
         <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-extrabold leading-tight outline-none sm:text-3xl">{copy.question}</h1>
         {copy.intro && <p className="mt-2 text-base text-ink-soft">{copy.intro}</p>}
 
@@ -80,6 +82,8 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
         {o.error && (
           <p role="alert" className="mt-6 rounded-2xl border-2 border-coral-dark bg-tint-coral px-4 py-3 font-bold text-ink">{o.error}</p>
         )}
+
+        </div>
 
         {/* Stays at the bottom of the screen, so Continue is always in reach. */}
         <div className="sticky bottom-0 -mx-5 mt-8 flex items-center gap-3 border-t border-line bg-cream px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
