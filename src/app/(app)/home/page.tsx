@@ -4,6 +4,7 @@ import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
 import { getModules } from "@/server/content/service";
 import { brand } from "@/config/brand";
+import { SearchBox } from "@/components/content/SearchBox";
 import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleStyle";
 
 export const metadata = { title: "Home" };
@@ -24,6 +25,8 @@ export default async function Home() {
         <p className="text-lg font-bold text-coral-dark">{g.child ? `You and ${g.child}!` : "You and your little one"}</p>
         <div className="ribbon-bar w-24" aria-hidden="true" />
       </header>
+
+      <SearchBox />
 
       {/* Not a link yet: the Find page arrives in a later phase. */}
       <div className="card flex items-center gap-4 p-4">
