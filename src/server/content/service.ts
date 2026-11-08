@@ -1,5 +1,6 @@
 import { cache } from "react";
 import type { ArticleFull, ArticleSummary, FaqItem, ModuleWithArticles, Professional } from "@/lib/domain/content";
+import { buildSearchDocs, isSearchable, search, type SearchHit } from "@/lib/domain/search";
 import * as repo from "./repo";
 
 // Pages call these. They return plain objects, never database rows.
@@ -39,3 +40,10 @@ export const getFaqs = cache(async (): Promise<FaqItem[]> =>
 
 export const getProfessionals = cache(async (): Promise<Professional[]> =>
   (await repo.listProfessionals()).map((p) => ({ id: p.id, name: p.name, role: p.role, location: p.location, note: p.note, verifiedAt: p.verifiedAt, source: p.source })));
+
+/** Search guides, FAQs and listings. Too-short queries return nothing without touching the database. */
+export async function searchContent(query: string): Promise<SearchHit[]> {
+  if (!isSearchable(query)) return [];
+  const [articles, faqs, professionals] = await Promise.all([getAllArticles(), getFaqs(), getProfessionals()]);
+  return search(buildSearchDocs({ articles, faqs, professionals }), query);
+}
