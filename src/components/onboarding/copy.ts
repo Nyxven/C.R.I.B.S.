@@ -2,7 +2,7 @@ import type { StepId } from "@/lib/domain/onboarding";
 
 // Warm, plain wording for each screen. No jargon.
 export const STEP_COPY: Record<StepId, { question: string; intro?: string }> = {
-  about: { question: "Let's start with you", intro: "This personalizes your guidance. You can change anything later." },
+  about: { question: "Let's start with you", intro: "This takes about 2 minutes and personalizes your guidance. You can change anything later." },
   child: { question: "Tell us about your child", intro: "A nickname is fine." },
   journey: { question: "Where are you on the journey?", intro: "There's no wrong answer. This stays private to your account." },
   communication: { question: "How does your child communicate?", intro: "Pick what fits best today." },
