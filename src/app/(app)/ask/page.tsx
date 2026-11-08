@@ -1,11 +1,13 @@
-import { ComingSoon } from "@/components/ui/ComingSoon";
+import { ChatView } from "@/components/ask/ChatView";
+import { starterChips } from "@/lib/ai/starters";
+import { isAiConfigured } from "@/server/ai/deps";
+import { getSession } from "@/server/auth/session";
+import { getChild } from "@/server/onboarding/repo";
 
 export const metadata = { title: "Ask CRIBS" };
 
-export default function Page() {
-  return (
-    <ComingSoon title="Ask CRIBS is on its way" links={[{ href: "/home", label: "Browse the guides" }, { href: "/faq", label: "Read the FAQ" }]}>
-      Soon you will be able to ask questions in your own words and get plain answers based on the guides in this app. Until then, the guides and the FAQ are ready for you.
-    </ComingSoon>
-  );
+export default async function AskPage() {
+  const session = await getSession();
+  const child = session ? await getChild(session.user.id) : null;
+  return <ChatView starters={starterChips(child?.challenges ?? [])} available={isAiConfigured()} />;
 }
