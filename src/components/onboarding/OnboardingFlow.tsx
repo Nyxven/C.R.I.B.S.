@@ -45,7 +45,7 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
   const submitLabel = isReview ? (o.pending ? "Creating…" : "Create profile") : o.pending ? "Saving…" : o.fromReview ? "Save" : "Continue";
 
   return (
-    <div className="mx-auto max-w-xl px-5 pb-16 pt-[max(1.5rem,env(safe-area-inset-top))]">
+    <div className="mx-auto max-w-xl px-5 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <header className="mb-6">
         <div className="mb-4 flex items-center gap-2">
           <Logo size={44} alt="" />
@@ -55,7 +55,14 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
           aria-valuetext={`Step ${n} of ${o.total}`} className="h-2.5 overflow-hidden rounded-full bg-tint-purple">
           <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${(n / o.total) * 100}%`, background: "var(--ribbon)" }} />
         </div>
-        <p className="mt-2 text-sm font-bold text-ink-soft">Step {n} of {o.total}</p>
+        <div className="mt-1 flex min-h-11 items-center justify-between gap-3">
+          <p className="text-sm font-bold text-ink-soft">Step {n} of {o.total}</p>
+          {o.step.skippable && (
+            <button type="button" onClick={() => void o.skip()} disabled={o.pending} className="min-h-11 rounded-xl px-3 font-extrabold text-brand underline">
+              Skip for now
+            </button>
+          )}
+        </div>
       </header>
 
       <form noValidate onSubmit={(e) => { e.preventDefault(); void (isReview ? o.finish() : o.next()); }}>
@@ -74,20 +81,14 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
           <p role="alert" className="mt-6 rounded-2xl border-2 border-coral-dark bg-tint-coral px-4 py-3 font-bold text-ink">{o.error}</p>
         )}
 
-        <div className="mt-8 space-y-3">
-          <button type="submit" disabled={o.pending} className="btn-primary w-full">{submitLabel}</button>
-          <div className="flex items-center justify-between gap-3">
-            {showBack ? (
-              <button type="button" onClick={o.back} disabled={o.pending} className="btn-secondary min-h-12 px-5">
-                <ArrowLeft size={18} aria-hidden="true" /> Back
-              </button>
-            ) : <span />}
-            {o.step.skippable && (
-              <button type="button" onClick={() => void o.skip()} disabled={o.pending} className="min-h-12 rounded-xl px-3 font-extrabold text-brand underline">
-                Skip for now
-              </button>
-            )}
-          </div>
+        {/* Stays at the bottom of the screen, so Continue is always in reach. */}
+        <div className="sticky bottom-0 -mx-5 mt-8 flex items-center gap-3 border-t border-line bg-cream px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+          {showBack && (
+            <button type="button" onClick={o.back} disabled={o.pending} className="btn-secondary min-h-14 shrink-0 px-4" aria-label="Back">
+              <ArrowLeft size={20} aria-hidden="true" /> Back
+            </button>
+          )}
+          <button type="submit" disabled={o.pending} className="btn-primary min-w-0 flex-1">{submitLabel}</button>
         </div>
       </form>
     </div>
