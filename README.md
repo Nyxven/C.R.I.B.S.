@@ -24,6 +24,7 @@ Follow [`SETUP_GUIDE.md`](SETUP_GUIDE.md). Environment variables are listed in [
 | `npm test` | run tests |
 | `npm run typecheck` | check types |
 | `npm run db:migrate` | create/update database tables |
+| `npm run db:seed` | load guides, FAQs and listings into the database (needs `DATABASE_URL_UNPOOLED`) |
 | `npm run check-secrets` | scan the repo for leaked secrets |
 
 ## Secrets
