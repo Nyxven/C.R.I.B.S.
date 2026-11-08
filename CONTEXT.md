@@ -13,21 +13,17 @@
 8. **Always deliver handoff files** (only when the user asks for the handoff): CONTEXT.md, BUILD_CRIBS.md (if changed), .env.example, SETUP_GUIDE.md, VERCEL_ENV.md, zip.
 
 ## Status
-- **Current phase:** P3 (onboarding quiz + Child Profile) is **written, committed, typechecked and unit-tested, but not yet seen in a browser by the user**. Next: user applies the SQL below, pushes, runs the checks, tries the quiz on a phone -> then **P4 (content)**.
-- **Last updated:** 2026-11-07 (end of session 5)
-- **Repo:** GitHub `Nyxven` (private), pushed by the user from their Windows/PowerShell machine. The zip's working tree is the source of truth; the user's GitHub copy is behind it (session 3 doc fixes, all of session 4 and all of session 5). Session 5 commits start after `2f53959`. Sandbox commits use placeholder identity "CRIBS Dev <dev@cribs.local>"; the sandbox has no GitHub/Vercel access, so the user pushes.
-- **Deployment:** Vercel, live at `https://cribs-ecru.vercel.app` (also `cribs-git-main-gabaii.vercel.app`). The live site is still the pre-session-4 build (commit 694a953) until the user pushes.
-- **Database:** Neon via Vercel Storage. Tables were created by running `drizzle/0000_*.sql` (also `create_tables.sql`) in Neon's SQL Editor, so Drizzle's migration journal in the DB does not know about them: **the GitHub 'DB migrate' workflow will fail with "already exists" if it runs; that is expected and harmless.**
-  - **Session 5 changed the schema** (`drizzle/0001_blushing_bug.sql`, **NOT yet applied**). Before pushing, the user must run once in Neon's SQL Editor (safe to repeat):
-    ```sql
-    ALTER TABLE "profile" ADD COLUMN IF NOT EXISTS "onboarding_step" integer DEFAULT 0 NOT NULL;
-    ALTER TABLE "child" ADD COLUMN IF NOT EXISTS "pronouns" text;
-    ```
-    If the code is pushed first, every signed-in page errors until the columns exist (`profile` is read in the app layout).
-  - FUTURE schema changes: edit `src/db/schema.ts`, run `npm run db:generate` (works offline; set dummy `DATABASE_URL_UNPOOLED` inline), then apply the new SQL in the SQL Editor.
-- **AI guide:** NOT built (P5). `/ask` is a friendly "Coming soon" page; no AI SDK installed; `AI_*` vars exist only in `.env.example`.
-- **Verified in session 5 (sandbox had npm registry access this time):** `npm ci`, `npm run typecheck` clean, `npm test` 133 passed (92 before, 41 new), a temporary server-render of all 10 quiz screens, and `next build` compiled with `/onboarding` in the route list **only with the Google fonts stubbed** (the sandbox cannot reach Google Fonts; the real build needs your machine). The user's own session 4 checks (typecheck, tests, build) passed.
-- **NOT tested in a real browser:** the whole quiz (focus handling, Skip, resume, Edit-from-review, finish animation), the 6-box OTP with paste and autofill, screen reader, 360px layout of the quiz, the new logo on the Ask button.
+- **Current phase:** P4 (content) and P5 (AI guide) are **written, committed, typechecked, unit-tested and compiled, but not yet applied to the database, pushed, or seen by the user**. Also done this session: a quiz smoothness pass and a fix for the GitHub "DB migrate" error. Next: the user follows `SETUP_GUIDE.md` section 0 (SQL, seed, push, API key) and tests on a phone -> then the next task (see Next 5 tasks).
+- **Last updated:** 2026-11-08 (end of session 6)
+- **Repo:** GitHub `Nyxven/C.R.I.B.S.` (private), pushed by the user from Windows/PowerShell. The zip's working tree is the source of truth. Session 6 commits start after `58217fc` (61 commits plus 4 handoff docs commits). The user's GitHub has an extra merge commit ("Merge remote-tracking branch 'origin/main'") that the sandbox history does not contain, so before pushing the user runs `git fetch origin` then `git merge origin/main` (see SETUP_GUIDE section 0). Never force push. Sandbox commits use the placeholder identity "CRIBS Dev <dev@cribs.local>"; the sandbox has no GitHub/Vercel access.
+- **Deployment:** Vercel, `https://cribs-ecru.vercel.app`. As far as known, live runs the session 5 code (user ran the 2 ALTER TABLE statements and pushed it). Session 6 is not pushed yet.
+- **Database:** Neon via Vercel Storage. Tables were created by hand in Neon's SQL Editor (`drizzle/0000_*.sql`), so Drizzle's migration journal in the DB does not know about them. `drizzle/0001_blushing_bug.sql` (2 ALTERs) was applied by the user in session 6.
+  - **`drizzle/0002_warm_catseye.sql` is NOT applied yet.** It creates `module`, `article`, `faq`, `professional`, `article_progress`. It is written to be **safe to run twice** (IF NOT EXISTS, constraints in DO blocks). Run it in Neon's SQL Editor, **then run `npm run db:seed`, then push.** If the code goes live first, pages that read guides error or show "Guides are being set up".
+  - **DB migrate workflow** (`.github/workflows/db-migrate.yml`) is now **manual only** (workflow_dispatch) and checks the secret first. The session 6 failure (`url: ''`) meant the `DATABASE_URL_UNPOOLED` secret was missing in the GitHub `production` environment; running it would also fail with "already exists". Nothing needs fixing: just do not run it. Apply SQL by hand.
+  - FUTURE schema changes: edit `src/db/schema.ts`, run `npm run db:generate` (offline; set a dummy `DATABASE_URL_UNPOOLED` inline), then apply the new SQL in the SQL Editor. Keep generated SQL repeatable like 0002.
+- **AI guide:** built (P5) but **off until `ANTHROPIC_API_KEY` is set in Vercel**. Without it `/ask` says "The guide is not available right now" and offers search/FAQ; emergency replies still work.
+- **Verified in session 6 (sandbox, npm registry reachable, Google Fonts not):** `npm ci`, `npm run typecheck` clean, `npm test` **277 passed** (133 at the start of the session), `next build` compiled with the Google fonts stubbed (real build needs the user's machine). Also run for real: migrations 0000-0002 (0002 twice), the seed upserts (twice, review status kept) and the progress upserts on a real in-process Postgres (pglite, outside the repo); the Anthropic provider code against a local fake server speaking the streaming format. User's own results at the start of session 6: typecheck, tests and build all passed on their PC for the session 5 code; the Ask logo is fine; the quiz needed to be "smoother and easier to answer" (done, see below).
+- **NOT tested:** anything in a real browser or phone for the new work (quiz sticky bar and fade, search page, Save/Read buttons, progress counts, Saved page, Recommended row, directory filter, Ask chat, composer position above the mobile nav), the **live Anthropic API** (streaming, citations, answer quality), real Neon SQL through the HTTP driver for the new repos (the same statements ran on pglite), `npm run db:seed` against Neon, and the real build with Google Fonts.
 
 | Phase | Status |
 |---|---|
@@ -35,9 +31,9 @@
 | P1 Auth | live and working (sign-up, emailed code, verify; user-confirmed) |
 | P2 Shell | done |
 | P2.5 UX pass | done; user verified (checks passed, looks good on phone). Ask button now shows the logo |
-| P3 Onboarding + Profile | done in code (session 5); needs the user's SQL + push + phone test |
-| P4 Content | NEXT: partial today (modules, article, directory, FAQ read seed/content.json; search/progress/DB seed todo) |
-| P5 AI Guide | todo |
+| P3 Onboarding + Profile | done; user ran SQL and checks; smoothness pass done in session 6 (needs phone re-test) |
+| P4 Content | done in code (session 6): content in Neon via `db:seed`, search, Save/Read + progress, Saved page, Recommended row, directory filter. Needs SQL + seed + push |
+| P5 AI Guide | done in code (session 6): needs `ANTHROPIC_API_KEY`. **P5b todo:** chat history (30 days + delete), thumbs feedback |
 | P6 Find + If-found | todo (Home shows "Find CRIBS" as a non-link "Coming soon" card) |
 | P7 Community/Notifs/Settings | todo (Settings has account info + sign out only; **editing the child profile in Settings belongs here**) |
 | P8 Surprise features | todo |
@@ -48,7 +44,7 @@
 Mobile-first (PC-usable) web app for parents of children with ASD: 4 guidance modules, directory, FAQ, community, AI guide (center nav tab), onboarding quiz that builds a Child Profile, and Find CRIBS tag (tracker-tag companion with QR "if found" page). Built by Taguig Science High School STEM team (adviser: Kristoffer Paulo L. Ramirez). Two papers: July 2026 proposal (C.R.I.B.S.) and October 2026 (CRIBSEER).
 
 ## Stack (decided)
-Node.js + Next.js 16 (App Router, TS) · Tailwind v4 · Vercel · Neon via Vercel Storage · Drizzle · **own auth** · Brevo (OTP emails, HTTP API only) · Vercel AI SDK (later; default Claude Haiku-class via `AI_MODEL`, OpenAI fallback) · Vitest + Playwright (e2e todo) · GitHub Actions. Versions pinned exactly in package.json. Icons: `lucide-react`. Zod 4 (`zod` 4.6.7).
+Node.js + Next.js 16 (App Router, TS) · Tailwind v4 · Vercel · Neon via Vercel Storage · Drizzle · **own auth** · Brevo (OTP emails, HTTP API only) · `@anthropic-ai/sdk` 1.3.0 called directly (Claude Haiku via `AI_MODEL`, default `claude-haiku-5-5`; no OpenAI, no Vercel AI SDK) · Vitest + Playwright (e2e todo) · GitHub Actions. Versions pinned exactly in package.json. Icons: `lucide-react`. Zod 4 (`zod` 4.6.7).
 
 ## Auth design (session 2, unchanged)
 - Email + password; passwords = argon2id (`@node-rs/argon2`, m=19456,t=2,p=1) over HMAC-SHA256(`PASSWORD_PEPPER`, password). Pepper only in Vercel.
@@ -69,10 +65,30 @@ Node.js + Next.js 16 (App Router, TS) · Tailwind v4 · Vercel · Neon via Verce
 - **Home** greets with `getGreeting(userId)`: "Hello, {first name}!" and "You and {child}!".
 - **Not used yet:** challenges / communication / sensory answers do not personalize anything until P4 ("Recommended for {child}") and P5 (AI starter chips, privacy-filtered). Nothing from the quiz goes to any third party.
 
+## Content layer design (session 6, P4)
+- **Tables** (`src/db/schema.ts`): `module`, `article` (slug is the key; `html`, `reviewStatus`, `sortOrder`), `faq`, `professional` (`verifiedAt` empty = "Sample listing"), `article_progress` (PK user + article slug; `saved`, `read`, `readAt`; cascades). Seeded by `scripts/seed.ts` (`npm run db:seed`) from `seed/content.json` through the pure mapper `src/server/content/seedRows.ts` (+test). Seed **upserts by id, never deletes, and never touches `reviewStatus`, `verifiedAt` or `source`** once set. FAQ ids are positional (`faq-01`...), so add new questions at the end of the file. The script uses `DATABASE_URL_UNPOOLED` (falls back to `DATABASE_URL`) and loads `.env.local` if present.
+- **Reading:** `src/server/content/{repo,service}.ts` (repo = only DB reader; service returns plain objects; `groupModules` is pure and tested). Pages Home, Learn, article, Directory and FAQ read through the service. **The public landing page (`(marketing)/page.tsx`) still reads `src/content` (the JSON) on purpose**, so it needs no database. `src/content/index.ts` now serves only the seed script, the landing page and tests.
+- **Pure rules** (`src/lib/domain/`, all tested): `content.ts` (types, `stripHtml`, `isExpertReviewed`, `isSampleListing`, `slugify`, `rolesOf`, `filterByRole`), `search.ts`, `progress.ts`, `recommend.ts`.
+- **Search:** `/search?q=` is a server-rendered GET form (works without JS) with a box on Home. Every word must match the start of a word; title > label > body; accents ignored; snippet around the match; 2-80 characters. Searches guides, FAQs and listings. No search-as-you-type (not built).
+- **Progress:** `src/server/progress/{repo,service}.ts` (every query has the user id; the service validates the slug and that the guide exists), server actions `src/features/content/actions.ts` (user from session), hook `useArticleActions` (updates first, undoes on failure), UI `ArticleActions`, `ProgressBar`. Module pages show "2 of 3 read" and a check on read guides; Home cards show the same; `/saved` lists saved guides (linked from Home).
+- **Recommended for {child}** (`src/lib/domain/recommend.ts`, service `src/server/content/recommendations.ts`): up to 3 unread guides, reasons shown. Rules use only matches the guide text really supports: meltdowns, transitions, sleep (routines), eating (sensory), communication, school; any sensory avoid/seek; few words or non-speaking; journey stage; fallback starter guides. **Gap: wandering, toileting, screen time and safety outside have no guide**, so they recommend nothing (the user said they will fix this later: write `draft` guides, then add rules).
+- **Directory:** role filter chips via `?role=` (server-rendered).
+- Not built from the P4 spec: text-size control, table of contents, related articles, search-as-you-type.
+
+## AI guide design (session 6, P5)
+- **Flow:** `/ask` page (server: starter chips from the quiz, `isAiConfigured()`) -> `ChatView` -> `useChat` -> `POST /api/chat` (`src/app/api/chat/route.ts`: same-origin check, session, body size and shape checks) -> `startChat` in `src/server/ai/service.ts` -> `src/server/ai/provider.ts` (the only file that talks to Anthropic; 30 s timeout, 1 retry). The route streams one JSON event per line (`start`, `text`, `done` with sources, `error`; `src/lib/ai/events.ts`).
+- **Order of checks in `startChat`:** clean input (1,000 chars, last 6 turns, control characters removed) -> **emergency keyword check (no model, no key, no rate limit needed)** -> key present (else 503) -> rate limit `chat:{userId}` via `hitRateLimit` (default 30/hour, `AI_RATE_LIMIT_PER_HOUR`; 429) -> stream. Max 700 output tokens.
+- **Safety:** `src/lib/ai/safety.ts` detects self-harm, abuse (incl. fear of hurting the child), missing child, medical emergency in English/Filipino/Taglish and returns fixed replies with **911** (`src/config/safety.ts`; `CRISIS_LINES` is empty until the team verifies numbers; never invent numbers). Patterns target "right now" phrasing, not questions like "what is a seizure?". It is a safety net, not a classifier.
+- **Privacy:** the model sees only the system prompt, the knowledge entries (guides, FAQs, listings as escaped data), an age band, communication level, sensory flags, challenges and school setting (`pickChildContext` + `buildChildContext`). Never names, email, phone or the emergency contact (tests enforce this). Only token counts are logged (`[ai] usage`), never questions, answers or user ids.
+- **Citations:** the model writes `[[id]]`; `splitCitations` keeps only ids that exist (guide slug, `faq-NN`, listing id) and the UI shows chips; markers are hidden while streaming.
+- **Client:** pure state rules `src/features/ask/chatState.ts` (+test), hook `useChat` (stop on leave, retry), `src/components/ask/{ChatView,Message,Composer}.tsx`. Plain text only (no HTML rendering). The composer is sticky above the mobile nav (`bottom-[calc(5.75rem+env(safe-area-inset-bottom))]`): **check this on a phone**.
+- **Not built (P5b):** chat history (30 days, delete), thumbs up/down, stop button, conversation titles.
+
 ## UI layer map (session 4, plus session 5 notes)
 - Tokens + shared styles: `src/app/globals.css` (`@theme` tokens from the logo, `.btn-primary/.btn-secondary/.field/.card/.chip/.ribbon-bar/.prose-cribs/.skip-link/.pop-in`, global `:focus-visible` ring, reduced-motion rule). Spec of the palette is in BUILD_CRIBS.md.
 - Pure logic (tested): `src/lib/otp.ts`, `src/lib/formChecks.ts`, `src/lib/contrast.ts` + `contrast.test.ts` (reads `globals.css` tokens; add a pair there when you add a color), `src/lib/domain/onboarding.ts`.
 - UI components: `src/components/ui/{OtpInput,ComingSoon,LegalPage}.tsx`, `src/components/auth/{AuthForms,PasswordField}.tsx`, `src/components/nav/AppNav.tsx`, `src/components/content/moduleStyle.tsx`, `src/components/{Logo,Loader}.tsx`, `src/components/onboarding/*`. Hooks: `src/features/auth/useCooldown.ts`, `src/features/onboarding/useOnboarding.ts`.
+- **Quiz smoothness pass (session 6):** the Continue/Back bar is sticky at the bottom of the quiz (`sticky`, not `fixed`, so it behaves with the phone keyboard); **Skip moved to the top-right next to "Step n of 10"**; each step fades in (`.step-in` in `globals.css`, off under reduced motion) and the page scrolls to the top on a new step; sensory buttons say Fine / Avoids / Seeks (UI labels only; saved values unchanged); Calming and Interests have tap-to-add chips (`appendIdea`, `CALMING_IDEAS`, `INTEREST_IDEAS` in the domain file, tested); the challenges counter explains the limit; the first screen says "about 2 minutes". Not done on purpose: auto-advance on tap (accessibility, accidental taps).
 - **Nav (session 5):** the middle Ask button (mobile) shows the logo in a white circle inside the rainbow ring; the desktop "Ask CRIBS" button shows a white logo. Accessible name unchanged. If the logo looks too small on a phone, raise `Logo size` (now 42) in `AppNav.tsx`.
 - `OtpInput`: 6 boxes, UI only; to clear it after an error, change its `key`.
 - Loader: shown once per browser session; server reads session cookie `cribs_loaded` (name in `src/config/ui.ts`). The 1.8 s timer is a placeholder (real prefetch in P3/P4 still todo). **Lesson:** a constant used by a server component must not live in a `"use client"` file.
@@ -93,43 +109,54 @@ Node.js + Next.js 16 (App Router, TS) · Tailwind v4 · Vercel · Neon via Verce
 - D11 `/privacy` and `/terms` are **DRAFT placeholders**. The team must write/approve real text (check the Philippine Data Privacy Act of 2012) before real families use the app. **The quiz now collects child data, so this matters more.**
 - D12 (session 5) Ask button uses the logo, not the sparkle icon (user request).
 - D13 (session 5) Child age is asked in years (not birth year); pronouns optional (she/her, he/him, they/them); relationship is required; v1 = one child and one emergency contact per account.
+- D14 (session 6) Guides, FAQs and listings live in Neon and are loaded by `npm run db:seed`; the public landing page still reads the JSON. The seed never downgrades review status.
+- D15 (session 6) "Recommended" only uses guide-to-challenge matches the text supports; uncovered challenges recommend nothing rather than something loose.
+- D16 (session 6) AI: Anthropic only, SDK pinned to 1.3.0 (newest versions younger than 14 days are avoided on purpose). Emergency check runs before the model. No chat history in v1 (child-related conversations are not stored until a retention and delete design is approved).
+- D17 (session 6) Chat and progress writes: user id always from the session, never from the request.
 - Seed content: `seed/content.json` (articles are plain p/ul/b plus `.disclaimer` boxes, styled via `.prose-cribs`). Fonts: Baloo 2 + Nunito. Nav (mobile): Home · Directory · **Ask (AI, center)** · FAQ · Settings. Desktop: sidebar.
 
 ## User environment
 Windows + PowerShell. Keep commands PowerShell-safe (no `openssl`, `source`, `unzip`; avoid `&&`). The user wants simple, short instructions: keep steps short, no long option lists. The sandbox may or may not have network: in session 5 `npm ci`, typecheck, tests and `db:generate` worked, but Google Fonts could not be fetched, so `next build` needs `src/app/layout.tsx` fonts stubbed temporarily (restore with a copy afterwards) to verify compilation. Vitest only picks up `src/**/*.test.ts` (not `.tsx`); use `createElement` for render tests.
 
 ## Env vars
-Full copy-paste list and secret/non-secret split: `VERCEL_ENV.md`; template: `.env.example` (both unchanged in session 5; no new vars). Used by code today: NEXT_PUBLIC_APP_URL, TAG_NAME, AUTH_SECRET(+_PREVIOUS), PASSWORD_PEPPER(+_PREVIOUS), DATABASE_URL, DATABASE_URL_UNPOOLED, MAIL_DRIVER, BREVO_API_KEY, MAIL_FROM_EMAIL, MAIL_FROM_NAME. In production `MAIL_DRIVER` must be `brevo` or sign-up email fails by design.
+Full copy-paste list and secret/non-secret split: `VERCEL_ENV.md`; template: `.env.example`. Used by code today: NEXT_PUBLIC_APP_URL, TAG_NAME, AUTH_SECRET(+_PREVIOUS), PASSWORD_PEPPER(+_PREVIOUS), DATABASE_URL, DATABASE_URL_UNPOOLED, MAIL_DRIVER, BREVO_API_KEY, MAIL_FROM_EMAIL, MAIL_FROM_NAME, and (session 6) **ANTHROPIC_API_KEY** (secret, Sensitive; turns Ask on), AI_MODEL (optional, default `claude-haiku-5-5`), AI_RATE_LIMIT_PER_HOUR (optional, default 30). `AI_PROVIDER` and `OPENAI_API_KEY` were removed from `.env.example` and `VERCEL_ENV.md` (unused). `getAiConfig()` in `src/config/env.ts` never throws: a bad value falls back to the default and a bad key counts as missing. In production `MAIL_DRIVER` must be `brevo` or sign-up email fails by design.
 
 ## Lessons (still true)
 - Sign-up failed with the generic message in session 3: tables missing on the DB in use, then an invalid `BREVO_API_KEY` (needs an **API key `xkeysib-...`** from SMTP & API > API keys, not an SMTP key).
 - Logging shows causes: `[auth] unexpected error: <name>: <message>`, `[onboarding] unexpected error: ...`, `[mail] send failed: ...`. No keys, recipients or answers. Keep that pattern.
 - Vercel "Needs Attention" on `DATABASE_URL*` is only a nudge to mark them Sensitive. Env changes apply only after a redeploy.
 - Check `git ls-files` for stray root-level `.ts` files. The zip's working tree is the source of truth.
-- **Apply schema changes in Neon BEFORE pushing code that reads the new columns.**
+- **Apply schema changes in Neon BEFORE pushing code that reads the new columns, and run `npm run db:seed` before pushing code that reads guides.**
+- Real-SQL check without Neon: `npm i @electric-sql/pglite` in a temp folder (`/tmp/pgt`), symlink it into `node_modules/@electric-sql` of the repo, run a throwaway `.mts` script that applies `drizzle/*.sql` and the same drizzle statements with `drizzle-orm/pglite`, then delete the script and the symlink. This caught nothing wrong in session 6 but proves the SQL runs.
+- Testing the safety patterns first paid off: two bugs ("gusto ko nang mamatay" missed; "missing the bus" wrongly flagged) were caught by tests before shipping. Add a test for every new phrase.
+- `npm run lint` is broken (Next 16 removed `next lint`); CI does not use it. ESLint config is still a todo.
+- GitHub Actions run names such as "Merge remote-tracking branch 'origin/main' #1" are just the commit message of the push that triggered them.
 
 ## Blockers / needs from the user
-1. Run the two `ALTER TABLE` statements in Neon's SQL Editor (see Database above), then push the commits to GitHub; Vercel redeploys.
-2. Run `npm ci`, `npm run typecheck`, `npm test`, `npm run build` locally and send the first error if any (the real build, with Google Fonts, has not run on the session 5 code).
-3. Try the quiz on a phone (360px): sign in with the existing account, go through the steps, Skip one, close and reopen to check resume, Edit from the review, finish, check Home greets you and the child. Also look at the logo on the Ask button. Send feedback.
-4. Team: write real Privacy/Terms text (D11); decide on D2 and D5 flags.
-5. Later: AI provider key (P5); verified local crisis hotline numbers for `src/config/safety.ts`.
+1. Follow `SETUP_GUIDE.md` section 0 in order: unzip, `npm ci`, local checks (typecheck, tests, real build), run `drizzle/0002_warm_catseye.sql` in Neon, `npm run db:seed`, merge + push, add `ANTHROPIC_API_KEY` in Vercel and redeploy.
+2. Phone test (360px): quiz (sticky bar, Skip top-right, fade, chips, resume), Home (search box, Recommended row, "x of y read", Saved guides), open a guide and use Mark as read / Save, `/search`, directory filter, Ask (question ideas, streaming answer with source chips, type "my son is not breathing" for the 911 message, send 2-3 follow-ups, New chat). Send feedback; say if the Ask composer overlaps the bottom nav.
+3. Send **verified Philippine mental-health hotline numbers** (checked on official sites) for `src/config/safety.ts`. Until then only 911 is shown.
+4. Team: write real Privacy/Terms text (D11; the quiz and chat now involve child data); decide on D2 and D5 flags.
+5. Missing guides (wandering, toileting, screen time, safety outside, plus parent self-care): the user said "we'll fix that later".
 
 ## Known deviations / todo (hardening)
-- Missing: ESLint config + import-restriction rules, commitlint, lint-staged, PR template, CODEOWNERS, dependabot, Playwright e2e, seed script (`db:seed` does not exist), `src/config/env.ts` only covers auth vars.
-- No DOM component tests (OtpInput and the quiz are covered through pure logic, services and a one-off server render only). Adding them needs `@testing-library/react` + `jsdom`.
+- Missing: ESLint config + import-restriction rules (and a working `lint` script), commitlint, lint-staged, PR template, CODEOWNERS, dependabot, Playwright e2e. (Seed script and AI/env config now exist.)
+- No DOM component tests (quiz, chat and buttons are covered through pure logic, services and route tests). Adding them needs `@testing-library/react` + `jsdom`.
 - Inline field errors exist on sign-up only; sign-in, forgot and the quiz use one message box.
-- Quiz server actions have no rate limit (session required); no unique index on `child.user_id` (a double submit could create two children; the app uses the oldest); `setContact` is select-then-write, not atomic.
+- Quiz and progress server actions have no rate limit (session required); no unique index on `child.user_id` (a double submit could create two children; the app uses the oldest); `setContact` is select-then-write.
 - Editing the profile after onboarding is only possible through the review screen before finishing; Settings editing is P7.
 - Pre-commit uses `.githooks` + `scripts/check-secrets.mjs` (activated by `npm run prepare`), not Husky.
-- Auth service and onboarding service are tested with a faked repo; real SQL was not run through the Neon HTTP driver in the sandbox (the `greatest(...)` and `coalesce(...)` upserts in `src/server/onboarding/repo.ts` are the parts to watch on first use).
+- Real Neon HTTP driver has not run the new SQL (pglite did): watch `db:seed` and the first Save/Read click. The `greatest(...)`/`coalesce(...)` upserts in `src/server/onboarding/repo.ts` are still unproven on Neon too.
+- `src/components/ui/ComingSoon.tsx` is unused now (Ask no longer uses it); keep it for the Find CRIBS/community pages or delete it.
+- The chat has no CSP/`connect-src` work (the browser only calls its own `/api/chat`); a strict CSP is still a P9 item.
+- Directory and search text mention "Sample listing" only on the directory page; the AI is told listings are samples.
 
 ## Next 5 tasks (each begins with a change plan; wait for "go")
-1. Ask the user what they want and for their results (Blockers 1-3); fix any build error, SQL problem or quiz/nav feedback first.
-2. P4 Content: seed script (`db:seed`), search across articles/FAQ/directory, progress + saved, and the "Recommended for {child}" row using `challenges` from the profile.
-3. P7 slice: Settings > edit child profile (reuse `StepFields` and the onboarding service), change password, sign out other devices.
-4. Hardening todo above (ESLint import rules, Playwright e2e for sign-up -> quiz -> home, dependabot, DOM tests, rate limit on quiz actions).
-5. Update this file, regenerate zip.
+1. Ask the user what they want and for their results (Blockers 1-2); fix any SQL/seed/build error, API problem, quiz or chat feedback first.
+2. Content gap + safety numbers: write `draft` guides (wandering and safety basics, sleep, toileting, screen time, parent self-care; plain language, marked draft, no medical claims), add recommend rules for them, add the verified hotline numbers to `src/config/safety.ts`.
+3. Next big phase, user's choice: **P5b** chat history + delete + thumbs (new tables, retention) or **P6 Find CRIBS + If-found** (BUILD_CRIBS.md).
+4. P7 slice: Settings > edit child profile (reuse `StepFields` and the onboarding service), change password, sign out other devices.
+5. Hardening todo above (ESLint import rules, Playwright e2e for sign-up -> quiz -> guide -> ask, dependabot, DOM tests, rate limits on actions); then update this file and regenerate the zip.
 
 ## Resume commands
 ```
@@ -140,6 +167,7 @@ vercel env pull .env.local
 npm run typecheck
 npm test
 npm run build
+npm run db:seed                   # after applying drizzle/0002 in Neon; needs DATABASE_URL_UNPOOLED
 npm run dev
 ```
 (Schema changes: `npm run db:generate`, then run the new SQL in Neon's SQL Editor; see SETUP_GUIDE.md step 6.)
@@ -152,3 +180,5 @@ npm run dev
 - 2026-11-05 (session 3): fixed live sign-up (tables missing, then invalid Brevo API key); added cause logging (26 tests); user confirmed it works; queued the P2.5 UX pass.
 - 2026-11-06 (session 4): Nielsen audit (40 findings), 6-box OtpInput, "ribbon" redesign on logo-based tokens, audit fixes; about 44 small commits; not built in the sandbox.
 - 2026-11-07 (session 5): user's checks all passed and the redesign looked good on a phone; their only change was the Ask button logo (done). User chose to go straight to P3 and answered the plan questions (pronouns fine, age in years), then said "go". Built P3 in 19 granular commits plus docs: schema + migration 0001, domain rules, Zod schemas, repo/service, actions, hook, step forms, review, stepper flow, quiz page, onboarding redirect, Home greeting. 133 tests pass (41 new); typecheck clean; build compiles with fonts stubbed. User's last answer to "what next?": "handoff".
+- 2026-11-08 (session 6): user reported checks passed, the ALTER TABLEs were run, the Ask logo is fine, and the quiz should be smoother and easier to answer; also pasted a failing GitHub "DB migrate" run (`url: ''`). Planned and got "go" for: quiz smoothness (6 commits), migrate workflow made manual-only, and **P4** (about 30 commits: tables + migration 0002, seed script, content repo/service, pages moved to the service, search, progress/saved, Recommended, directory filter). User then said "keep progressing, we'll fix that later" (about the missing guides), planned **P5**, got "go", and it was built in about 18 commits (SDK, safety config and emergency check, prompt, citations, limits, starters, events, same-origin check, provider, service, deps, route, chat state, hook, components, page, docs). 277 tests pass; typecheck clean; build compiles with fonts stubbed. User's last message: "handoff" and asked to be guided through the setup (new section 0 in SETUP_GUIDE.md).
+
