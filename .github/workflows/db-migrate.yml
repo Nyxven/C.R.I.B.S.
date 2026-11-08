@@ -1,7 +1,7 @@
 name: DB migrate
-# Runs when migrations change on main, or manually from the Actions tab.
+# Manual only (Actions tab > Run workflow). Tables are applied by hand in Neon's SQL Editor,
+# so this must not run on every push. Needs the secret DATABASE_URL_UNPOOLED in the "production" environment.
 on:
-  push: { branches: [main], paths: ["drizzle/**"] }
   workflow_dispatch:
 concurrency: db-migrate
 jobs:
@@ -13,6 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - name: Check secret
+        env:
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+        run: test -n "$DATABASE_URL_UNPOOLED" || { echo "Secret DATABASE_URL_UNPOOLED is empty. Add it under Settings > Environments > production."; exit 1; }
       - run: npx drizzle-kit migrate
         env:
           DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
