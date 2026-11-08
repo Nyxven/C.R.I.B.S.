@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { ChevronRight, MapPin } from "lucide-react";
+import { Bookmark, ChevronRight, MapPin } from "lucide-react";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
 import { getModules } from "@/server/content/service";
+import { getRecommendations } from "@/server/content/recommendations";
+import { getProgress } from "@/server/progress/service";
+import { moduleProgress, progressLabel } from "@/lib/domain/progress";
 import { brand } from "@/config/brand";
 import { SearchBox } from "@/components/content/SearchBox";
 import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleStyle";
@@ -10,13 +13,19 @@ import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleS
 export const metadata = { title: "Home" };
 
 const rows = [
+  { href: "/saved", title: "Saved guides", sub: "Guides you saved for later", look: { box: "bg-tint-purple", Icon: Bookmark } },
   { href: "/directory", title: "Professional Support Directory", sub: "Specialists near Taguig (sample listings)", look: directoryLook },
   { href: "/faq", title: "Frequently Asked Questions", sub: "Quick answers to common questions", look: faqLook },
 ];
 
 export default async function Home() {
   const [session, modules] = await Promise.all([getSession(), getModules()]);
-  const g = session ? await getGreeting(session.user.id) : { parent: "", child: "" };
+  const uid = session?.user.id;
+  const [g, entries, rec] = await Promise.all([
+    uid ? getGreeting(uid) : { parent: "", child: "" },
+    uid ? getProgress(uid) : [],
+    uid ? getRecommendations(uid) : { child: "", guides: [] },
+  ]);
   const first = (g.parent || session?.user.name || "friend").trim().split(" ")[0];
   return (
     <div className="space-y-8">
@@ -38,6 +47,26 @@ export default async function Home() {
         <span className="chip shrink-0">Coming soon</span>
       </div>
 
+      {rec.guides.length > 0 && (
+        <section aria-labelledby="rec-title">
+          <h2 id="rec-title" className="mb-3 text-xl font-bold">{rec.child ? `Recommended for ${rec.child}` : "Recommended for you"}</h2>
+          <ul className="space-y-3">
+            {rec.guides.map((a) => (
+              <li key={a.slug}>
+                <Link href={`/learn/${a.moduleId}/${a.slug}`} className="card flex min-h-20 items-center gap-4 p-4 transition active:scale-[.99]">
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold text-coral-dark">{a.reason}</span>
+                    <span className="block font-display text-lg font-bold leading-tight">{a.title}</span>
+                    <span className="block text-sm text-ink-soft">{a.moduleShortName} · {a.readTime}</span>
+                  </span>
+                  <ChevronRight size={22} className="shrink-0 text-ink-soft" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section aria-labelledby="guides-title">
         <h2 id="guides-title" className="mb-3 text-xl font-bold">Your guides</h2>
         {modules.length === 0 && <p className="card p-4 text-ink-soft">Guides are being set up. Please check back soon.</p>}
@@ -50,7 +79,7 @@ export default async function Home() {
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ink shadow-sm"><Icon size={22} aria-hidden="true" /></span>
                   <span>
                     <span className="block font-display text-lg font-bold leading-tight">{m.shortName}</span>
-                    <span className="mt-1 block text-sm font-semibold text-ink-soft">{m.articles.length} guides</span>
+                    <span className="mt-1 block text-sm font-semibold text-ink-soft">{progressLabel(moduleProgress(m.articles.map((a) => a.slug), entries))}</span>
                   </span>
                 </Link>
               </li>
