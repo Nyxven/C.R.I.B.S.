@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   STEPS, STEP_FIELDS, STEP_IDS, canFinish, clampStep, emptyData, isDataStep, isSkippable, normalizePhone,
-  pickStep, resetStep, reviewSections, stepIndex, toggleValue, ageText, valuesOf, RELATIONSHIPS,
+  pickStep, resetStep, reviewSections, stepIndex, toggleValue, ageText, valuesOf, RELATIONSHIPS, appendIdea, CALMING_IDEAS, INTEREST_IDEAS,
 } from "./onboarding";
 
 describe("steps", () => {
@@ -96,5 +96,22 @@ describe("reviewSections", () => {
     expect(s[6].lines[0].value).toBe("Sleep, Meltdowns");
     expect(s[8].lines).toContainEqual({ label: "Emergency contact", value: "Lola, 09171234567" });
     expect(s[8].lines).toContainEqual({ label: "Wears CRIBS", value: "Yes, Apple Find My" });
+  });
+});
+
+describe("appendIdea", () => {
+  it("adds the first idea as is, then lowercases later ones", () => {
+    expect(appendIdea("", "Music", 300)).toBe("Music");
+    expect(appendIdea("Music", "A quiet space", 300)).toBe("Music, a quiet space");
+  });
+  it("skips repeats (any case) and never goes over the limit", () => {
+    expect(appendIdea("music, drawing", "Music", 300)).toBe("music, drawing");
+    expect(appendIdea("1234567890", "Songs", 12)).toBe("1234567890");
+  });
+  it("keeps the idea lists short and unique", () => {
+    for (const list of [CALMING_IDEAS, INTEREST_IDEAS]) {
+      expect(new Set(list).size).toBe(list.length);
+      for (const idea of list) expect(idea.length).toBeLessThanOrEqual(30);
+    }
   });
 });

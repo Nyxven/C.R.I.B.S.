@@ -63,6 +63,18 @@ export const CALMING_IDEAS = [
   "A quiet space", "Music", "Deep pressure hugs", "A favorite toy", "Fresh air outside", "Dim lights", "Swinging",
 ] as const;
 
+export const INTEREST_IDEAS = [
+  "Music", "Songs", "Cartoons", "Animals", "Cars and trains", "Drawing", "Water play", "Building blocks", "Books",
+] as const;
+
+/** Add a tap-to-add idea to a free-text answer: skips repeats and never goes over `max` characters. */
+export function appendIdea(current: string, idea: string, max: number): string {
+  const cur = current.trim();
+  if (cur.toLowerCase().includes(idea.toLowerCase())) return current;
+  const next = cur ? `${cur}, ${idea.toLowerCase()}` : idea;
+  return next.length <= max ? next : current;
+}
+
 export const CHALLENGES = [
   { value: "meltdowns", label: "Meltdowns" },
   { value: "sleep", label: "Sleep" },
