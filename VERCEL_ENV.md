@@ -34,16 +34,30 @@ DATABASE_URL_UNPOOLED    (direct, migrations)
 ```
 Do not copy these by hand. Neon also adds `POSTGRES_*` / `PG*` variables; they are unused and can stay.
 
-## D. AI guide (phase P5): one secret turns Ask CRIBS on
+## D. AI guide on a free model
+Plain (scope: Production + Preview). Check your provider's docs for the OpenAI-compatible address, a current free model id and its limits:
 ```
-ANTHROPIC_API_KEY=<secret, toggle Sensitive; scope: Production + Preview>
+AI_PROVIDER=openai-compatible
+AI_BASE_URL=<provider's OpenAI-compatible address, https>
+AI_MODEL=<model id>
+AI_GLOBAL_PER_MIN=<your provider's requests per minute, or lower>
+AI_GLOBAL_PER_DAY=<your provider's requests per day, or lower>
 ```
-Create the key in the Anthropic Console. Never paste it in chat, issues or git. Optional, plain (defaults shown, only add to change them):
+Secret (toggle **Sensitive**):
 ```
-AI_MODEL=claude-haiku-5-5
-AI_RATE_LIMIT_PER_HOUR=30
+AI_API_KEY=<key from your provider>
 ```
-Without the key the Ask tab says "The guide is not available right now" and search keeps working. Redeploy after adding it.
+Optional, defaults shown: `AI_MAX_OUTPUT_TOKENS=450`, `AI_RATE_LIMIT_PER_HOUR=20`, `AI_USER_PER_DAY=60`, `AI_USER_TOKENS_PER_DAY=40000`, `AI_GLOBAL_TOKENS_PER_DAY=400000`.
+Using Anthropic instead: `AI_PROVIDER=anthropic` plus `ANTHROPIC_API_KEY` (Sensitive); the model defaults to `claude-haiku-5-5`.
+Without a key the Ask tab says "not available" and search keeps working. Never paste keys in chat.
+
+## D2. Security settings
+```
+TRUST_PROXY=vercel
+MAIL_DAILY_CAP=250
+```
+Secret (Sensitive): `CRON_SECRET` = a random string of 16+ characters (`node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"`). Vercel Cron then calls `/api/cron/cleanup` daily with it. Without it the cleanup never runs.
+Optional bot check (see `docs/CLOUDFLARE.md`): `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (plain) and `TURNSTILE_SECRET_KEY` (Sensitive).
 
 ## E. GitHub Actions secret (only for the migration workflow)
 Repo > Settings > Environments > New environment `production` > add secret:
