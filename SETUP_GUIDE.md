@@ -44,6 +44,8 @@ If Git says "refusing to merge unrelated histories", run `git merge origin/main 
 
 6. **Vercel.** Wait until the new deployment says Ready. Then Settings > Environment Variables > add `ANTHROPIC_API_KEY` (toggle **Sensitive**, Production + Preview), and Deployments > the latest > Redeploy. Get the key from the Anthropic Console > API keys. Never paste it in chat.
 
+6b. **Security settings** (new, no SQL needed): add `CRON_SECRET` and, when you are ready for the AI, the free-model variables from step 7b below. Details and the Turnstile bot check are in `docs/CLOUDFLARE.md`. Deploy these changes **before** you add any AI key.
+
 7. **Try it on your phone** and tell me what feels wrong:
 - Quiz: Continue bar stays visible, Skip is top-right, steps fade in, tap ideas for Calming and Interests.
 - Home: search box, "Recommended for ..." row, "x of y read" on the cards, Saved guides.
@@ -108,16 +110,19 @@ It prints `Seeded 4 modules, 12 guides, 6 FAQs, 5 listings.` Safe to run again: 
 ## 7. YOU: Brevo
 Brevo > Senders, domains > add and verify the sender address (or domain). Put that address in `MAIL_FROM_EMAIL`. Create an API key (SMTP & API > API keys) and put it in `BREVO_API_KEY` in Vercel only. Redeploy.
 
-## 7b. YOU: Turn on Ask CRIBS (the AI guide)
-1. Anthropic Console > API keys > create a key. Copy it once.
-2. Vercel > Project > Settings > Environment Variables > add `ANTHROPIC_API_KEY`, toggle **Sensitive**, scope Production + Preview. Redeploy.
-3. Open the Ask tab. Without the key it shows "not available" and nothing breaks.
+## 7b. YOU: Turn on Ask CRIBS (the AI guide) on a free model
+Do this only after the new code (session 6, security pass) is live.
+1. Pick a provider with a free tier that speaks the "OpenAI-compatible" API (for example Google AI Studio for Gemini, OpenRouter free models, or Groq). Create an API key there and note its free limits (requests per minute and per day).
+2. Vercel > Settings > Environment Variables (details in `VERCEL_ENV.md` section D): `AI_PROVIDER=openai-compatible`, `AI_BASE_URL`, `AI_MODEL`, `AI_API_KEY` (**Sensitive**), and set `AI_GLOBAL_PER_MIN` / `AI_GLOBAL_PER_DAY` to your provider's limits or lower.
+3. Also add `CRON_SECRET` (**Sensitive**, see `VERCEL_ENV.md` D2) so the daily cleanup runs.
+4. Redeploy, open the Ask tab. Without the key it shows "not available" and nothing breaks.
 Emergency numbers live in `src/config/safety.ts`. Only 911 is set. Add a support line there only after you checked it on an official site.
+Optional but recommended: the free Turnstile bot check, `docs/CLOUDFLARE.md`.
 
 ## 8. Check it works
 - `https://YOUR-PROJECT.vercel.app/api/health` returns `{"ok":true,...}`
 - Landing page shows the new logo; the tab icon and "Add to Home Screen" use it
-- Ask tab: tap a question idea, the answer streams in with source chips. Type "my son is not breathing": you get the 911 message at once.
+- Ask tab: tap a question idea, the answer streams in with source chips. Ask 5 questions quickly: the 5th should say to try again later. Type "my son is not breathing": you get the 911 message at once.
 - Sign up > the 6-digit email arrives > verify > you land on `/home` > Forgot password flow works
 
 ## Keeping secrets out of the repo
