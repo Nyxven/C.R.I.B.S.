@@ -1,8 +1,7 @@
 // Input rules for the chat. Pure. The server checks again, whatever the browser sent.
-export const MAX_INPUT_CHARS = 1000;
-export const MAX_HISTORY_MESSAGES = 6;
-const MAX_ASSISTANT_CHARS = 4000; // earlier answers come back from the browser, so they are untrusted and capped
-export const MAX_OUTPUT_TOKENS = 700;
+export const MAX_INPUT_CHARS = 600; // short questions keep a free model's token budget going further
+export const MAX_HISTORY_MESSAGES = 4;
+const MAX_ASSISTANT_CHARS = 2000; // earlier answers come back from the browser, so they are untrusted and capped
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 export type CleanResult = { ok: true; messages: ChatTurn[]; question: string } | { ok: false; error: "empty" | "too_long" | "bad_order" };

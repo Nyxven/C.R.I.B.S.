@@ -29,7 +29,7 @@ export function Composer({ busy, onSend }: { busy: boolean; onSend: (text: strin
           <SendHorizontal size={22} aria-hidden="true" />
         </button>
       </div>
-      {text.length >= 800 && <p className="text-right text-sm font-bold text-ink-soft" aria-live="polite">{text.length} / {MAX_INPUT_CHARS}</p>}
+      {text.length >= MAX_INPUT_CHARS - 150 && <p className="text-right text-sm font-bold text-ink-soft" aria-live="polite">{text.length} / {MAX_INPUT_CHARS}</p>}
     </form>
   );
 }

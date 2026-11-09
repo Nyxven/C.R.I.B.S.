@@ -38,6 +38,6 @@ describe("cleanMessages", () => {
   });
   it("caps earlier assistant answers", () => {
     const r = cleanMessages([u("q"), a("y".repeat(9000)), u("next")]);
-    expect(r.ok && r.messages[1]!.content.length).toBe(4000);
+    expect(r.ok && r.messages[1]!.content.length).toBe(2000);
   });
 });
