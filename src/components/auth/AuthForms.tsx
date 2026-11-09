@@ -2,7 +2,8 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signUpAction, verifyEmailAction, resendCodeAction, signInAction, requestResetAction, resetPasswordAction } from "@/features/auth/actions";
+import { signUpAction, verifyEmailAction, resendCodeAction, signInAction, requestResetAction, resendResetAction, resetPasswordAction } from "@/features/auth/actions";
+import { Turnstile, turnstileEnabled } from "./Turnstile";
 import { Logo } from "@/components/Logo";
 import { OtpInput } from "@/components/ui/OtpInput";
 import { PasswordField } from "@/components/auth/PasswordField";
@@ -28,6 +29,7 @@ export function SignUpForm() {
   const [f, setF] = useState({ name: "", email: "", password: "", consent: false });
   const [errs, setErrs] = useState<FieldErrors>({});
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
+  const [bot, setBot] = useState<string | null>(null); const [botReset, setBotReset] = useState(0);
   const clear = (k: keyof FieldErrors) => setErrs((e) => ({ ...e, [k]: undefined }));
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr("");
@@ -35,10 +37,11 @@ export function SignUpForm() {
     setErrs(found);
     const first = (["name", "email", "password", "consent"] as const).find((k) => found[k]);
     if (first) { document.getElementById(`su-${first}`)?.focus(); return; }
+    if (turnstileEnabled && !bot) return setErr("Please complete the check below.");
     setBusy(true);
-    const res = await signUpAction({ name: f.name, email: f.email, password: f.password });
+    const res = await signUpAction({ name: f.name, email: f.email, password: f.password, turnstileToken: bot ?? undefined });
     setBusy(false);
-    if (!res.ok) return setErr(res.error);
+    if (!res.ok) { setBotReset((n) => n + 1); return setErr(res.error); }
     r.push(`/verify?email=${encodeURIComponent(f.email.trim())}`);
   }
   return (
@@ -66,6 +69,7 @@ export function SignUpForm() {
           </label>
           <FieldError id="su-consent-error" m={errs.consent} />
         </div>
+        <Turnstile onToken={setBot} resetSignal={botReset} />
         <Err m={err} />
         <button className="btn-primary w-full" disabled={busy}>{busy ? "Creating…" : "Create account"}</button>
       </form>
@@ -165,18 +169,21 @@ export function ForgotForm() {
   const [email, setEmail] = useState(""); const [otp, setOtp] = useState(""); const [password, setPassword] = useState("");
   const [err, setErr] = useState(""); const [info, setInfo] = useState(""); const [busy, setBusy] = useState(false);
   const [boxKey, setBoxKey] = useState(0); const [sending, setSending] = useState(false); const [codeBad, setCodeBad] = useState(false); const [pwErr, setPwErr] = useState("");
+  const [bot, setBot] = useState<string | null>(null); const [botReset, setBotReset] = useState(0);
   const cooldown = useCooldown(60);
   async function sendCode(e: React.FormEvent) {
-    e.preventDefault(); setErr(""); setBusy(true);
-    const res = await requestResetAction({ email }); // same response whether or not the email exists
+    e.preventDefault(); setErr("");
+    if (turnstileEnabled && !bot) return setErr("Please complete the check below.");
+    setBusy(true);
+    const res = await requestResetAction({ email, turnstileToken: bot ?? undefined }); // same response whether or not the email exists
     setBusy(false);
-    if (!res.ok) return setErr(res.error);
+    if (!res.ok) { setBotReset((n) => n + 1); return setErr(res.error); }
     cooldown.restart(); setStep("reset");
   }
   async function resend() {
     if (cooldown.active || sending) return;
     setErr(""); setInfo(""); setSending(true);
-    const res = await requestResetAction({ email });
+    const res = await resendResetAction({ email });
     setSending(false);
     if (!res.ok) return setErr(res.error);
     cooldown.restart(); setOtp(""); setBoxKey((k) => k + 1);
@@ -199,6 +206,7 @@ export function ForgotForm() {
           <label htmlFor="fg-email" className="block text-sm font-bold">Email</label>
           <input id="fg-email" className="field mt-1" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         </div>
+        <Turnstile onToken={setBot} resetSignal={botReset} />
         <Err m={err} />
         <button className="btn-primary w-full" disabled={busy}>{busy ? "Sending…" : "Send code"}</button>
       </form>
