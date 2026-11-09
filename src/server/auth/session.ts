@@ -8,7 +8,7 @@ const ABSOLUTE_MS = 30 * 24 * 3600_000; // hard cap from sign-in
 const IDLE_MS = 7 * 24 * 3600_000; // signed out after 7 idle days
 const TOUCH_MS = 3600_000; // write last-seen at most hourly
 
-export type SessionUser = { id: string; name: string; email: string };
+export type SessionUser = { id: string; name: string; email: string; createdAt: Date };
 
 /** New token on every sign-in (never reuse), stored only as a keyed hash. */
 export async function startSession(userId: string) {

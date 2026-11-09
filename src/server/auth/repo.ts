@@ -50,7 +50,7 @@ export async function insertSession(v: { id: string; userId: string; tokenHash: 
 }
 export async function findSessionByDigests(digests: string[]) {
   const [row] = await db
-    .select({ session, user: { id: user.id, name: user.name, email: user.email } })
+    .select({ session, user: { id: user.id, name: user.name, email: user.email, createdAt: user.createdAt } })
     .from(session)
     .innerJoin(user, eq(user.id, session.userId))
     .where(inArray(session.tokenHash, digests))
