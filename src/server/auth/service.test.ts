@@ -29,6 +29,9 @@ vi.mock("./repo", () => ({
 vi.mock("./session", () => ({ startSession: async (id: string) => { db.started.push(id); }, endSession: async () => {} }));
 vi.mock("@/lib/mail", async (orig) => ({ ...(await orig<typeof import("@/lib/mail")>()), sendMail: async (m: { to: string; subject: string; html: string }) => { db.mails.push(m); } }));
 
+const bot = vi.hoisted(() => ({ ok: true, seen: [] as (string | undefined)[] }));
+vi.mock("@/server/security/turnstile", () => ({ verifyBot: async (t?: string) => { bot.seen.push(t); return { ok: bot.ok }; } }));
+
 import * as svc from "./service";
 
 const lastCode = () => /(\d{6})/.exec(db.mails.at(-1)!.html)![1];
@@ -37,7 +40,30 @@ const good = { name: "Ana", email: "ana@example.com", password: "a-long-password
 beforeEach(() => {
   process.env.AUTH_SECRET = "a".repeat(40); process.env.PASSWORD_PEPPER = "b".repeat(40);
   resetAuthEnvCache();
+  bot.ok = true; bot.seen.length = 0;
   db.users.length = 0; db.codes.clear(); db.limits.clear(); db.sessionsDeleted.length = 0; db.mails.length = 0; db.started.length = 0;
+});
+
+describe("bot check (Turnstile)", () => {
+  it("blocks sign-up when the check fails, before anything is stored or emailed", async () => {
+    bot.ok = false;
+    const r = await svc.signUp({ ...good, turnstileToken: "bad" }, "ip");
+    expect(r).toEqual({ ok: false, error: "Please complete the check and try again." });
+    expect(db.users).toHaveLength(0);
+    expect(db.mails).toHaveLength(0);
+  });
+  it("passes the token on and allows sign-up when it is good", async () => {
+    expect(await svc.signUp({ ...good, turnstileToken: "good-token" }, "ip")).toEqual({ ok: true });
+    expect(bot.seen).toEqual(["good-token"]);
+  });
+  it("checks the first password-reset request but not the resend", async () => {
+    await svc.signUp(good, "ip"); await svc.verifyEmail({ email: good.email, code: lastCode() }, "ip");
+    bot.ok = false;
+    expect((await svc.requestPasswordReset({ email: good.email }, "ip")).ok).toBe(false);
+    const before = db.mails.length;
+    expect((await svc.requestPasswordReset({ email: good.email }, "ip", { bot: false })).ok).toBe(true);
+    expect(db.mails.length).toBe(before + 1);
+  });
 });
 
 describe("abuse limits", () => {

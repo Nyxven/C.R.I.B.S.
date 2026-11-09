@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { getSecurityConfig } from "@/config/env";
 import { sendMail, codeEmail, existingAccountEmail } from "@/lib/mail";
 import { fakeVerify, generateCode, hashCode, codeMatches, hashPassword, limiterKey, verifyPassword } from "./crypto";
+import { verifyBot } from "@/server/security/turnstile";
 import * as repo from "./repo";
 import { startSession, endSession } from "./session";
 import { signUpInput, signInInput, verifyInput, emailOnlyInput, resetInput } from "./validation";
@@ -15,6 +16,7 @@ const fail = (error: string): AuthResult => ({ ok: false, error });
 const TOO_MANY = "Too many attempts. Please wait a few minutes and try again.";
 const BAD_CODE = "That code didn't work. Check it and try again, or request a new one.";
 const BAD_LOGIN = "Email or password is incorrect.";
+const BOT_FAILED = "Please complete the check and try again.";
 
 const logMail = (e: unknown) =>
   console.error("[mail] send failed:", e instanceof Error ? `${e.name}: ${e.message}`.slice(0, 300) : "unknown");
@@ -49,6 +51,7 @@ export async function signUp(input: unknown, ip: string): Promise<AuthResult> {
   const p = signUpInput.safeParse(input);
   if (!p.success) return fail(p.error.issues.find((i) => i.path[0] === "password")?.message ?? "Please check your details and try again.");
   const { name, email, password } = p.data;
+  if (!(await verifyBot(p.data.turnstileToken)).ok) return fail(BOT_FAILED);
   if ((await tooMany(`signup:ip:${ip}`, 10, 3600)) || (await tooMany(`signup:ipday:${ip}`, 20, 86_400)) || (await tooMany(`code:${email}`, 3, 600))) return fail(TOO_MANY);
 
   const existing = await repo.findUserByEmail(email);
@@ -106,10 +109,12 @@ export async function signIn(input: unknown, ip: string): Promise<AuthResult> {
   return ok();
 }
 
-export async function requestPasswordReset(input: unknown, ip: string): Promise<AuthResult> {
+/** `bot: false` is for the "send it again" button, which has no fresh check to show. It stays rate-limited and email-capped. */
+export async function requestPasswordReset(input: unknown, ip: string, opts: { bot?: boolean } = {}): Promise<AuthResult> {
   const p = emailOnlyInput.safeParse(input);
   if (!p.success) return ok(); // never reveal anything
   const { email } = p.data;
+  if ((opts.bot ?? true) && !(await verifyBot(p.data.turnstileToken)).ok) return fail(BOT_FAILED);
   if ((await tooMany(`reset:ip:${ip}`, 10, 3600)) || (await tooMany(`code:${email}`, 3, 600))) return fail(TOO_MANY);
   if (await repo.findUserByEmail(email)) await issueCode(email, "reset").catch(logMail);
   return ok();
