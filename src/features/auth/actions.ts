@@ -2,12 +2,13 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import * as auth from "@/server/auth/service";
+import { requestIpBucket } from "@/server/security/request";
 import type { AuthResult } from "@/server/auth/service";
 
 // Thin boundary between UI and server logic: components import only this file.
+// A private bucket key, never the raw address. Only the platform's own headers are trusted (TRUST_PROXY).
 async function ip() {
-  const h = await headers();
-  return (h.get("x-forwarded-for")?.split(",")[0] ?? h.get("x-real-ip") ?? "unknown").trim();
+  return requestIpBucket(await headers());
 }
 async function safe(fn: () => Promise<AuthResult>): Promise<AuthResult> {
   try { return await fn(); }
