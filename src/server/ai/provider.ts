@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ChatTurn } from "@/lib/ai/limits";
+import { classifyStatus, parseRetryAfter, ProviderError } from "@/lib/ai/providerError";
 
 export type Usage = { inputTokens: number; outputTokens: number };
 export type ChatProvider = {
@@ -12,10 +13,18 @@ export function createAnthropicProvider(apiKey: string, model: string): ChatProv
   const client = new Anthropic({ apiKey, timeout: 30_000, maxRetries: 1 });
   return {
     async stream({ system, messages, maxTokens, signal }, onText) {
-      const stream = client.messages.stream({ model, max_tokens: maxTokens, system, messages }, { signal });
-      stream.on("text", (delta) => onText(delta));
-      const final = await stream.finalMessage();
-      return { inputTokens: final.usage.input_tokens, outputTokens: final.usage.output_tokens };
+      try {
+        const stream = client.messages.stream({ model, max_tokens: maxTokens, system, messages }, { signal });
+        stream.on("text", (delta) => onText(delta));
+        const final = await stream.finalMessage();
+        return { inputTokens: final.usage.input_tokens, outputTokens: final.usage.output_tokens };
+      } catch (e) {
+        if (signal?.aborted) throw e;
+        if (e instanceof Anthropic.APIError && typeof e.status === "number") {
+          throw new ProviderError(classifyStatus(e.status), `Provider returned HTTP ${e.status}`, parseRetryAfter(e.headers?.get?.("retry-after") ?? null));
+        }
+        throw e;
+      }
     },
   };
 }
