@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { getSecurityConfig } from "@/config/env";
 import { sendMail, codeEmail, existingAccountEmail } from "@/lib/mail";
-import { fakeVerify, generateCode, hashCode, codeMatches, hashPassword, verifyPassword } from "./crypto";
+import { fakeVerify, generateCode, hashCode, codeMatches, hashPassword, limiterKey, verifyPassword } from "./crypto";
 import * as repo from "./repo";
 import { startSession, endSession } from "./session";
 import { signUpInput, signInInput, verifyInput, emailOnlyInput, resetInput } from "./validation";
@@ -18,11 +19,19 @@ const BAD_LOGIN = "Email or password is incorrect.";
 const logMail = (e: unknown) =>
   console.error("[mail] send failed:", e instanceof Error ? `${e.name}: ${e.message}`.slice(0, 300) : "unknown");
 
-const tooMany = async (key: string, limit: number, sec: number) => !(await repo.hitRateLimit(key, limit, sec)).allowed;
+const tooMany = async (key: string, limit: number, sec: number) => !(await repo.hitRateLimit(limiterKey(key), limit, sec)).allowed;
+
+/** One shared daily budget for every email the app sends (the free mail plan has a daily limit that sign-up spam could burn). */
+async function mailBudgetLeft(): Promise<boolean> {
+  const ok = (await repo.hitRateLimit(limiterKey("mail:global:day"), getSecurityConfig().mailDailyCap, 86_400)).allowed;
+  if (!ok) console.warn("[abuse] daily email cap reached");
+  return ok;
+}
 
 async function issueCode(email: string, purpose: repo.Purpose) {
   const code = generateCode();
   await repo.upsertLoginCode({ id: randomUUID(), email, purpose, codeHash: hashCode(email, purpose, code), expiresAt: new Date(Date.now() + CODE_TTL_MS) });
+  if (!(await mailBudgetLeft())) throw new Error("daily email cap reached");
   await sendMail({ to: email, ...codeEmail(purpose, code) });
 }
 
@@ -40,12 +49,12 @@ export async function signUp(input: unknown, ip: string): Promise<AuthResult> {
   const p = signUpInput.safeParse(input);
   if (!p.success) return fail(p.error.issues.find((i) => i.path[0] === "password")?.message ?? "Please check your details and try again.");
   const { name, email, password } = p.data;
-  if ((await tooMany(`signup:ip:${ip}`, 10, 3600)) || (await tooMany(`code:${email}`, 3, 600))) return fail(TOO_MANY);
+  if ((await tooMany(`signup:ip:${ip}`, 10, 3600)) || (await tooMany(`signup:ipday:${ip}`, 20, 86_400)) || (await tooMany(`code:${email}`, 3, 600))) return fail(TOO_MANY);
 
   const existing = await repo.findUserByEmail(email);
   if (existing?.emailVerifiedAt) {
     // Same response as a new sign-up, so the form can't be used to discover who has an account.
-    await sendMail({ to: email, ...existingAccountEmail() }).catch(logMail);
+    if (await mailBudgetLeft()) await sendMail({ to: email, ...existingAccountEmail() }).catch(logMail);
     return ok();
   }
   const passwordHash = await hashPassword(password);

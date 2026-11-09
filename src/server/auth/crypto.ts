@@ -13,6 +13,10 @@ const hmacHex = (key: string, data: string) => createHmac("sha256", key).update(
 const secrets = () => { const e = getAuthEnv(); return [e.AUTH_SECRET, e.AUTH_SECRET_PREVIOUS].filter((s): s is string => !!s); };
 const peppers = () => { const e = getAuthEnv(); return [e.PASSWORD_PEPPER, e.PASSWORD_PEPPER_PREVIOUS].filter((s): s is string => !!s); };
 
+// ---------- rate-limit keys ----------
+/** Opaque key for a rate-limit counter. Emails and address buckets never sit in the database in readable form. */
+export const limiterKey = (key: string): string => hmacHex(secrets()[0], `limiter-v1:${key}`).slice(0, 32);
+
 // ---------- passwords ----------
 export async function hashPassword(password: string): Promise<string> {
   return hash(hmac(peppers()[0], password), ARGON);

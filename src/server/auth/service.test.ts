@@ -40,6 +40,32 @@ beforeEach(() => {
   db.users.length = 0; db.codes.clear(); db.limits.clear(); db.sessionsDeleted.length = 0; db.mails.length = 0; db.started.length = 0;
 });
 
+describe("abuse limits", () => {
+  it("never stores emails or addresses in readable form in the limiter", async () => {
+    await svc.signUp(good, "bucket-abc123");
+    const keys = [...db.limits.keys()].join(" ");
+    expect(keys).not.toContain("ana@example.com");
+    expect(keys).not.toContain("bucket-abc123");
+    expect(keys).not.toContain("signup");
+  });
+  it("stops sending email once the daily cap is reached, and says so without revealing why", async () => {
+    process.env.MAIL_DAILY_CAP = "2";
+    try {
+      expect(await svc.signUp({ ...good, email: "a1@example.com" }, "ip1")).toEqual({ ok: true });
+      expect(await svc.signUp({ ...good, email: "a2@example.com" }, "ip2")).toEqual({ ok: true });
+      const third = await svc.signUp({ ...good, email: "a3@example.com" }, "ip3");
+      expect(third.ok).toBe(false);
+      expect(db.mails).toHaveLength(2);
+    } finally { delete process.env.MAIL_DAILY_CAP; }
+  });
+  it("limits sign-ups per address per day", async () => {
+    let refused = 0;
+    for (let i = 0; i < 25; i++) if (!(await svc.signUp({ ...good, email: `user${i}@example.com` }, "same-ip")).ok) refused++;
+    expect(refused).toBeGreaterThan(0);
+    expect(db.users.length).toBeLessThanOrEqual(10);
+  });
+});
+
 describe("sign-up and verify", () => {
   it("creates an unverified user, emails a code, then verifies and signs in", async () => {
     expect(await svc.signUp(good, "1.1.1.1")).toEqual({ ok: true });
