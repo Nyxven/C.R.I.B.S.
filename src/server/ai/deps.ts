@@ -1,4 +1,4 @@
-import { getAiConfig } from "@/config/env";
+import { aiReady, getAiConfig } from "@/config/env";
 import type { Source } from "@/lib/ai/citations";
 import { pickChildContext } from "@/lib/ai/prompt";
 import { buildSearchDocs } from "@/lib/domain/search";
@@ -9,14 +9,14 @@ import { createAnthropicProvider } from "./provider";
 import type { ChatDeps } from "./service";
 
 /** True when an API key is set. The Ask page uses this to show "not available" instead of a broken chat. */
-export const isAiConfigured = (): boolean => !!getAiConfig().apiKey;
+export const isAiConfigured = (): boolean => aiReady(getAiConfig());
 
 /** The real dependencies for the chat route. Reuses the DB-backed rate limiter from auth. */
 export function defaultChatDeps(): ChatDeps {
   const cfg = getAiConfig();
   return {
-    provider: cfg.apiKey ? createAnthropicProvider(cfg.apiKey, cfg.model) : null,
-    ratePerHour: cfg.ratePerHour,
+    provider: aiReady(cfg) && cfg.provider === "anthropic" ? createAnthropicProvider(cfg.apiKey!, cfg.model!) : null,
+    ratePerHour: cfg.limits.perHour,
     hitRateLimit,
     // Small data set (about 2,300 tokens), so every request carries all of it.
     async loadKnowledge() {
