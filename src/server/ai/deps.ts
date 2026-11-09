@@ -1,23 +1,33 @@
-import { aiReady, getAiConfig } from "@/config/env";
+import { aiReady, getAiConfig, type AiConfig } from "@/config/env";
 import type { Source } from "@/lib/ai/citations";
 import { pickChildContext } from "@/lib/ai/prompt";
 import { buildSearchDocs } from "@/lib/domain/search";
-import { hitRateLimit } from "@/server/auth/repo";
+import { buildPolicy } from "@/lib/ai/policy";
+import { dbGuard } from "@/server/security/repo";
 import { getAllArticles, getFaqs, getProfessionals } from "@/server/content/service";
 import { getChild } from "@/server/onboarding/repo";
-import { createAnthropicProvider } from "./provider";
+import { createOpenAiCompatProvider } from "./openaiCompat";
+import { createAnthropicProvider, type ChatProvider } from "./provider";
 import type { ChatDeps } from "./service";
 
 /** True when an API key is set. The Ask page uses this to show "not available" instead of a broken chat. */
 export const isAiConfigured = (): boolean => aiReady(getAiConfig());
 
-/** The real dependencies for the chat route. Reuses the DB-backed rate limiter from auth. */
+function createProvider(cfg: AiConfig): ChatProvider | null {
+  if (!aiReady(cfg)) return null;
+  return cfg.provider === "anthropic"
+    ? createAnthropicProvider(cfg.apiKey!, cfg.model!)
+    : createOpenAiCompatProvider({ apiKey: cfg.apiKey!, baseUrl: cfg.baseUrl!, model: cfg.model! });
+}
+
+/** The real dependencies for the chat route. */
 export function defaultChatDeps(): ChatDeps {
   const cfg = getAiConfig();
   return {
-    provider: aiReady(cfg) && cfg.provider === "anthropic" ? createAnthropicProvider(cfg.apiKey!, cfg.model!) : null,
-    ratePerHour: cfg.limits.perHour,
-    hitRateLimit,
+    provider: createProvider(cfg),
+    policy: buildPolicy(cfg.limits),
+    maxOutputTokens: cfg.maxOutputTokens,
+    guard: dbGuard,
     // Small data set (about 2,300 tokens), so every request carries all of it.
     async loadKnowledge() {
       const [articles, faqs, professionals] = await Promise.all([getAllArticles(), getFaqs(), getProfessionals()]);

@@ -1,5 +1,6 @@
 import { encodeEvent } from "@/lib/ai/events";
 import { isSameOrigin } from "@/lib/origin";
+import { requestIpBucket } from "@/server/security/request";
 import { chatRequestSchema } from "@/features/ask/schema";
 import { getSession } from "@/server/auth/session";
 import { defaultChatDeps } from "@/server/ai/deps";
@@ -11,7 +12,7 @@ export const maxDuration = 30;
 
 const MAX_BODY_CHARS = 30_000;
 const json = (status: number, error: string) =>
-  Response.json({ error }, { status, headers: { "Cache-Control": "no-store" } });
+  Response.json({ error }, { status, headers: { "Cache-Control": "no-store", ...(status === 429 || status === 503 ? { "Retry-After": "60" } : {}) } });
 
 // Thin boundary: same-origin check, sign-in, body checks, then hand over to the service. Streams one JSON event per line.
 export async function POST(req: Request) {
@@ -19,6 +20,7 @@ export async function POST(req: Request) {
   const session = await getSession();
   if (!session) return json(401, "Your session ended. Please sign in again.");
 
+  if (!(req.headers.get("content-type") ?? "").toLowerCase().startsWith("application/json")) return json(415, "Unsupported request.");
   const text = await req.text();
   if (text.length > MAX_BODY_CHARS) return json(413, "That request is too large.");
   let body: unknown;
@@ -26,7 +28,8 @@ export async function POST(req: Request) {
   const parsed = chatRequestSchema.safeParse(body);
   if (!parsed.success) return json(400, "Please type a question.");
 
-  const started = await startChat(defaultChatDeps(), session.user.id, parsed.data.messages);
+  const accountAgeHours = (Date.now() - session.user.createdAt.getTime()) / 3_600_000;
+  const started = await startChat(defaultChatDeps(), { userId: session.user.id, ipBucket: requestIpBucket(req.headers), accountAgeHours }, parsed.data.messages);
   if (started.type === "rejected") return json(started.status, started.error);
 
   const abort = new AbortController();
