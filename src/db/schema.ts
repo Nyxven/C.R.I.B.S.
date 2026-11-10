@@ -49,6 +49,7 @@ export const profile = pgTable("profile", {
   notifOn: boolean("notif_on").notNull().default(true),
   onboardingStep: integer("onboarding_step").notNull().default(0), // next quiz step to show (resume)
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  chatHistoryEnabled: boolean("chat_history_enabled").notNull().default(true), // false = Ask conversations are not saved
 });
 export const child = pgTable("child", {
   id: text("id").primaryKey(),
@@ -128,3 +129,25 @@ export const articleProgress = pgTable("article_progress", {
   readAt: timestamp("read_at"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.userId, t.articleSlug] })]);
+
+// ---------- Ask CRIBS history (kept 30 days after the last message; deleted by the daily cleanup) ----------
+export const chatThread = pgTable("chat_thread", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+}, (t) => [index("chat_thread_user_idx").on(t.userId, t.updatedAt), index("chat_thread_expires_idx").on(t.expiresAt)]);
+
+export const chatMessage = pgTable("chat_message", {
+  id: text("id").primaryKey(),
+  threadId: text("thread_id").notNull().references(() => chatThread.id, { onDelete: "cascade" }),
+  role: text("role").notNull(), // "user" | "assistant"
+  content: text("content").notNull(),
+  sources: jsonb("sources").$type<{ id: string; title: string; href: string }[]>().notNull().default([]),
+  inputTokens: integer("input_tokens").notNull().default(0),
+  outputTokens: integer("output_tokens").notNull().default(0),
+  feedback: text("feedback"), // "up" | "down" | null (assistant messages only)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [index("chat_message_thread_idx").on(t.threadId, t.createdAt)]);
