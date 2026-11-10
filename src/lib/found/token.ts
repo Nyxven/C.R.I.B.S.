@@ -10,3 +10,13 @@ export const hashToken = (token: string): string => createHash("sha256").update(
 export const isTokenShape = (t: unknown): t is string => typeof t === "string" && /^[A-Za-z0-9_-]{43}$/.test(t);
 
 export const foundUrl = (appUrl: string, token: string): string => `${appUrl.replace(/\/+$/, "")}/f/${token}`;
+
+/** The site address printed into the QR. Prefer the configured one; otherwise use the host that served the request (https), never a request-supplied scheme. */
+export function pickAppUrl(configured: string | undefined, host: string | null): string | null {
+  const ok = (u: string) => /^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(u) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(u);
+  const c = configured?.trim().replace(/\/+$/, "");
+  if (c && ok(c)) return c;
+  const h = host?.trim();
+  if (h && /^[a-z0-9.-]+(:\d+)?$/i.test(h)) return /^(localhost|127\.0\.0\.1)/i.test(h) ? `http://${h}` : `https://${h}`;
+  return null;
+}

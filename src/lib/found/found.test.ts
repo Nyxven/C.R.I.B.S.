@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildFoundCard, cleanText, DEFAULT_FIELDS, FINDER_TIPS, parseFields, type FoundFields } from "./card";
-import { foundUrl, generateToken, hashToken, isTokenShape } from "./token";
+import { foundUrl, generateToken, hashToken, isTokenShape, pickAppUrl } from "./token";
 
 const child = { nickname: "Bunso", communicationLevel: "nonspeaking", calming: "Quiet music and a hug", avoid: "Loud sirens and crowds" };
 const contact = { name: "Ate Rose", phone: "0917 123 4567", isPublic: true };
@@ -73,4 +73,18 @@ describe("token", () => {
     for (const bad of ["", "short", "x".repeat(42), "x".repeat(44), `${"a".repeat(42)}!`, "../etc/passwd", null, undefined, 5]) expect(isTokenShape(bad)).toBe(false);
   });
   it("builds the QR address", () => expect(foundUrl("https://cribs.example/", "abc")).toBe("https://cribs.example/f/abc"));
+});
+
+describe("pickAppUrl", () => {
+  it("prefers the configured address", () => expect(pickAppUrl("https://cribs.example/", "other.example")).toBe("https://cribs.example"));
+  it("falls back to the host that served the request, over https", () => {
+    expect(pickAppUrl(undefined, "cribs-ecru.vercel.app")).toBe("https://cribs-ecru.vercel.app");
+    expect(pickAppUrl("", "localhost:3000")).toBe("http://localhost:3000");
+  });
+  it("refuses odd values", () => {
+    expect(pickAppUrl("javascript:alert(1)", null)).toBeNull();
+    expect(pickAppUrl("http://evil.example", null)).toBeNull();
+    expect(pickAppUrl(undefined, "evil.example/path?x=1")).toBeNull();
+    expect(pickAppUrl(undefined, null)).toBeNull();
+  });
 });
