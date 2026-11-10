@@ -151,3 +151,17 @@ export const chatMessage = pgTable("chat_message", {
   feedback: text("feedback"), // "up" | "down" | null (assistant messages only)
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => [index("chat_message_thread_idx").on(t.threadId, t.createdAt)]);
+
+// ---------- Find CRIBS "if found" tags (the QR link holds a random token; only its hash is stored) ----------
+export type FoundFields = { nickname: boolean; autism: boolean; communication: boolean; calming: boolean; avoid: boolean; contact: boolean };
+export const foundToken = pgTable("found_token", {
+  id: text("id").primaryKey(),
+  childId: text("child_id").notNull().references(() => child.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(), // sha256 of a 256-bit random token
+  publicFields: jsonb("public_fields").$type<FoundFields>().notNull(),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  revokedAt: timestamp("revoked_at"),
+  accessCount: integer("access_count").notNull().default(0), // a count only: no visitor details are kept
+  lastAccessedAt: timestamp("last_accessed_at"),
+}, (t) => [index("found_token_child_idx").on(t.childId)]);
