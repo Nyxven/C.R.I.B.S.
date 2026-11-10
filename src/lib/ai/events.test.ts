@@ -21,6 +21,11 @@ describe("chat events", () => {
     const r = parseEvents('not json\n{"t":"nope"}\n{"t":"text","d":5}\n{"t":"text","d":"ok"}\n');
     expect(r.events).toEqual([{ t: "text", d: "ok" }]);
   });
+  it("carries the saved chat and message ids when present", () => {
+    const e: ChatEvent = { t: "done", sources: [], threadId: "t1", messageId: "m1" };
+    expect(parseEvents(encodeEvent(e)).events).toEqual([e]);
+    expect(parseEvents('{"t":"done","sources":[],"threadId":5}\n').events).toEqual([{ t: "done", sources: [] }]);
+  });
   it("drops sources with the wrong shape", () => {
     const r = parseEvents('{"t":"done","sources":[{"id":"a","title":"A","href":"/a"},{"id":1},"x"]}\n');
     expect(r.events).toEqual([{ t: "done", sources: [{ id: "a", title: "A", href: "/a" }] }]);

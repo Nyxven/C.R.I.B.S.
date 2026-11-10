@@ -4,7 +4,7 @@ import type { Source } from "./citations";
 export type ChatEvent =
   | { t: "start"; kind: "answer" | "emergency" }
   | { t: "text"; d: string }
-  | { t: "done"; sources: Source[] }
+  | { t: "done"; sources: Source[]; threadId?: string; messageId?: string }
   | { t: "error"; message: string };
 
 export const encodeEvent = (e: ChatEvent): string => `${JSON.stringify(e)}\n`;
@@ -18,7 +18,13 @@ function toEvent(v: unknown): ChatEvent | null {
   switch (o.t) {
     case "start": return o.kind === "answer" || o.kind === "emergency" ? { t: "start", kind: o.kind } : null;
     case "text": return typeof o.d === "string" ? { t: "text", d: o.d } : null;
-    case "done": return Array.isArray(o.sources) ? { t: "done", sources: o.sources.filter(isSource) } : null;
+    case "done": {
+      if (!Array.isArray(o.sources)) return null;
+      const out: ChatEvent = { t: "done", sources: o.sources.filter(isSource) };
+      if (typeof o.threadId === "string") out.threadId = o.threadId;
+      if (typeof o.messageId === "string") out.messageId = o.messageId;
+      return out;
+    }
     case "error": return typeof o.message === "string" ? { t: "error", message: o.message } : null;
     default: return null;
   }
