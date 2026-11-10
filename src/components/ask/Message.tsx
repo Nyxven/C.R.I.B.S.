@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { BookOpen, Check, Copy, PhoneCall } from "lucide-react";
+import { BookOpen, Check, Copy, PhoneCall, ThumbsDown, ThumbsUp } from "lucide-react";
 import { visibleText, type ChatMessage } from "@/features/ask/chatState";
 
-export function Message({ message, onRetry }: { message: ChatMessage; onRetry: () => void }) {
+export function Message({ message, onRetry, onRate }: { message: ChatMessage; onRetry: () => void; onRate?: (value: "up" | "down") => void }) {
   const [copied, setCopied] = useState(false);
   const text = visibleText(message);
 
@@ -44,9 +44,23 @@ export function Message({ message, onRetry }: { message: ChatMessage; onRetry: (
           </div>
         )}
         {message.status === "done" && !emergency && text !== "" && (
-          <button type="button" onClick={copy} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-bold text-ink-soft">
-            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />} {copied ? "Copied" : "Copy"}
-          </button>
+          <div className="flex flex-wrap items-center gap-1">
+            <button type="button" onClick={copy} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-2 text-sm font-bold text-ink-soft">
+              {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />} {copied ? "Copied" : "Copy"}
+            </button>
+            {onRate && message.serverId && (
+              <>
+                <button type="button" onClick={() => onRate("up")} aria-pressed={message.feedback === "up"} aria-label="Helpful"
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${message.feedback === "up" ? "bg-tint-mint text-ink" : "text-ink-soft"}`}>
+                  <ThumbsUp size={18} aria-hidden="true" />
+                </button>
+                <button type="button" onClick={() => onRate("down")} aria-pressed={message.feedback === "down"} aria-label="Not helpful"
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-xl ${message.feedback === "down" ? "bg-tint-pink text-ink" : "text-ink-soft"}`}>
+                  <ThumbsDown size={18} aria-hidden="true" />
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>

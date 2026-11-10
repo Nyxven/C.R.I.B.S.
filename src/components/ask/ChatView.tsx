@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { MessageCircle, RotateCcw } from "lucide-react";
+import { History, MessageCircle, RotateCcw } from "lucide-react";
+import type { ChatMessage } from "@/features/ask/chatState";
 import { useChat } from "@/features/ask/useChat";
 import { Composer } from "./Composer";
 import { Message } from "./Message";
 
-export function ChatView({ starters, available }: { starters: string[]; available: boolean }) {
-  const chat = useChat();
+export function ChatView({ starters, available, initial }: { starters: string[]; available: boolean; initial?: { threadId: string; messages: ChatMessage[] } }) {
+  const chat = useChat(initial);
   const endRef = useRef<HTMLDivElement>(null);
   const last = chat.messages.at(-1);
 
@@ -18,11 +19,14 @@ export function ChatView({ starters, available }: { starters: string[]; availabl
       <header className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-3xl font-extrabold leading-tight">Ask CRIBS</h1>
-          {chat.messages.length > 0 && (
-            <button type="button" onClick={chat.newChat} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 font-bold text-brand">
-              <RotateCcw size={18} aria-hidden="true" /> New chat
-            </button>
-          )}
+          <div className="flex shrink-0 items-center">
+            {chat.messages.length > 0 && (
+              <button type="button" onClick={chat.newChat} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 font-bold text-brand">
+                <RotateCcw size={18} aria-hidden="true" /> New chat
+              </button>
+            )}
+            <Link href="/ask/history" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 font-bold text-brand"><History size={18} aria-hidden="true" /> History</Link>
+          </div>
         </div>
         <div className="ribbon-bar w-24" aria-hidden="true" />
       </header>
@@ -55,7 +59,7 @@ export function ChatView({ starters, available }: { starters: string[]; availabl
             </section>
           ) : (
             <div role="log" aria-label="Conversation" aria-busy={chat.busy} className="space-y-4">
-              {chat.messages.map((m) => <Message key={m.id} message={m} onRetry={chat.retry} />)}
+              {chat.messages.map((m) => <Message key={m.id} message={m} onRetry={chat.retry} onRate={m.role === "assistant" ? (v) => void chat.rate(m.id, v) : undefined} />)}
               <div ref={endRef} />
             </div>
           )}
