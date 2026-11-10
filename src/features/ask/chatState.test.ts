@@ -40,6 +40,21 @@ describe("chatReducer", () => {
     const finished = run([send("Hi"), { type: "delta", d: "Ok" }, { type: "done", sources: [] }, { type: "end" }]);
     expect(finished.messages.at(-1)!.status).toBe("done");
   });
+  it("remembers the saved chat id and the saved answer id from the done event", () => {
+    const s = run([send("Hi"), { type: "delta", d: "Hello" }, { type: "done", sources: [], threadId: "t1", messageId: "m1" }]);
+    expect(s.threadId).toBe("t1");
+    expect(s.messages.at(-1)!.serverId).toBe("m1");
+    expect(run([{ type: "done", sources: [] }], s).threadId).toBe("t1"); // a later done without ids keeps the chat
+  });
+  it("sets a thumb on one message only", () => {
+    const s = run([send("Hi"), { type: "delta", d: "Hello" }, { type: "done", sources: [], threadId: "t1", messageId: "m1" }, { type: "feedback", id: "a1", value: "up" }]);
+    expect(s.messages.map((m) => m.feedback ?? null)).toEqual([null, "up"]);
+  });
+  it("loads a saved chat and keeps its id through a retry", () => {
+    const loaded = run([{ type: "load", threadId: "t9", messages: [{ id: "x", role: "user", text: "old", status: "done", kind: "answer", sources: [] }] }]);
+    expect(loaded.threadId).toBe("t9");
+    expect(run([send("next", 5), { type: "fail", message: "Oops" }, { type: "drop_last_turn" }], loaded).threadId).toBe("t9");
+  });
   it("drops the last turn for a retry, and resets", () => {
     const s = run([send("one"), { type: "delta", d: "A" }, { type: "done", sources: [] }, send("two", 2), { type: "fail", message: "Oops" }, { type: "drop_last_turn" }]);
     expect(s.messages.map((m) => m.id)).toEqual(["u1", "a1"]);
@@ -55,4 +70,8 @@ describe("historyFor", () => {
     ]);
   });
   it("is just the question for a new chat", () => expect(historyFor(initialChat, "Hi")).toEqual([{ role: "user", content: "Hi" }]));
+  it("is just the question for a saved chat, because the server keeps its own copy", () => {
+    const s = run([{ type: "load", threadId: "t1", messages: [{ id: "x", role: "user", text: "old", status: "done", kind: "answer", sources: [] }] }]);
+    expect(historyFor(s, "next")).toEqual([{ role: "user", content: "next" }]);
+  });
 });
