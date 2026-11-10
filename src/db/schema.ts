@@ -1,3 +1,4 @@
+import type { FoundFields } from "@/lib/found/card";
 import { pgTable, text, timestamp, boolean, integer, jsonb, uniqueIndex, primaryKey, index } from "drizzle-orm/pg-core";
 
 // --- Auth tables (own implementation; secrets live in env, never in the DB) ---
@@ -153,7 +154,6 @@ export const chatMessage = pgTable("chat_message", {
 }, (t) => [index("chat_message_thread_idx").on(t.threadId, t.createdAt)]);
 
 // ---------- Find CRIBS "if found" tags (the QR link holds a random token; only its hash is stored) ----------
-export type FoundFields = { nickname: boolean; autism: boolean; communication: boolean; calming: boolean; avoid: boolean; contact: boolean };
 export const foundToken = pgTable("found_token", {
   id: text("id").primaryKey(),
   childId: text("child_id").notNull().references(() => child.id, { onDelete: "cascade" }),
