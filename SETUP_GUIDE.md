@@ -12,9 +12,11 @@ npm run typecheck
 npm test
 npm run build
 ```
-Expect: no type errors, `354 passed`, and a finished build (this is the real build with Google Fonts). If one fails, send me the first error.
+Expect: no type errors, `384 passed`, and a finished build (this is the real build with Google Fonts). If one fails, send me the first error.
 
 2. **Tables (Neon).** Neon > SQL Editor > paste the whole file `drizzle/0002_warm_catseye.sql` > Run. Safe to run twice.
+
+2b. **Chat history tables (new, session 6 part 2).** Neon > SQL Editor > paste the whole file `drizzle/0003_confused_guardian.sql` > Run. Safe to run twice. Do this before pushing, or the Ask tab errors when it saves a chat.
 
 3. **Content (seed).** In Neon, click Connect, copy the **unpooled** connection string. In the same PowerShell window:
 ```powershell
