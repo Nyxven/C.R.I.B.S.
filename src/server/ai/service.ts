@@ -6,6 +6,7 @@ import { buildChildContext, buildKnowledge, buildSystemPrompt, type ChildContext
 import { cooldownSeconds, ProviderError } from "@/lib/ai/providerError";
 import { detectEmergency, emergencyReply } from "@/lib/ai/safety";
 import { scrubPii } from "@/lib/ai/scrub";
+import { threadTitle, type HistoryStore } from "@/lib/chat/history";
 import { firstBroken, type AbuseGuard } from "@/lib/security/guard";
 import type { ChatProvider } from "./provider";
 
@@ -15,11 +16,12 @@ export type ChatDeps = {
   policy: AiPolicy;
   maxOutputTokens: number;
   guard: AbuseGuard;
+  history: HistoryStore | null; // null = nothing is ever saved
   loadKnowledge(): Promise<{ entries: KnowledgeEntry[]; sources: Record<string, Source> }>;
   loadChild(userId: string): Promise<ChildContextInput | null>;
   log(message: string, data: Record<string, string | number>): void;
 };
-export type ChatContext = { userId: string; ipBucket: string; accountAgeHours: number };
+export type ChatContext = { userId: string; ipBucket: string; accountAgeHours: number; threadId?: string };
 
 export type StartedChat =
   | { type: "rejected"; status: 400 | 429 | 503; error: string }
@@ -35,6 +37,8 @@ export const MSG = {
   busy: "The guide is very busy right now. Please try again in a few minutes, or search the guides.",
   inProgress: "Please wait for the current answer to finish.",
   failed: "The guide had trouble answering. Please try again.",
+  threadMissing: "We could not find that chat. Please start a new chat.",
+  threadFull: "This chat is full. Please start a new chat.",
 } as const;
 
 /** Error text for the logs, with anything that looks like an API key removed. */
@@ -68,6 +72,16 @@ export async function startChat(deps: ChatDeps, ctx: ChatContext, raw: readonly 
   if ((await guard.used(tokenKey.user(ctx.userId))) >= policy.userTokensPerDay) { deps.log("[ai] limited", { scope: "user-tokens" }); return { type: "rejected", status: 429, error: MSG.userDaily }; }
   if ((await guard.used(tokenKey.global)) >= policy.globalTokensPerDay) { deps.log("[ai] limited", { scope: "global-tokens" }); return { type: "rejected", status: 503, error: MSG.busy }; }
 
+  // Saved chats: when a chat id is sent, the server uses ITS OWN copy of the conversation, never what the browser says it was.
+  let saved: ChatTurn[] | null = null;
+  const saving = !!deps.history && (await deps.history.enabled(ctx.userId));
+  if (saving && ctx.threadId) {
+    const thread = await deps.history!.loadThread(ctx.userId, ctx.threadId);
+    if (!thread) return { type: "rejected", status: 400, error: MSG.threadMissing };
+    if (thread.full) return { type: "rejected", status: 400, error: MSG.threadFull };
+    saved = thread.turns;
+  }
+
   const lock = lockKey(ctx.userId);
   if (!(await guard.lock(lock, LOCK_SEC))) return { type: "rejected", status: 429, error: MSG.inProgress };
 
@@ -80,7 +94,9 @@ export async function startChat(deps: ChatDeps, ctx: ChatContext, raw: readonly 
   }
 
   // Contact details never leave: the provider only sees the cleaned-up text.
-  const messages: ChatTurn[] = cleaned.messages.map((m) => (m.role === "user" ? { role: m.role, content: scrubPii(m.content).text } : m));
+  const scrubbedQuestion = scrubPii(cleaned.question).text;
+  const base = saved ? cleanMessages([...saved, { role: "user", content: cleaned.question }]) : cleaned;
+  const messages: ChatTurn[] = (base.ok ? base.messages : cleaned.messages).map((m) => (m.role === "user" ? { role: m.role, content: scrubPii(m.content).text } : m));
 
   return {
     type: "stream",
@@ -95,7 +111,17 @@ export async function startChat(deps: ChatDeps, ctx: ChatContext, raw: readonly 
         const total = usage.inputTokens + usage.outputTokens;
         await Promise.all([guard.consume(tokenKey.user(ctx.userId), total, NO_LIMIT, DAY_SEC), guard.consume(tokenKey.global, total, NO_LIMIT, DAY_SEC)]);
         if (full.trim() === "") { emit({ t: "error", message: MSG.failed }); return; }
-        emit({ t: "done", sources: splitCitations(full, sources).sources });
+        const cited = splitCitations(full, sources);
+        let ids: { threadId?: string; messageId?: string } = {};
+        if (saving) {
+          // A failed save must never break the answer.
+          try {
+            const threadId = ctx.threadId ?? (await deps.history!.createThread(ctx.userId, threadTitle(scrubbedQuestion)));
+            const messageId = await deps.history!.saveTurn(ctx.userId, threadId, { question: scrubbedQuestion, answer: cited.text, sources: cited.sources, inputTokens: usage.inputTokens, outputTokens: usage.outputTokens });
+            ids = { threadId, messageId };
+          } catch (e) { deps.log("[ai] history-save-failed", { error: safeError(e) }); }
+        }
+        emit({ t: "done", sources: cited.sources, ...ids });
         // Counts only: never the question, the answer or who asked.
         deps.log("[ai] usage", { inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, ms: Date.now() - started });
       } catch (e) {

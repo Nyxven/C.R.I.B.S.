@@ -3,6 +3,7 @@ import type { Source } from "@/lib/ai/citations";
 import { pickChildContext } from "@/lib/ai/prompt";
 import { buildSearchDocs } from "@/lib/domain/search";
 import { buildPolicy } from "@/lib/ai/policy";
+import { createHistoryStore } from "@/server/chat/service";
 import { dbGuard } from "@/server/security/repo";
 import { getAllArticles, getFaqs, getProfessionals } from "@/server/content/service";
 import { getChild } from "@/server/onboarding/repo";
@@ -28,6 +29,7 @@ export function defaultChatDeps(): ChatDeps {
     policy: buildPolicy(cfg.limits),
     maxOutputTokens: cfg.maxOutputTokens,
     guard: dbGuard,
+    history: createHistoryStore(),
     // Small data set (about 2,300 tokens), so every request carries all of it.
     async loadKnowledge() {
       const [articles, faqs, professionals] = await Promise.all([getAllArticles(), getFaqs(), getProfessionals()]);

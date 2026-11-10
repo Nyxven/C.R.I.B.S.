@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return json(400, "Please type a question.");
 
   const accountAgeHours = (Date.now() - session.user.createdAt.getTime()) / 3_600_000;
-  const started = await startChat(defaultChatDeps(), { userId: session.user.id, ipBucket: requestIpBucket(req.headers), accountAgeHours }, parsed.data.messages);
+  const started = await startChat(defaultChatDeps(), { userId: session.user.id, ipBucket: requestIpBucket(req.headers), accountAgeHours, threadId: parsed.data.threadId }, parsed.data.messages);
   if (started.type === "rejected") return json(started.status, started.error);
 
   const abort = new AbortController();

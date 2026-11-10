@@ -12,6 +12,7 @@ vi.mock("@/server/ai/deps", async () => {
     policy: buildPolicy({ perHour: 20, perDay: 60, userTokensPerDay: 40000, globalPerMin: 10, globalPerDay: 400, globalTokensPerDay: 400000 }),
     maxOutputTokens: 300,
     guard: h.guard,
+    history: null,
     loadKnowledge: async () => ({ entries: [], sources: { a: { id: "a", title: "A", href: "/a" } } }),
     loadChild: async () => null,
     log: () => {},
