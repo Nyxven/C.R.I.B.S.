@@ -40,8 +40,11 @@ function toChildPatch(v: OtherStep): repo.ChildPatch {
   }
 }
 
-/** Saves one step. The step number moves forward only after the answers are stored. */
-export async function saveStep(userId: string, input: unknown): Promise<OnboardingResult> {
+/**
+ * Saves one step. The step number moves forward only after the answers are stored.
+ * `advance: false` is for editing later (Settings): the answers are saved and the quiz position is left alone.
+ */
+export async function saveStep(userId: string, input: unknown, opts: { advance?: boolean } = {}): Promise<OnboardingResult> {
   const p = saveStepInput.safeParse(input);
   if (!p.success) return fail(firstMessage(p.error));
   const v = p.data;
@@ -62,7 +65,7 @@ export async function saveStep(userId: string, input: unknown): Promise<Onboardi
       await repo.setContact(existing.id, contactName && contactPhone ? { name: contactName, phone: contactPhone } : null);
     }
   }
-  await repo.advanceStep(userId, stepIndex(v.step) + 1);
+  if (opts.advance ?? true) await repo.advanceStep(userId, stepIndex(v.step) + 1);
   return ok();
 }
 

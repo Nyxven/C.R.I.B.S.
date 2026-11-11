@@ -43,6 +43,14 @@ describe("saving steps", () => {
     expect(childOf(A)).toMatchObject({ nickname: "Bo", ageYears: 6, pronouns: "they" });
     expect(store.profiles.get(A)!.onboardingStep).toBe(2);
   });
+  it("edits later without moving the quiz position (advance: false)", async () => {
+    await svc.saveStep(A, aboutOk);
+    await svc.saveStep(A, childOk);
+    const before = store.profiles.get(A)!.onboardingStep;
+    expect(await svc.saveStep(A, { step: "child", data: { nickname: "Bobo", ageYears: 7, pronouns: "" } }, { advance: false })).toEqual({ ok: true });
+    expect(childOf(A)).toMatchObject({ nickname: "Bobo", ageYears: 7 });
+    expect(store.profiles.get(A)!.onboardingStep).toBe(before);
+  });
   it("updates the same child instead of adding another", async () => {
     await svc.saveStep(A, childOk);
     await svc.saveStep(A, { step: "child", data: { nickname: "Bobo", ageYears: 7, pronouns: "" } });
