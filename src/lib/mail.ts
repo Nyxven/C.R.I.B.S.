@@ -55,3 +55,12 @@ export function existingAccountEmail() {
       <p>If it was you, just sign in (or use "Forgot password?"). If not, you can ignore this email.</p>`),
   };
 }
+
+// Sent after a password change, so a hijacked account does not go unnoticed.
+export function passwordChangedEmail() {
+  return {
+    subject: "Your C.R.I.B.S. password was changed",
+    html: wrap(`<p>The password on your C.R.I.B.S. account was just changed, and your other devices were signed out.</p>
+      <p>If this was you, there is nothing to do. If it was not, use "Forgot password?" to set a new one right away.</p>`),
+  };
+}

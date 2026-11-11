@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { user, session, loginCode } from "@/db/schema";
 
@@ -62,6 +62,21 @@ export async function touchSession(id: string, expiresAt: Date) {
 }
 export async function deleteSession(id: string) {
   await db.delete(session).where(eq(session.id, id));
+}
+export async function findUserById(id: string): Promise<UserRow | undefined> {
+  const [row] = await db.select().from(user).where(eq(user.id, id)).limit(1);
+  return row;
+}
+/** Signs out every other device: all of this person's sessions except the one in use. */
+export async function deleteOtherSessions(userId: string, keepSessionId: string): Promise<number> {
+  return (await db.delete(session).where(and(eq(session.userId, userId), ne(session.id, keepSessionId))).returning({ id: session.id })).length;
+}
+/** Removes the account. Everything that belongs to it goes with it (profile, child, tags, progress, chats, sessions). */
+export async function deleteUser(id: string): Promise<void> {
+  await db.delete(user).where(eq(user.id, id));
+}
+export async function deleteUserCodes(email: string): Promise<void> {
+  await db.delete(loginCode).where(eq(loginCode.email, email));
 }
 export async function deleteUserSessions(userId: string) {
   await db.delete(session).where(eq(session.userId, userId));
