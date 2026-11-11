@@ -1,5 +1,7 @@
 import { getSession } from "@/server/auth/session";
+import Link from "next/link";
 import { signOutAction } from "@/features/auth/actions";
+import { ChangePassword, DeleteAccount, DownloadData, SignOutOthers } from "@/components/settings/AccountControls";
 
 export const metadata = { title: "Settings" };
 
@@ -19,7 +21,21 @@ export default async function Page() {
         </dl>
         <form action={signOutAction}><button className="btn-secondary w-full sm:w-auto">Sign out</button></form>
       </section>
-      <p className="text-ink-soft">More settings, like changing your password, are coming soon.</p>
+      <section aria-labelledby="pw-title" className="card space-y-3 p-5">
+        <h2 id="pw-title" className="text-xl font-bold">Password and devices</h2>
+        <ChangePassword />
+        <SignOutOthers />
+      </section>
+      <section aria-labelledby="data-title" className="card space-y-3 p-5">
+        <h2 id="data-title" className="text-xl font-bold">Your data</h2>
+        <p className="text-ink-soft">Download everything we hold about you, or manage your saved Ask chats.</p>
+        <DownloadData />
+        <Link href="/ask/history" className="btn-secondary inline-flex w-full justify-center sm:w-auto">Chat history</Link>
+      </section>
+      <section aria-labelledby="del-title" className="card space-y-3 p-5">
+        <h2 id="del-title" className="text-xl font-bold">Delete my account</h2>
+        <DeleteAccount />
+      </section>
     </div>
   );
 }
