@@ -18,6 +18,8 @@ Expect: no type errors, `384 passed`, and a finished build (this is the real bui
 
 2b. **Chat history tables (new, session 6 part 2).** Neon > SQL Editor > paste the whole file `drizzle/0003_confused_guardian.sql` > Run. Safe to run twice. Do this before pushing, or the Ask tab errors when it saves a chat.
 
+2c. **Find CRIBS table (new).** Neon > SQL Editor > paste the whole file `drizzle/0004_mixed_tomas.sql` > Run. Safe to run twice. Also check that `NEXT_PUBLIC_APP_URL` in Vercel is your real https address: it is printed into the QR codes.
+
 3. **Content (seed).** In Neon, click Connect, copy the **unpooled** connection string. In the same PowerShell window:
 ```powershell
 $env:DATABASE_URL_UNPOOLED = "PASTE-THE-UNPOOLED-STRING-HERE"
