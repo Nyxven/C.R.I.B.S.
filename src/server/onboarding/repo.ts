@@ -56,3 +56,8 @@ export async function setContact(childId: string, contact: { name: string; phone
     await db.insert(emergencyContact).values({ id: crypto.randomUUID(), childId, ...contact });
   }
 }
+
+/** Settings the person can change later (not the quiz). Only the given fields change. */
+export async function updateSettings(userId: string, patch: Partial<{ displayName: string; relationship: string; language: string; theme: string; textSize: number; sensoryMode: boolean; notifOn: boolean }>): Promise<void> {
+  await db.insert(profile).values({ userId, ...patch }).onConflictDoUpdate({ target: profile.userId, set: patch });
+}
