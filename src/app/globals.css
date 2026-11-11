@@ -133,3 +133,11 @@ h1, h2, h3 { font-family: var(--font-display); }
 /* Quiz steps fade and slide in a little. Off under reduced motion (rule above). */
 @keyframes step-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .step-in { animation: step-in .25s ease both; }
+
+/* Printing the if-found QR: only the QR prints, on a small tag-size page. */
+@media print {
+  @page { size: A6; margin: 8mm; }
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; max-width: none; }
+}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bookmark, ChevronRight, MapPin } from "lucide-react";
+import { Bookmark, ChevronRight, MapPin, QrCode } from "lucide-react";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
 import { getModules } from "@/server/content/service";
@@ -13,6 +13,7 @@ import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleS
 export const metadata = { title: "Home" };
 
 const rows = [
+  { href: "/find", title: "Find CRIBS", sub: "Your tag and the if-found page", look: { box: "bg-tint-pink", Icon: QrCode } },
   { href: "/saved", title: "Saved guides", sub: "Guides you saved for later", look: { box: "bg-tint-purple", Icon: Bookmark } },
   { href: "/directory", title: "Professional Support Directory", sub: "Specialists near Taguig (sample listings)", look: directoryLook },
   { href: "/faq", title: "Frequently Asked Questions", sub: "Quick answers to common questions", look: faqLook },
