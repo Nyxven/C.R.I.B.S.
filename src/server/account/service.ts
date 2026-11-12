@@ -6,6 +6,8 @@ import * as auth from "@/server/auth/repo";
 import { hashPassword, verifyPassword } from "@/server/auth/crypto";
 import * as chat from "@/server/chat/repo";
 import * as found from "@/server/found/repo";
+import { texts } from "@/lib/notifications/rules";
+import { notify } from "@/server/notifications/service";
 import * as onboarding from "@/server/onboarding/repo";
 import * as progress from "@/server/progress/repo";
 
@@ -26,6 +28,7 @@ export async function changePassword(userId: string, sessionId: string, input: u
   await auth.setPasswordHash(userId, await hashPassword(p.data.next));
   await auth.deleteOtherSessions(userId, sessionId);
   await sendMail({ to: u.email, ...passwordChangedEmail() }).catch(() => console.error("[account] password notice email failed"));
+  await notify(userId, "account", texts.passwordChanged, "/settings"); // always delivered, even with notifications off
   return { ok: true };
 }
 

@@ -3,7 +3,7 @@ import { memoryGuard } from "@/lib/security/memoryGuard";
 
 const s = vi.hoisted(() => ({
   user: { id: "u1", name: "Ana", email: "ana@example.com", passwordHash: "H:old-password-1", createdAt: new Date("2026-11-01T00:00:00Z") } as { id: string; name: string; email: string; passwordHash: string; createdAt: Date } | undefined,
-  calls: [] as string[], mails: [] as string[], mailFails: false, settings: [] as unknown[],
+  calls: [] as string[], mails: [] as string[], notes: [] as string[], mailFails: false, settings: [] as unknown[],
 }));
 
 vi.mock("@/server/auth/crypto", () => ({
@@ -24,6 +24,7 @@ vi.mock("@/server/onboarding/repo", () => ({
   getContact: async () => ({ name: "Ate Rose", phone: "0917", isPublic: true }),
   updateSettings: async (_u: string, patch: unknown) => { s.settings.push(patch); },
 }));
+vi.mock("@/server/notifications/service", () => ({ notify: async (to: string, type: string, body: string) => { s.notes.push(`${to}|${type}|${body.slice(0, 20)}`); } }));
 vi.mock("@/server/progress/repo", () => ({ listProgress: async () => [{ slug: "a", saved: true, read: true }] }));
 vi.mock("@/server/chat/repo", () => ({
   listThreads: async () => [{ id: "t1", title: "Bedtime", updatedAt: new Date("2026-11-09T00:00:00Z") }],
@@ -36,7 +37,7 @@ import { changePassword, deleteAccount, exportData, signOutOtherDevices, updateS
 let guard = memoryGuard();
 beforeEach(() => {
   s.user = { id: "u1", name: "Ana", email: "ana@example.com", passwordHash: "H:old-password-1", createdAt: new Date("2026-11-01T00:00:00Z") };
-  s.calls.length = 0; s.mails.length = 0; s.settings.length = 0; s.mailFails = false; guard = memoryGuard();
+  s.calls.length = 0; s.mails.length = 0; s.notes.length = 0; s.settings.length = 0; s.mailFails = false; guard = memoryGuard();
 });
 
 describe("changePassword", () => {
@@ -45,6 +46,7 @@ describe("changePassword", () => {
     expect(await changePassword("u1", "sess-9", input, guard)).toEqual({ ok: true });
     expect(s.calls).toEqual(["setPassword:H:brand-new-password-2", "signOutOthers:keep=sess-9"]);
     expect(s.mails).toEqual(["ana@example.com|Your C.R.I.B.S. password was changed"]);
+    expect(s.notes).toEqual(["u1|account|Your password was ch"]);
   });
   it("refuses a wrong current password and changes nothing", async () => {
     expect(await changePassword("u1", "s", { ...input, current: "nope-nope-nope" }, guard)).toEqual({ ok: false, error: "That password is not right." });
