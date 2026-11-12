@@ -12,7 +12,7 @@ npm run typecheck
 npm test
 npm run build
 ```
-Expect: no type errors, `432 passed`, and a finished build (this is the real build with Google Fonts). If one fails, send me the first error.
+Expect: no type errors, `473 passed`, and a finished build (this is the real build with Google Fonts). If one fails, send me the first error.
 
 2. **Tables (Neon).** Neon > SQL Editor > paste the whole file `drizzle/0002_warm_catseye.sql` > Run. Safe to run twice.
 
