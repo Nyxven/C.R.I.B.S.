@@ -78,3 +78,9 @@ export async function listHeld(limit: number): Promise<(PostRow & { reports: num
 export async function removePost(id: string): Promise<void> {
   await db.update(post).set({ body: "", status: "removed" }).where(eq(post.id, id));
 }
+
+/** Everything this person wrote, for their data download. */
+export async function listByAuthor(userId: string, limit: number): Promise<{ body: string; isReply: boolean; status: string; createdAt: Date }[]> {
+  const rows = await db.select({ body: post.body, parentId: post.parentId, status: post.status, createdAt: post.createdAt }).from(post).where(eq(post.userId, userId)).orderBy(desc(post.createdAt)).limit(limit);
+  return rows.map((r) => ({ body: r.body, isReply: r.parentId !== null, status: r.status, createdAt: r.createdAt }));
+}

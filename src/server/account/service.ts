@@ -5,6 +5,7 @@ import { changePasswordInput, deleteAccountInput, settingsInput } from "@/featur
 import * as auth from "@/server/auth/repo";
 import { hashPassword, verifyPassword } from "@/server/auth/crypto";
 import * as chat from "@/server/chat/repo";
+import * as community from "@/server/community/repo";
 import * as found from "@/server/found/repo";
 import { texts } from "@/lib/notifications/rules";
 import { notify } from "@/server/notifications/service";
@@ -56,7 +57,7 @@ export async function exportData(userId: string, guard: AbuseGuard): Promise<Res
   if (!(await guard.consume(`acct:export:${userId}`, 1, 3, 3600)).allowed) return { ok: false, error: TRY_LATER };
   const u = await auth.findUserById(userId);
   if (!u) return { ok: false, error: GENERIC };
-  const [prof, kid, entries, threads] = await Promise.all([onboarding.getProfile(userId), onboarding.getChild(userId), progress.listProgress(userId), chat.listThreads(userId, 100)]);
+  const [prof, kid, entries, threads, posts] = await Promise.all([onboarding.getProfile(userId), onboarding.getChild(userId), progress.listProgress(userId), chat.listThreads(userId, 100), community.listByAuthor(userId, 500)]);
   const [contact, tag] = kid ? await Promise.all([onboarding.getContact(kid.id), found.activeTag(kid.id)]) : [undefined, undefined];
   const chats = await Promise.all(threads.map(async (t) => ({ title: t.title, updatedAt: t.updatedAt, messages: await chat.listMessages(userId, t.id, 200) })));
   const now = new Date();
@@ -69,6 +70,7 @@ export async function exportData(userId: string, guard: AbuseGuard): Promise<Res
     progress: entries,
     chats: chats.map((c) => ({ title: c.title, updatedAt: c.updatedAt, messages: c.messages.map((m) => ({ role: m.role, content: m.content, feedback: m.feedback, createdAt: m.createdAt })) })),
     tag: tag ? { enabled: tag.enabled, createdAt: tag.createdAt, accessCount: tag.accessCount } : null,
+    posts,
   });
   return { ok: true, fileName: exportFileName(now), json: JSON.stringify(data, null, 2) };
 }

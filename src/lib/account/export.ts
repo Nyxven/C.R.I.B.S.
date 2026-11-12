@@ -9,6 +9,7 @@ export type ExportInput = {
   progress: { slug: string; saved: boolean; read: boolean }[];
   chats: { title: string; updatedAt: Date; messages: { role: string; content: string; feedback: string | null; createdAt: Date }[] }[];
   tag: { enabled: boolean; createdAt: Date; accessCount: number } | null;
+  posts: { body: string; isReply: boolean; status: string; createdAt: Date }[];
 };
 
 const iso = (d: Date) => d.toISOString();
@@ -23,6 +24,7 @@ export function buildExport(i: ExportInput) {
     emergencyContact: i.contact,
     guides: { saved: i.progress.filter((p) => p.saved).map((p) => p.slug), read: i.progress.filter((p) => p.read).map((p) => p.slug) },
     askChats: i.chats.map((c) => ({ title: c.title, lastMessageAt: iso(c.updatedAt), messages: c.messages.map((m) => ({ role: m.role, text: m.content, feedback: m.feedback, at: iso(m.createdAt) })) })),
+    communityPosts: i.posts.map((p) => ({ text: p.body, isReply: p.isReply, status: p.status, at: iso(p.createdAt) })),
     ifFoundTag: i.tag ? { enabled: i.tag.enabled, madeAt: iso(i.tag.createdAt), timesOpened: i.tag.accessCount } : null,
   };
 }

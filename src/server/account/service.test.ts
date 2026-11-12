@@ -25,6 +25,7 @@ vi.mock("@/server/onboarding/repo", () => ({
   updateSettings: async (_u: string, patch: unknown) => { s.settings.push(patch); },
 }));
 vi.mock("@/server/notifications/service", () => ({ notify: async (to: string, type: string, body: string) => { s.notes.push(`${to}|${type}|${body.slice(0, 20)}`); } }));
+vi.mock("@/server/community/repo", () => ({ listByAuthor: async () => [{ body: "Bedtime tip", isReply: false, status: "visible", createdAt: new Date("2026-11-08T00:00:00Z") }] }));
 vi.mock("@/server/progress/repo", () => ({ listProgress: async () => [{ slug: "a", saved: true, read: true }] }));
 vi.mock("@/server/chat/repo", () => ({
   listThreads: async () => [{ id: "t1", title: "Bedtime", updatedAt: new Date("2026-11-09T00:00:00Z") }],
@@ -106,6 +107,7 @@ describe("exportData", () => {
     expect(data.child).toEqual({ nickname: "Bunso", ageYears: 4 });
     expect(data.askChats[0].messages[0].text).toBe("Q");
     expect(data.ifFoundTag).toMatchObject({ enabled: true, timesOpened: 2 });
+    expect(data.communityPosts[0].text).toBe("Bedtime tip");
     for (const leak of ["passwordHash", "H:old-password", "tag1", "userId", '"id"']) expect(r.json).not.toContain(leak);
   });
   it("limits how often it can be requested", async () => {
