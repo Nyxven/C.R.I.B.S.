@@ -20,6 +20,8 @@ Expect: no type errors, `432 passed`, and a finished build (this is the real bui
 
 2c. **Find CRIBS table (new).** Neon > SQL Editor > paste the whole file `drizzle/0004_mixed_tomas.sql` > Run. Safe to run twice. Also check that `NEXT_PUBLIC_APP_URL` in Vercel is your real https address: it is printed into the QR codes.
 
+2d. **Community and notifications tables (new).** Neon > SQL Editor > paste the whole file `drizzle/0005_flashy_blue_blade.sql` > Run. Safe to run twice. Then add `MODERATOR_EMAILS` in Vercel (see `VERCEL_ENV.md` D3) with the email of someone who will review reported posts.
+
 3. **Content (seed).** In Neon, click Connect, copy the **unpooled** connection string. In the same PowerShell window:
 ```powershell
 $env:DATABASE_URL_UNPOOLED = "PASTE-THE-UNPOOLED-STRING-HERE"

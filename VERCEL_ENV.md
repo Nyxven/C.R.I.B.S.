@@ -59,6 +59,9 @@ MAIL_DAILY_CAP=250
 Secret (Sensitive): `CRON_SECRET` = a random string of 16+ characters (`node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"`). Vercel Cron then calls `/api/cron/cleanup` daily with it. Without it the cleanup never runs.
 Optional bot check (see `docs/CLOUDFLARE.md`): `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (plain) and `TURNSTILE_SECRET_KEY` (Sensitive).
 
+## D3. Community moderation
+Plain: `MODERATOR_EMAILS` = comma-separated emails of the moderators (the accounts must exist and be verified; if empty, nobody can moderate and held posts stay held). Optional: `COMMUNITY_REPORT_HIDE_AT` (default 2; reports for personal details or unsafe advice hold a post after one report).
+
 ## E. GitHub Actions secret (only for the migration workflow)
 Repo > Settings > Environments > New environment `production` > add secret:
 ```

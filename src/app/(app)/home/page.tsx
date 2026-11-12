@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Bookmark, ChevronRight, MapPin, QrCode } from "lucide-react";
+import { Bell, Bookmark, ChevronRight, MapPin, QrCode, Users } from "lucide-react";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
 import { getModules } from "@/server/content/service";
 import { getRecommendations } from "@/server/content/recommendations";
+import { countUnread } from "@/server/notifications/service";
 import { getProgress } from "@/server/progress/service";
 import { moduleProgress, progressLabel } from "@/lib/domain/progress";
 import { brand } from "@/config/brand";
@@ -13,6 +14,7 @@ import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleS
 export const metadata = { title: "Home" };
 
 const rows = [
+  { href: "/community", title: "Parent community", sub: "Share tips and small wins", look: { box: "bg-tint-sage", Icon: Users } },
   { href: "/find", title: "Find CRIBS", sub: "Your tag and the if-found page", look: { box: "bg-tint-pink", Icon: QrCode } },
   { href: "/saved", title: "Saved guides", sub: "Guides you saved for later", look: { box: "bg-tint-purple", Icon: Bookmark } },
   { href: "/directory", title: "Professional Support Directory", sub: "Specialists near Taguig (sample listings)", look: directoryLook },
@@ -27,6 +29,7 @@ export default async function Home() {
     uid ? getProgress(uid) : [],
     uid ? getRecommendations(uid) : { child: "", guides: [] },
   ]);
+  const unread = uid ? await countUnread(uid).catch(() => 0) : 0;
   const first = (g.parent || session?.user.name || "friend").trim().split(" ")[0];
   return (
     <div className="space-y-8">
@@ -101,6 +104,13 @@ export default async function Home() {
               </Link>
             </li>
           ))}
+          <li>
+            <Link href="/notifications" className="card flex min-h-20 items-center gap-4 p-4 transition active:scale-[.99]">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-tint-yellow text-ink"><Bell size={24} aria-hidden="true" /></span>
+              <span className="min-w-0 flex-1"><span className="block font-display text-lg font-bold leading-tight">Notifications</span><span className="block text-sm text-ink-soft">{unread > 0 ? `${unread} new` : "Nothing new"}</span></span>
+              <ChevronRight size={22} className="shrink-0 text-ink-soft" aria-hidden="true" />
+            </Link>
+          </li>
         </ul>
       </section>
     </div>
