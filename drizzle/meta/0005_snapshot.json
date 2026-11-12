@@ -1,5 +1,5 @@
 {
-  "id": "9233ca97-aa3b-43e3-aac7-cf1f3e2df53f",
+  "id": "9409285c-57d3-4ddc-96e6-4d8138d439ff",
   "prevId": "21c8561f-d5f5-42c3-8224-2c2604ca9c5e",
   "version": "7",
   "dialect": "postgresql",
@@ -1095,6 +1095,19 @@
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "post_parent_id_post_id_fk": {
+          "name": "post_parent_id_post_id_fk",
+          "tableFrom": "post",
+          "tableTo": "post",
+          "columnsFrom": [
+            "parent_id"
           ],
           "columnsTo": [
             "id"

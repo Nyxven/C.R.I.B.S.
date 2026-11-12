@@ -1,4 +1,5 @@
 import type { FoundFields } from "@/lib/found/card";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { pgTable, text, timestamp, boolean, integer, jsonb, uniqueIndex, primaryKey, index } from "drizzle-orm/pg-core";
 
 // --- Auth tables (own implementation; secrets live in env, never in the DB) ---
@@ -170,7 +171,7 @@ export const foundToken = pgTable("found_token", {
 export const post = pgTable("post", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  parentId: text("parent_id"), // set for a reply to a top-level post
+  parentId: text("parent_id").references((): AnyPgColumn => post.id, { onDelete: "cascade" }), // set for a reply to a top-level post; replies go when their post goes
   displayName: text("display_name").notNull(), // first name or "Anonymous parent", fixed when written
   anonymous: boolean("anonymous").notNull().default(false),
   body: text("body").notNull(), // emptied when the author deletes the post
