@@ -165,3 +165,41 @@ export const foundToken = pgTable("found_token", {
   accessCount: integer("access_count").notNull().default(0), // a count only: no visitor details are kept
   lastAccessedAt: timestamp("last_accessed_at"),
 }, (t) => [index("found_token_child_idx").on(t.childId)]);
+
+// ---------- Parent community (no private messages; reported posts are held for review) ----------
+export const post = pgTable("post", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  parentId: text("parent_id"), // set for a reply to a top-level post
+  displayName: text("display_name").notNull(), // first name or "Anonymous parent", fixed when written
+  anonymous: boolean("anonymous").notNull().default(false),
+  body: text("body").notNull(), // emptied when the author deletes the post
+  status: text("status").notNull().default("visible"), // visible | hidden | removed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [index("post_feed_idx").on(t.status, t.createdAt), index("post_parent_idx").on(t.parentId, t.createdAt), index("post_user_idx").on(t.userId)]);
+
+export const postReaction = pgTable("post_reaction", {
+  postId: text("post_id").notNull().references(() => post.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  kind: text("kind").notNull().default("helpful"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.postId, t.userId, t.kind] })]);
+
+export const postReport = pgTable("post_report", {
+  id: text("id").primaryKey(),
+  postId: text("post_id").notNull().references(() => post.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }), // the reporter
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [uniqueIndex("post_report_once").on(t.postId, t.userId)]);
+
+// ---------- Notifications ----------
+export const notification = pgTable("notification", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // reply | helpful | moderation | account | article
+  body: text("body").notNull(), // plain text
+  link: text("link"),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [index("notification_user_idx").on(t.userId, t.createdAt)]);
