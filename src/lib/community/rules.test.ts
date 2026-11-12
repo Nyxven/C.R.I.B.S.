@@ -60,11 +60,14 @@ describe("names, moderators, reports, cursors", () => {
     expect(isModerator(null, "mod@example.com")).toBe(false);
   });
   it("holds a post once enough different people reported it", () => {
-    expect(shouldHide(0, 1)).toBe(false);
-    expect(shouldHide(1, 1)).toBe(true);
-    expect(shouldHide(1, 2)).toBe(false);
-    expect(shouldHide(2, 2)).toBe(true);
-    expect(shouldHide(1, 0)).toBe(true); // never fewer than one
+    const hide = (reporters: number, reasons: string[], hideAt: number) => shouldHide({ reporters, reasons, hideAt });
+    expect(hide(0, [], 2)).toBe(false);
+    expect(hide(1, ["unkind"], 2)).toBe(false);
+    expect(hide(2, ["unkind", "spam"], 2)).toBe(true);
+    expect(hide(1, ["personal_info"], 2)).toBe(true); // urgent reasons need only one report
+    expect(hide(1, ["unsafe_advice"], 5)).toBe(true);
+    expect(hide(0, ["personal_info"], 2)).toBe(false);
+    expect(hide(1, ["spam"], 0)).toBe(true); // never fewer than one
   });
   it("round-trips a cursor and refuses junk", () => {
     const d = new Date("2026-11-10T08:00:00Z");

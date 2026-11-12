@@ -44,8 +44,14 @@ export function isModerator(email: string | null | undefined, allowlist: string 
   return allowlist.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean).includes(e);
 }
 
-/** A post is held for review once this many different people have reported it. */
-export const shouldHide = (distinctReporters: number, hideAt: number): boolean => distinctReporters >= Math.max(1, hideAt);
+/** Reasons that put a post on hold after a single report (privacy and safety come first). */
+const URGENT: readonly ReportReason[] = ["personal_info", "unsafe_advice"];
+
+/** A post is held for review once enough different people reported it, or at once for an urgent reason. */
+export function shouldHide(o: { reporters: number; reasons: readonly string[]; hideAt: number }): boolean {
+  if (o.reporters >= 1 && o.reasons.some((r) => (URGENT as readonly string[]).includes(r))) return true;
+  return o.reporters >= Math.max(1, o.hideAt);
+}
 
 export const CURSOR_PAGE = 20;
 export const encodeCursor = (createdAt: Date, id: string): string => Buffer.from(`${createdAt.getTime()}|${id}`).toString("base64url");

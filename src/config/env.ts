@@ -95,3 +95,14 @@ export function getAiConfig(env: Record<string, string | undefined> = process.en
 
 /** True when the chosen provider has everything it needs. */
 export const aiReady = (c: AiConfig): boolean => !!c.apiKey && !!c.model && (c.provider === "anthropic" || !!c.baseUrl);
+
+// ---------- Community moderation ----------
+const communityShape = {
+  MODERATOR_EMAILS: z.preprocess(blank, z.string().max(2000).optional()),
+  COMMUNITY_REPORT_HIDE_AT: int(1, 10, 2), // different people who must report a post before it is held (urgent reasons need one)
+};
+export type CommunityConfig = { moderatorEmails: string | undefined; reportHideAt: number };
+export function getCommunityConfig(env: Record<string, string | undefined> = process.env): CommunityConfig {
+  const d = lenient(communityShape, env);
+  return { moderatorEmails: d.MODERATOR_EMAILS, reportHideAt: d.COMMUNITY_REPORT_HIDE_AT };
+}
