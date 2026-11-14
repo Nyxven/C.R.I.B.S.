@@ -89,3 +89,9 @@ export async function updateSettings(userId: string, input: unknown): Promise<Re
   await onboarding.updateSettings(userId, p.data);
   return { ok: true };
 }
+
+/** What the Settings screen needs to show: the current switches. */
+export async function getPreferences(userId: string): Promise<{ notifOn: boolean; displayName: string; relationship: string }> {
+  const prof = await onboarding.getProfile(userId);
+  return { notifOn: prof?.notifOn ?? true, displayName: prof?.displayName ?? "", relationship: prof?.relationship ?? "" };
+}

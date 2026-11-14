@@ -35,15 +35,15 @@ export function Group({ legend, hint, children }: { legend: string; hint?: strin
 }
 
 export function TextField({
-  id, label, hint, value, onChange, maxLength, type = "text", inputMode, autoComplete, multiline,
+  id, label, hint, value, onChange, maxLength, type = "text", inputMode, autoComplete, multiline, hideLabel,
 }: {
   id: string; label: string; hint?: string; value: string; onChange: (v: string) => void; maxLength?: number;
-  type?: "text" | "tel"; inputMode?: "numeric" | "tel" | "text"; autoComplete?: string; multiline?: boolean;
+  type?: "text" | "tel"; inputMode?: "numeric" | "tel" | "text"; autoComplete?: string; multiline?: boolean; hideLabel?: boolean;
 }) {
   const common = { id, value, maxLength, autoComplete, "aria-describedby": hint ? `${id}-hint` : undefined };
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block font-display text-lg font-bold">{label}</label>
+      <label htmlFor={id} className={hideLabel ? "sr-only" : "block font-display text-lg font-bold"}>{label}</label>
       {hint && <p id={`${id}-hint`} className="-mt-1 text-sm text-ink-soft">{hint}</p>}
       {multiline ? (
         <textarea {...common} rows={3} className="field min-h-24 py-3" onChange={(e) => onChange(e.target.value)} />

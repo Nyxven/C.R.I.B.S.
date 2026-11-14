@@ -1,24 +1,24 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useOnboarding } from "@/features/onboarding/useOnboarding";
 import { reviewSections, type OnboardingData } from "@/lib/domain/onboarding";
-import { STEP_COPY } from "./copy";
+import { PANEL_COPY } from "./copy";
 import { ReviewCard } from "./ReviewCard";
-import { StepFields } from "./StepFields";
+import { PanelFields } from "./PanelFields";
 
 export function OnboardingFlow({ initial, tagName }: { initial: { step: number; data: OnboardingData }; tagName: string }) {
   const router = useRouter();
   const o = useOnboarding(initial);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const n = o.index + 1;
+  const n = o.position;
   const isReview = o.step.id === "review";
 
   // Move focus to the new question so screen readers announce it.
   // Start each new step at the top of the screen.
-  useEffect(() => { window.scrollTo({ top: 0 }); headingRef.current?.focus({ preventScroll: true }); }, [o.index]);
+  useEffect(() => { window.scrollTo({ top: 0 }); headingRef.current?.focus({ preventScroll: true }); }, [o.index, o.panel.id]);
 
   // Short celebration, then Home.
   useEffect(() => {
@@ -41,9 +41,9 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
     );
   }
 
-  const copy = STEP_COPY[o.step.id];
-  const showBack = o.index > 0;
-  const submitLabel = isReview ? (o.pending ? "Creating…" : "Create profile") : o.pending ? "Saving…" : o.fromReview ? "Save" : "Continue";
+  const copy = PANEL_COPY[o.panel.id];
+  const showBack = o.canGoBack;
+  const submitLabel = isReview ? (o.pending ? "Creating…" : "Create profile") : o.pending ? "Saving…" : o.fromReview && o.isLast ? "Save" : "Continue";
 
   return (
     <div className="mx-auto max-w-xl px-5 pt-[max(1.5rem,env(safe-area-inset-top))]">
@@ -52,13 +52,13 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
           <Logo size={44} alt="" />
           <span className="font-display text-lg font-bold">C.R.I.B.S.</span>
         </div>
-        <div role="progressbar" aria-label="Quiz progress" aria-valuemin={1} aria-valuemax={o.total} aria-valuenow={n}
-          aria-valuetext={`Step ${n} of ${o.total}`} className="h-2.5 overflow-hidden rounded-full bg-tint-purple">
-          <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${(n / o.total) * 100}%`, background: "var(--ribbon)" }} />
+        <div role="progressbar" aria-label="Setup progress" aria-valuemin={1} aria-valuemax={o.total} aria-valuenow={n}
+          aria-valuetext={`Question ${n} of ${o.total}`} className="h-2.5 overflow-hidden rounded-full bg-tint-purple">
+          <div className="h-full rounded-full transition-[width] duration-200 ease-out" style={{ width: `${(n / o.total) * 100}%`, background: "var(--ribbon)" }} />
         </div>
         <div className="mt-1 flex min-h-11 items-center justify-between gap-3">
-          <p className="text-sm font-bold text-ink-soft">Step {n} of {o.total}</p>
-          {o.step.skippable && (
+          <p className="text-sm font-bold text-ink-soft">Question {n} of {o.total}</p>
+          {o.panel.skippable && (
             <button type="button" onClick={() => void o.skip()} disabled={o.pending} className="min-h-11 rounded-xl px-3 font-extrabold text-brand underline">
               Skip for now
             </button>
@@ -67,15 +67,20 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
       </header>
 
       <form noValidate onSubmit={(e) => { e.preventDefault(); void (isReview ? o.finish() : o.next()); }}>
-        <div key={o.index} className="step-in">
+        <div key={o.panel.id} className="step-in">
         <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-extrabold leading-tight outline-none sm:text-3xl">{copy.question}</h1>
         {copy.intro && <p className="mt-2 text-base text-ink-soft">{copy.intro}</p>}
+        {copy.why && (
+          <p className="mt-3 flex gap-2 rounded-2xl bg-tint-mint px-4 py-3 text-sm font-semibold text-ink">
+            <ShieldCheck size={20} className="mt-0.5 shrink-0 text-mint-dark" aria-hidden="true" /><span><span className="sr-only">Why we ask: </span>{copy.why}</span>
+          </p>
+        )}
 
         <div className="mt-6 space-y-7">
           {o.step.id === "review" ? (
             <ReviewCard sections={reviewSections(o.data, tagName)} onEdit={o.edit} />
           ) : (
-            <StepFields id={o.step.id} data={o.data} update={o.update} tagName={tagName} />
+            <PanelFields id={o.panel.id} data={o.data} update={o.update} tagName={tagName} />
           )}
         </div>
 

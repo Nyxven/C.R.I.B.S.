@@ -18,7 +18,7 @@ export function AppNav() {
         <Link href="/home" className="mb-6 flex items-center gap-2 rounded-2xl">
           <Logo size={52} alt="" /><span className="font-display text-xl font-bold">C.R.I.B.S.</span>
         </Link>
-        <Link href="/ask" aria-current={active("/ask") ? "page" : undefined} className="btn-primary mb-4 w-full"><Logo size={30} white alt="" /> Ask CRIBS</Link>
+        <Link href="/ask" data-tour="ask" aria-current={active("/ask") ? "page" : undefined} className="btn-primary mb-4 w-full"><Logo size={30} white alt="" /> Ask CRIBS</Link>
         <nav aria-label="Main">
           <ul className="space-y-1">
             {navItems.filter((n) => !("center" in n)).map((n) => {
@@ -26,7 +26,7 @@ export function AppNav() {
               const on = active(n.href);
               return (
                 <li key={n.href}>
-                  <Link href={n.href} aria-current={on ? "page" : undefined}
+                  <Link href={n.href} data-tour={`nav-${n.href.slice(1)}`} aria-current={on ? "page" : undefined}
                     className={`flex min-h-12 items-center gap-3 rounded-2xl px-4 text-base font-bold transition ${on ? "bg-tint-purple text-brand" : "text-ink-soft hover:bg-cream hover:text-ink"}`}>
                     <Icon size={22} aria-hidden="true" /> {n.label}
                   </Link>
@@ -46,7 +46,7 @@ export function AppNav() {
             if ("center" in n) {
               return (
                 <li key={n.href} className="-mt-9 flex flex-1 flex-col items-center">
-                  <Link href={n.href} aria-label="Ask CRIBS, the AI guide" aria-current={on ? "page" : undefined}
+                  <Link href={n.href} data-tour="ask" aria-label="Ask CRIBS, the AI guide" aria-current={on ? "page" : undefined}
                     className="flex h-16 w-16 items-center justify-center rounded-full p-[3px] shadow-lg transition active:scale-95" style={{ background: "var(--ribbon)" }}>
                     <span className="flex h-full w-full items-center justify-center rounded-full border-2 border-white bg-white">
                       <Logo size={42} alt="" />
@@ -59,7 +59,7 @@ export function AppNav() {
             const Icon = icons[n.icon];
             return (
               <li key={n.href} className="flex-1">
-                <Link href={n.href} aria-current={on ? "page" : undefined}
+                <Link href={n.href} data-tour={`nav-${n.href.slice(1)}`} aria-current={on ? "page" : undefined}
                   className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl text-xs font-extrabold ${on ? "text-brand" : "text-ink-soft"}`}>
                   <span className={`flex h-7 w-14 items-center justify-center rounded-full transition ${on ? "bg-tint-purple" : ""}`}><Icon size={22} aria-hidden="true" /></span>
                   {n.label}

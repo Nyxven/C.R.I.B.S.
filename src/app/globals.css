@@ -141,3 +141,66 @@ h1, h2, h3 { font-family: var(--font-display); }
   .print-area, .print-area * { visibility: visible; }
   .print-area { position: absolute; left: 0; top: 0; width: 100%; max-width: none; }
 }
+
+/* ---------- Design system additions (UI/UX pass) ---------- */
+/* Motion: short and purposeful. Everything here is switched off by the reduced-motion rule above. */
+:root { --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --ease-out: cubic-bezier(.2, .7, .2, 1); }
+
+.btn-primary, .btn-secondary, .field { transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast); }
+.btn-secondary:hover { background: var(--color-tint-purple); }
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; padding: 0 1rem;
+  border-radius: 999px; font-weight: 800; color: var(--color-brand); background: transparent; cursor: pointer;
+  transition: background-color var(--dur-fast);
+}
+.btn-ghost:hover { background: var(--color-tint-purple); }
+.btn-danger {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 52px; padding: 0 1.5rem;
+  border-radius: 999px; font-weight: 800; color: #fff; background: #A8321A; border: 0; cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast);
+}
+.btn-danger:hover { background: #8E2A16; }
+.btn-danger:active { transform: scale(.97); }
+.btn-danger:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Settings-style grouped list: one white surface per group, rows divided by a hairline. No cards inside cards. */
+.section-label { font-family: var(--font-display); font-size: .8125rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--color-ink-soft); padding: 0 .25rem .5rem; }
+.list-group { background: #fff; border: 1px solid var(--color-line); border-radius: 20px; overflow: hidden; }
+.list-group > * + * { border-top: 1px solid var(--color-line); }
+.list-row {
+  display: flex; align-items: center; gap: .875rem; min-height: 64px; padding: .75rem 1rem; width: 100%; text-align: left;
+  background: transparent; color: var(--color-ink); transition: background-color var(--dur-fast);
+}
+a.list-row:hover, button.list-row:hover { background: var(--color-cream); }
+.list-row .row-icon { display: flex; height: 40px; width: 40px; flex: none; align-items: center; justify-content: center; border-radius: 12px; background: var(--color-tint-purple); color: var(--color-brand); }
+.list-row .row-title { font-weight: 800; }
+.list-row .row-sub { font-size: .875rem; color: var(--color-ink-soft); }
+.list-row.danger .row-icon { background: var(--color-tint-coral); color: var(--color-coral-dark); }
+.list-row.danger .row-title { color: var(--color-coral-dark); }
+
+/* Loading placeholder. Shape only; screen readers get a status line from the page. */
+@keyframes shimmer { to { background-position: -200% 0; } }
+.skeleton { border-radius: 12px; background: linear-gradient(90deg, #EFE6DB 25%, #F8F1E8 45%, #EFE6DB 65%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+
+/* Messages that carry an icon and words, never color alone. */
+.notice { display: flex; gap: .75rem; align-items: flex-start; padding: .875rem 1rem; border-radius: 16px; font-weight: 600; }
+.notice-info { background: var(--color-tint-purple); }
+.notice-success { background: var(--color-tint-mint); }
+.notice-warn { background: var(--color-tint-yellow); }
+.notice-error { background: var(--color-tint-coral); border: 2px solid var(--color-coral-dark); }
+
+/* Gentle entrance for pages and list items. */
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise var(--dur-slow) var(--ease-out) both; }
+.stagger > * { animation: rise var(--dur-slow) var(--ease-out) both; }
+.stagger > *:nth-child(2) { animation-delay: 40ms; } .stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; } .stagger > *:nth-child(n+5) { animation-delay: 160ms; }
+
+/* Modal dialogs (native <dialog>): focus trap and Esc come from the browser. */
+dialog.sheet { border: 0; padding: 0; border-radius: 24px; max-width: min(92vw, 28rem); width: 100%; color: var(--color-ink); background: #fff; box-shadow: 0 24px 60px -20px rgba(55,47,74,.55); animation: rise var(--dur-base) var(--ease-out) both; }
+dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(--dur-base) ease both; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Walkthrough: the highlight ring follows the real target; the tip sits beside it. */
+.tour-ring { position: fixed; z-index: 70; pointer-events: none; border-radius: 16px; outline: 3px solid #fff; box-shadow: 0 0 0 5px var(--color-brand), 0 0 0 9999px rgba(55, 47, 74, .55); transition: top var(--dur-base) var(--ease-out), left var(--dur-base) var(--ease-out), width var(--dur-base) var(--ease-out), height var(--dur-base) var(--ease-out); }
+.tour-tip { position: fixed; z-index: 71; width: min(20rem, calc(100vw - 1.5rem)); background: #fff; border-radius: 20px; padding: 1rem 1.1rem; box-shadow: 0 18px 44px -14px rgba(55,47,74,.6); animation: rise var(--dur-base) var(--ease-out) both; }
