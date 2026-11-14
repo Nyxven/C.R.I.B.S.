@@ -1,5 +1,34 @@
 # CONTEXT.md — C.R.I.B.S. Web App (living state file)
 
+> **SESSION 8 (UI pass, Phase 2 + part of Phase 3) — READ THIS BLOCK FIRST, then the Session 7 block below it.** Handoff files: `HANDOFF.md`, `NEXT_PROMPT.md`, `ENV_REFERENCE.md`.
+
+## Session 8 — status (2026-11-14)
+**Scope chosen by the user:** skip typecheck/build/browser verification (old steps 1-2) and continue the UI pass on the remaining screens. **So nothing from session 7 or 8 has been typechecked, built, linted, run in a browser or screenshotted. The sandbox again had no network and no `node_modules`.** Still Phase 4B. Stage 5 not started. No database or migration change. No new environment variable.
+
+**What ran this session (honest list):** a TypeScript *syntax* parse (`ts.transpileModule`, 0 errors) over every changed `.ts/.tsx` file; the pure text-size logic ran in a hand-made harness (4 checks pass). The new `textSize.test.ts` (Vitest) has **not** been run, and neither have the 473 older tests.
+
+**Repo state found at the start:** HEAD already held five commits after the session 7 docs commit (a "Phase 1" redesign: layered CSS, flat buttons, `SearchBox`, `PageHeader`, `EmptyState`, landing and auth screens, simplified Home). They were described in the "Redesign plan" below but missing from HANDOFF.md. `git log phase-4b-baseline..HEAD` now shows 36 commits.
+
+**Built in session 8 (all unverified in a browser):**
+1. New shared UI parts in `src/components/ui`: `BackLink`, `LinkRow` (row for a `.list-group`), `Feedback` (icon + words result line, `role="status"`, reserves one line so nothing jumps), `ListSkeleton` / `ArticleSkeleton`. `EmptyState` gained an optional second action.
+2. **One page pattern** (BackLink, `PageHeader`, one list surface, no ribbon bar, no card-per-row) applied to: Saved, Notifications, Search, Learn module list, Article reader, FAQ, Directory, Ask (+ chat history), Community (+ moderation), Find, Settings hub, Settings profile and security. Home and Child profile headings use `h-page`.
+3. **Empty states with a next step:** no saved guides, no notifications, no search results (Ask or FAQ), no FAQs, no specialists, no guides in a module or on Home, no chat history (text depends on whether saving is on), nothing to moderate, Ask unavailable, Find without a child profile (opens `/child`). Community shows a clear line when only the built-in example posts exist.
+4. **Child profile:** a "next step" notice that opens the first empty section's edit dialog (only shown while a section is empty).
+5. **Feedback in words:** Save / Mark as read (`useArticleActions` now returns `done`), Mark all as read, community post / reply / load more, Find actions (switch, save visible fields, new QR, stop tag). Errors use icon + text, never colour alone.
+6. **Skeletons:** `loading.tsx` for saved, notifications, search, directory, faq, community, learn module and article.
+7. **Article reader:** "Up next" link built from the module's real article order (none on the last guide).
+8. **Text size (fully wired, no migration):** `src/lib/domain/textSize.ts` (+test): Standard 100 / Large 115 / Extra large 130, stored values snap to the nearest step. `getPreferences` now returns `textSize`. `(app)/layout.tsx` renders one `<style>html{font-size:N%}</style>` on the server (nothing for 100), so everything in rem scales without a flash. New `/settings/appearance` page (`TextSizeForm`, radio rows, saves on tap, `router.refresh()`, reverts on failure) and a "Text size" row under Settings > Preferences. **Language and Theme remain omitted on purpose** (no translations, no alternative theme exist).
+9. Accessibility fixes found by reading the CSS: `.list-group` clips its corners, so the keyboard focus ring on `.list-row` is now drawn inside the row (`outline-offset: -3px`); radio rows use `:has(input:focus-visible)`.
+10. Up-next lookup guarded (`findIndex` of -1 no longer returns the first guide).
+
+**Not done / still open:** the public if-found page `/f/[token]` is not redesigned; sign-in/sign-up were redesigned in Phase 1 and **not touched** this session (only confirmed that sign-up links to Terms and Privacy); Ask message bubbles and composer not touched; Tour only covers `/home`; no page transitions; no DOM/component tests; contact details in Terms/Privacy are still placeholders; legal pages remain drafts pending adviser and privacy professional review (no compliance claim).
+
+**Unverified items most likely to break first:** type errors (strict TS) in `Feedback` usage, `LinkRow` children, `ChatView` header (`PageHeader action`), `FoundManager.act` signature (now `act(fn, successText, after?)`), `ChildProfile` `firstEmpty`; Tailwind v4 class names (`accent-brand`, `rounded-xl` overriding `.skeleton`); the `<style>` element rendered in the layout body (check it applies and does not hydrate-warn); focus ring inside `.list-group` rows and FAQ summaries; horizontal scroll of the Directory filter at 360px; `ListSkeleton` heights vs real content (layout shift); sticky Ask composer after the new header.
+
+**Exact next step.** On a machine with network: `npm ci`, `npm run typecheck`, `npm test`, `npm run lint`, `npm run build`; fix what fails (mostly small type errors); `npm run dev`; look at every screen listed above at 360/390/768/1024/1440 px (plus text size Large and Extra large), keyboard-only, reduced motion; then redesign `/f/[token]`, polish Ask bubbles and Tour steps beyond Home. Do NOT start Stage 5 until this is verified.
+
+---
+
 > **SESSION 7 (UI/UX pass on the Phase 4B baseline) — READ THIS BLOCK FIRST.** Everything below it is the session 6 record and is still accurate for the backend. Handoff files: `HANDOFF.md`, `NEXT_PROMPT.md`, `ENV_REFERENCE.md`.
 
 ## Session 7 — status (2026-11-14)

@@ -371,3 +371,17 @@ Steps: (a) all work committed in granular commits (no `wip:` pile; if budget for
 **Legal pages:** structured drafts, `LEGAL_VERSION` in `src/components/ui/LegalPage.tsx`; every claim must match code; unresolved items stay in each page's `openQuestions`.
 
 **Routes added:** `/child`, `/settings/profile`, `/settings/security`. **Removed:** inline delete form and "Download my data" button components (replaced by `SettingsActions`).
+
+
+---
+
+## Session 8 addendum (UI pass, Phase 2 + part of Phase 3)
+Still Phase 4B. No schema, migration or environment change.
+
+**Design-system additions.** Page pattern: `BackLink` (sub-pages) + `PageHeader` + one `.list-group` of `LinkRow` rows (no ribbon bar, no card per row). `EmptyState` (icon, title, one sentence, primary and optional secondary action) is used for every list that can be empty. `Feedback` is the one result line (icon + words, `role="status"`, one reserved line). `ListSkeleton` / `ArticleSkeleton` back the per-route `loading.tsx` files. Keyboard focus inside a `.list-group` row is drawn inside the row.
+
+**Text size (the only new setting).** `src/lib/domain/textSize.ts`: Standard 100, Large 115, Extra large 130; stored values (85-140) snap to the nearest step; non-numbers become 100; CSS is empty for 100. `(app)/layout.tsx` renders `<style>html{font-size:N%}</style>` server-side from `getPreferences(...).textSize`. `/settings/appearance` saves via `updateSettingsAction({ textSize })` then `router.refresh()`. Language and Theme are not offered (no alternatives exist).
+
+**Article reader.** "Up next" is the next article in the module's own order; the last guide shows "Back to <module>".
+
+**Status.** Syntax-parsed only; not typechecked, tested, built or viewed. See CONTEXT.md "Session 8" for the open list and the exact next step.
