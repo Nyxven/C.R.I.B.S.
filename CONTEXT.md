@@ -7,7 +7,7 @@
 
 **What ran this session (honest list):** a TypeScript *syntax* parse (`ts.transpileModule`, 0 errors) over every changed `.ts/.tsx` file; the pure text-size logic ran in a hand-made harness (4 checks pass). The new `textSize.test.ts` (Vitest) has **not** been run, and neither have the 473 older tests.
 
-**Repo state found at the start:** HEAD already held five commits after the session 7 docs commit (a "Phase 1" redesign: layered CSS, flat buttons, `SearchBox`, `PageHeader`, `EmptyState`, landing and auth screens, simplified Home). They were described in the "Redesign plan" below but missing from HANDOFF.md. `git log phase-4b-baseline..HEAD` now shows 36 commits.
+**Repo state found at the start:** HEAD already held five commits after the session 7 docs commit (a "Phase 1" redesign: layered CSS, flat buttons, `SearchBox`, `PageHeader`, `EmptyState`, landing and auth screens, simplified Home). They were described in the "Redesign plan" below but missing from HANDOFF.md. `git log phase-4b-baseline..HEAD` now shows 36 commits (20 of them from session 8).
 
 **Built in session 8 (all unverified in a browser):**
 1. New shared UI parts in `src/components/ui`: `BackLink`, `LinkRow` (row for a `.list-group`), `Feedback` (icon + words result line, `role="status"`, reserves one line so nothing jumps), `ListSkeleton` / `ArticleSkeleton`. `EmptyState` gained an optional second action.

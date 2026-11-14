@@ -1,7 +1,7 @@
 # HANDOFF.md — Session 8 (UI pass: Phase 2 and part of Phase 3)
 
 ## Summary
-Still **Phase 4B** (baseline `bc599d2`, tag `phase-4b-baseline`). The user chose to **skip verification** (typecheck, tests, build, browser) and continue the UI pass. Session 8 applied one page pattern and added empty states, skeletons, feedback, an "Up next" link, a child-profile nudge and a working text-size setting. **Nothing from sessions 7 and 8 has been typechecked, built, run in a browser or screenshotted** (no network in the sandbox). About 24 small commits; no database change; no new environment variable.
+Still **Phase 4B** (baseline `bc599d2`, tag `phase-4b-baseline`). The user chose to **skip verification** (typecheck, tests, build, browser) and continue the UI pass. Session 8 applied one page pattern and added empty states, skeletons, feedback, an "Up next" link, a child-profile nudge and a working text-size setting. **Nothing from sessions 7 and 8 has been typechecked, built, run in a browser or screenshotted** (no network in the sandbox). About 20 small commits (cadb50e..HEAD); no database change; no new environment variable.
 
 Note: the uploaded repo already contained five "Phase 1 redesign" commits (landing, auth, Home, layered CSS, `PageHeader`, `EmptyState`) that the previous HANDOFF did not list. They are described in CONTEXT.md.
 
