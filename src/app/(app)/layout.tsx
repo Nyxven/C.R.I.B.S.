@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth/session";
 import { ConnectionBanner } from "@/components/ui/ConnectionBanner";
+import { Tour } from "@/components/tour/Tour";
 import { isOnboarded } from "@/server/onboarding/service";
 import { AppNav } from "@/components/nav/AppNav";
 import { Loader } from "@/components/Loader";
@@ -23,6 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <Loader seen={seen}>
       <a href="#content" className="skip-link">Skip to content</a>
       <ConnectionBanner />
+      <Tour userId={session.user.id} />
       <AppNav />
       <header className="sticky top-0 z-10 bg-cream/90 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-2xl items-center px-5 py-2">
