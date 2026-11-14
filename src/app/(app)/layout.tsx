@@ -9,6 +9,8 @@ import { AppNav } from "@/components/nav/AppNav";
 import { Loader } from "@/components/Loader";
 import { LOADER_COOKIE } from "@/config/ui";
 import { Logo } from "@/components/Logo";
+import { textSizeCss } from "@/lib/domain/textSize";
+import { getPreferences } from "@/server/account/service";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -20,7 +22,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const seen = (await cookies()).has(LOADER_COOKIE);
   // New accounts build their child profile first.
   if (!(await isOnboarded(session.user.id))) redirect("/onboarding");
+  // The person's text size: one root font-size rule, rendered on the server so there is no flash. Nothing is added for Standard.
+  const sizeCss = textSizeCss((await getPreferences(session.user.id)).textSize);
   return (
+    <>
+    {sizeCss && <style>{sizeCss}</style>}
     <Loader seen={seen}>
       <a href="#content" className="skip-link">Skip to content</a>
       <ConnectionBanner />
@@ -36,5 +42,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <main id="content" tabIndex={-1} className="mx-auto max-w-2xl px-5 pb-40 pt-6 outline-none lg:max-w-3xl lg:px-8 lg:pb-12 lg:pt-10">{children}</main>
       </div>
     </Loader>
+    </>
   );
 }
