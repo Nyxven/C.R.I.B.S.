@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signUpAction, verifyEmailAction, resendCodeAction, signInAction, requestResetAction, resendResetAction, resetPasswordAction } from "@/features/auth/actions";
 import { Turnstile, turnstileEnabled } from "./Turnstile";
+import { CircleAlert } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { OtpInput } from "@/components/ui/OtpInput";
 import { PasswordField } from "@/components/auth/PasswordField";
@@ -12,17 +13,24 @@ import { formatClock, useCooldown } from "@/features/auth/useCooldown";
 
 function Shell({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 py-10">
-      <Link href="/" className="mb-6 flex items-center gap-2"><Logo size={52} alt="" /><span className="font-display text-xl font-bold">C.R.I.B.S.</span></Link>
-      <h1 className="text-3xl font-extrabold">{title}</h1>
-      {sub && <p className="mb-5 mt-1 text-ink-soft">{sub}</p>}
-      <div className="mt-4 space-y-4">{children}</div>
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 py-8">
+      <Link href="/" className="mb-6 flex items-center gap-2 self-start rounded-xl"><Logo size={48} alt="" /><span className="font-display text-xl font-bold">C.R.I.B.S.</span></Link>
+      <div className="rise overflow-hidden rounded-3xl border border-line bg-white shadow-[0_18px_40px_-28px_rgba(55,47,74,.55)]">
+        <div className="ribbon-bar rounded-none" aria-hidden="true" />
+        <div className="space-y-5 p-6 sm:p-8">
+          <div className="space-y-1">
+            <h1 className="h-page">{title}</h1>
+            {sub && <p className="text-ink-soft">{sub}</p>}
+          </div>
+          <div className="space-y-4">{children}</div>
+        </div>
+      </div>
     </main>
   );
 }
-const Err = ({ m, id }: { m: string; id?: string }) => (m ? <p id={id} role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{m}</p> : null);
+const Err = ({ m, id }: { m: string; id?: string }) => (m ? <p id={id} role="alert" className="notice notice-error"><CircleAlert size={20} className="mt-0.5 shrink-0 text-coral-dark" aria-hidden="true" />{m}</p> : null);
 
-const FieldError = ({ id, m }: { id: string; m?: string }) => (m ? <p id={id} role="alert" className="mt-1 text-sm font-semibold text-red-700">{m}</p> : null);
+const FieldError = ({ id, m }: { id: string; m?: string }) => (m ? <p id={id} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm font-bold text-coral-dark"><CircleAlert size={16} className="mt-0.5 shrink-0" aria-hidden="true" />{m}</p> : null);
 
 export function SignUpForm() {
   const r = useRouter();
@@ -48,13 +56,13 @@ export function SignUpForm() {
     <Shell title="Create your account" sub="It takes a minute. We'll email you a 6-digit code.">
       <form onSubmit={submit} noValidate className="space-y-4">
         <div>
-          <label htmlFor="su-name" className="block text-sm font-bold">Your name</label>
+          <label htmlFor="su-name" className="block font-bold">Your name</label>
           <input id="su-name" className="field mt-1" maxLength={60} value={f.name} autoComplete="name" aria-invalid={errs.name ? true : undefined} aria-describedby={errs.name ? "su-name-error" : undefined}
             onChange={(e) => { setF({ ...f, name: e.target.value }); clear("name"); }} />
           <FieldError id="su-name-error" m={errs.name} />
         </div>
         <div>
-          <label htmlFor="su-email" className="block text-sm font-bold">Email</label>
+          <label htmlFor="su-email" className="block font-bold">Email</label>
           <input id="su-email" className="field mt-1" type="email" value={f.email} autoComplete="email" aria-invalid={errs.email ? true : undefined} aria-describedby={errs.email ? "su-email-error" : undefined}
             onChange={(e) => { setF({ ...f, email: e.target.value }); clear("email"); }} />
           <FieldError id="su-email-error" m={errs.email} />
@@ -148,10 +156,11 @@ export function SignInForm() {
   }
   return (
     <Shell title="Welcome back" sub="Sign in to continue.">
+      {params.get("expired") === "1" && <p role="status" className="notice notice-info">You were signed out for your security. Please sign in again.</p>}
       {justReset && <p role="status" className="rounded-xl bg-tint-sage p-3 text-sm font-bold">Password updated. Sign in with your new password.</p>}
       <form onSubmit={submit} className="space-y-4">
         <div>
-          <label htmlFor="si-email" className="block text-sm font-bold">Email</label>
+          <label htmlFor="si-email" className="block font-bold">Email</label>
           <input id="si-email" className="field mt-1" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         </div>
         <PasswordField id="si-password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
@@ -203,7 +212,7 @@ export function ForgotForm() {
     <Shell title="Reset your password" sub="Enter your email and we'll send a 6-digit code.">
       <form onSubmit={sendCode} className="space-y-4">
         <div>
-          <label htmlFor="fg-email" className="block text-sm font-bold">Email</label>
+          <label htmlFor="fg-email" className="block font-bold">Email</label>
           <input id="fg-email" className="field mt-1" type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         </div>
         <Turnstile onToken={setBot} resetSignal={botReset} />
