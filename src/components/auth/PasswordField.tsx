@@ -1,7 +1,6 @@
 "use client";
-import { CircleAlert } from "lucide-react";
 import { useState } from "react";
-import { Check, Eye, EyeOff } from "lucide-react";
+import { Check, CircleAlert, Eye, EyeOff } from "lucide-react";
 import { PASSWORD_MIN } from "@/lib/formChecks";
 
 type Props = {
