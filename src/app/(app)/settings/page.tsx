@@ -1,4 +1,5 @@
-import { Baby, FileText, History, LifeBuoy, Lock, ScrollText, User } from "lucide-react";
+import { Baby, FileText, History, LifeBuoy, Lock, ScrollText, Type, User } from "lucide-react";
+import { TEXT_SIZES, normalizeTextSize } from "@/lib/domain/textSize";
 import { getSession } from "@/server/auth/session";
 import { getPreferences } from "@/server/account/service";
 import { RowLink, SettingsGroup } from "@/components/settings/SettingsParts";
@@ -26,6 +27,7 @@ export default async function Page() {
 
       <SettingsGroup id="grp-prefs" label="Preferences">
         <NotificationsSwitch initial={prefs.notifOn} />
+        <RowLink href="/settings/appearance" icon={Type} title="Text size" sub={TEXT_SIZES.find((s) => s.value === normalizeTextSize(prefs.textSize))?.label} />
         <RowLink href="/ask/history" icon={History} title="Ask chat history" sub="Review, delete or turn off saved chats" />
       </SettingsGroup>
 
