@@ -1,15 +1,36 @@
-import { LegalPage } from "@/components/ui/LegalPage";
+import { LegalPage, type LegalSection } from "@/components/ui/LegalPage";
 
-export const metadata = { title: "Terms of Use" };
+export const metadata = { title: "Terms and Conditions" };
 
-// TODO(team): replace with reviewed text before real users.
+const sections: LegalSection[] = [
+  { id: "acceptance", title: "Acceptance of Terms", body: <p>By creating an account or using C.R.I.B.S. (Child Raising Information Basis System), you agree to these Terms. If you do not agree, please do not use the app. These Terms should be read together with the <a className="text-brand underline" href="/privacy">Privacy Policy</a>.</p> },
+  { id: "eligibility", title: "Eligibility and Parent/Guardian Responsibilities", body: <><p>C.R.I.B.S. is for parents and legal guardians aged 18 and over. You are responsible for the information you enter about your child and for deciding what, if anything, is shown on a public if-found page.</p><p>You confirm that you are the child&apos;s parent or legal guardian, or are acting with the permission of one.</p></> },
+  { id: "account", title: "Account Registration and Security", body: <><p>You need a verified email address. Please give accurate information, keep your password private, and tell us if you think someone else used your account.</p><p>You can change your password, sign out other devices, download your data and delete your account in Settings.</p></> },
+  { id: "use", title: "Permitted Use", body: <><p>You may use C.R.I.B.S. for personal, non-commercial family support. You must not:</p><ul><li>try to break, overload or bypass the app&apos;s protections;</li><li>use the app to harass, deceive or harm anyone;</li><li>post other people&apos;s private details, or attempt to find out who a person is from a public page;</li><li>copy the app&apos;s content in bulk or present it as your own.</li></ul></> },
+  { id: "purpose", title: "Educational and Informational Purpose", body: <p>C.R.I.B.S. is an informational and parenting-support platform. Guides, FAQs and AI answers give general information. Content marked as not yet expert-reviewed is a draft and may be incomplete or wrong.</p> },
+  { id: "medical", title: "Medical Disclaimer", body: <><p>C.R.I.B.S. does <b>not</b> diagnose autism or any other condition. It does not replace doctors, therapists, teachers or other qualified professionals. Never delay or ignore professional advice because of something you read in the app.</p><p>In an emergency, call <b>911</b> or your local emergency number. The AI assistant cannot call for help for you.</p></> },
+  { id: "directory", title: "Professional Directory Disclaimer", body: <p>The directory currently shows <b>sample listings</b> for demonstration and they are labeled that way. Even for real listings, we cannot guarantee that a listing is available, accurate, up to date or suitable for your child, and a listing is not an endorsement. Always check credentials and availability yourself.</p> },
+  { id: "community", title: "Community Guidelines", body: <><p>Be kind and respectful. Share experiences, not medical instructions. Do not post phone numbers, email addresses, links or home addresses; the app will refuse them. Use a first name or post as an anonymous parent.</p><p>Posts that are reported may be hidden while a moderator reviews them. Urgent reports, such as personal details or unsafe advice, may be hidden at once. Moderators can put a post back or remove it.</p></> },
+  { id: "ugc", title: "User-Generated Content", body: <><p>You keep ownership of what you write. By posting, you allow C.R.I.B.S. to store and show it to other signed-in users inside the app. You can delete your own posts. Deleting a post erases its words; replies stay in place under an empty shell.</p><p>You are responsible for what you post. We may hide or remove content that breaks these Terms.</p></> },
+  { id: "child-qr", title: "Child Information and Emergency QR Features", body: <><ul><li>The Find CRIBS if-found page is optional and off until you make a tag.</li><li>You choose which details a person who scans the QR code can see. The line saying your child has autism is <b>off by default</b>. A call button appears only if you choose to show the emergency contact.</li><li>Anyone with the link or QR code can open the public page, so print and share it with care. You can switch it off, or stop it for good, at any time.</li><li>C.R.I.B.S. does <b>not</b> provide live GPS tracking and cannot see where a tag is. It links you to Apple Find My or Google Find Hub, which are separate services with their own terms.</li><li>A QR code is a helpful aid, not a safety guarantee. It does not replace supervision.</li></ul></> },
+  { id: "ip", title: "Intellectual Property", body: <p>The C.R.I.B.S. name, logo, design, and original guides belong to the project team or their licensors. You may read and use the app for your own family. Do not republish its content without permission.</p> },
+  { id: "availability", title: "Service Availability and Limitations", body: <p>C.R.I.B.S. is a school research project. It may be unavailable, change, or stop without notice. The AI assistant is limited by usage caps and may be turned off. We do not promise that answers are correct, complete or suitable for your child.</p> },
+  { id: "termination", title: "Account Suspension and Termination", body: <p>We may suspend or remove an account that breaks these Terms or harms others or the service. You may delete your account at any time in Settings; this removes your profile, child profile, saved items, chats, tags and posts as described in the Privacy Policy.</p> },
+  { id: "liability", title: "Limitation of Liability", body: <p>To the extent the law allows, the C.R.I.B.S. team is not responsible for losses that come from using the app, relying on its content, third-party listings or services, or the app being unavailable. Nothing here limits rights you have under Philippine law that cannot be limited.</p> },
+  { id: "changes", title: "Changes to Terms", body: <p>We may update these Terms. If a change is important, we will show a notice in the app. Continuing to use the app after a change means you accept it. The version label at the top of this page shows which draft you are reading.</p> },
+  { id: "contact", title: "Contact Information", body: <p>Contact details for the C.R.I.B.S. team have not been set up yet. <b>[To be added by the team before real use: responsible person, email address and school address.]</b></p> },
+];
+
+const openQuestions = [
+  "Who is the legal operator of the app (school, student team, or adviser), and who signs these Terms on its behalf?",
+  "Does the school or a research ethics process need to approve use with real families, and is parental consent needed for student researchers who are minors?",
+  "Is the liability wording suitable under Philippine law and school policy?",
+  "Which law governs disputes, and where would a dispute be heard?",
+  "What contact details and response time should be published?",
+  "Should accepting these Terms be recorded at sign-up (a checkbox and a timestamp)? The app does not record this yet.",
+];
+
 export default function Page() {
-  return (
-    <LegalPage title="Terms of Use">
-      <p><b>Who it is for.</b> Parents and guardians aged 18 and over.</p>
-      <p><b>Guidance only.</b> C.R.I.B.S. shares general information. It does not diagnose, treat, or replace a licensed doctor, therapist, or teacher.</p>
-      <p><b>Sample listings.</b> The directory shows sample listings for demonstration. Always check credentials and availability yourself.</p>
-      <p><b>Your account.</b> Please keep your password private and tell us if you think someone else used your account.</p>
-    </LegalPage>
-  );
+  return <LegalPage title="Terms and Conditions" sections={sections} openQuestions={openQuestions}
+    intro={<p>Plain-language rules for using C.R.I.B.S. Please read them. They explain what the app is, and what it is not.</p>} />;
 }
