@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { History, MessageCircle, RotateCcw } from "lucide-react";
+import { History, MessageCircle, RotateCcw, WifiOff } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { ChatMessage } from "@/features/ask/chatState";
 import { useChat } from "@/features/ask/useChat";
 import { Composer } from "./Composer";
@@ -16,30 +18,20 @@ export function ChatView({ starters, available, initial }: { starters: string[];
 
   return (
     <div className="space-y-5">
-      <header className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="text-3xl font-extrabold leading-tight">Ask CRIBS</h1>
-          <div className="flex shrink-0 items-center">
+      <PageHeader title="Ask CRIBS" intro="Answers from the guides in this app."
+        action={
+          <div className="-mr-2 flex items-center">
             {chat.messages.length > 0 && (
-              <button type="button" onClick={chat.newChat} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 font-bold text-brand">
-                <RotateCcw size={18} aria-hidden="true" /> New chat
-              </button>
+              <button type="button" onClick={chat.newChat} className="btn-ghost"><RotateCcw size={18} aria-hidden="true" /> New chat</button>
             )}
-            <Link href="/ask/history" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl px-3 font-bold text-brand"><History size={18} aria-hidden="true" /> History</Link>
+            <Link href="/ask/history" className="btn-ghost"><History size={18} aria-hidden="true" /> History</Link>
           </div>
-        </div>
-        <div className="ribbon-bar w-24" aria-hidden="true" />
-      </header>
+        } />
 
       {!available ? (
-        <div className="card space-y-3 p-5">
-          <p className="font-display text-lg font-bold">The guide is not available right now</p>
-          <p className="text-ink-soft">You can still search the guides and read the questions parents ask most.</p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/search" className="btn-primary">Search guides</Link>
-            <Link href="/faq" className="btn-secondary">Read the FAQ</Link>
-          </div>
-        </div>
+        <EmptyState icon={WifiOff} title="The guide is not available right now" actionHref="/search" actionLabel="Search guides" secondaryHref="/faq" secondaryLabel="Read the FAQ">
+          You can still search the guides and read the questions parents ask most.
+        </EmptyState>
       ) : (
         <>
           {chat.messages.length === 0 ? (
