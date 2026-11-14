@@ -1,7 +1,8 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Flag, HandHeart, Trash2 } from "lucide-react";
+import { Flag, HandHeart, HeartHandshake, MessageSquarePlus, Trash2 } from "lucide-react";
+import { Feedback } from "@/components/ui/Feedback";
 import { createPostAction, deletePostAction, loadMoreAction, reportPostAction, setHelpfulAction } from "@/features/community/actions";
 import { POST_MAX, REASON_LABELS, REPORT_REASONS } from "@/lib/community/rules";
 import { timeAgo } from "@/lib/notifications/rules";
@@ -16,7 +17,7 @@ function Composer({ parentId, onDone, label }: { parentId?: string; onDone: () =
   const [anonymous, setAnonymous] = useState(false);
   const [msg, setMsg] = useState<Msg>({ ok: true, text: "" });
   return (
-    <form className="space-y-2" onSubmit={(e) => { e.preventDefault(); start(async () => { const r = await createPostAction({ body, anonymous, parentId }); if (r.ok) { setBody(""); setMsg({ ok: true, text: "" }); onDone(); } else setMsg({ ok: false, text: r.error }); }); }}>
+    <form className="space-y-2" onSubmit={(e) => { e.preventDefault(); start(async () => { const r = await createPostAction({ body, anonymous, parentId }); if (r.ok) { setBody(""); setMsg({ ok: true, text: parentId ? "Reply posted." : "Posted. Thank you for sharing." }); onDone(); } else setMsg({ ok: false, text: r.error }); }); }}>
       <label className="block"><span className="sr-only">{label}</span>
         <textarea className="field min-h-24 w-full" maxLength={POST_MAX} placeholder={label} value={body} onChange={(e) => setBody(e.target.value)} />
       </label>
@@ -24,7 +25,7 @@ function Composer({ parentId, onDone, label }: { parentId?: string; onDone: () =
         <label className="flex min-h-11 items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} /> Post as anonymous</label>
         <button className="btn-primary" disabled={pending || body.trim().length < 3}>{parentId ? "Reply" : "Post"}</button>
       </div>
-      <p role="status" className={`min-h-5 font-bold ${msg.ok ? "" : "text-coral-dark"}`}>{msg.text}</p>
+      <Feedback kind={msg.ok ? "success" : "error"} message={msg.text} />
     </form>
   );
 }
@@ -69,7 +70,7 @@ function PostCard({ p, isReply, onChanged }: { p: FeedPost; isReply?: boolean; o
         </div>
       )}
       {replying && <Composer parentId={p.id} label="Write a kind reply" onDone={() => { setReplying(false); onChanged(); }} />}
-      <p role="status" className={`min-h-5 text-sm font-bold ${msg.ok ? "" : "text-coral-dark"}`}>{msg.text}</p>
+      <Feedback kind={msg.ok ? "success" : "error"} message={msg.text} />
       {p.replies.length > 0 && <ul className="space-y-3">{p.replies.map((r) => <PostCard key={r.id} p={r} isReply onChanged={onChanged} />)}</ul>}
     </li>
   );
@@ -80,16 +81,25 @@ export function CommunityFeed({ initial, next }: { initial: FeedPost[]; next: st
   const [posts, setPosts] = useState(initial);
   const [cursor, setCursor] = useState(next);
   const [pending, start] = useTransition();
+  const [more, setMore] = useState("");
   const refresh = () => router.refresh();
+  const onlyExamples = posts.length > 0 && posts.every((p) => p.example);
   return (
     <div className="space-y-5">
-      <section className="card space-y-2 p-5" aria-labelledby="guide-title">
-        <h2 id="guide-title" className="font-display text-lg font-bold">Be kind</h2>
-        <p className="text-ink-soft">Every child is different. Share what worked for you, never share phone numbers, addresses or where you live, and do not give medical advice. Posts are shown with your first name, or anonymously if you choose.</p>
+      <section className="notice notice-info" aria-labelledby="guide-title">
+        <HeartHandshake size={22} className="mt-0.5 shrink-0 text-brand" aria-hidden="true" />
+        <div className="space-y-1 font-normal">
+          <h2 id="guide-title" className="font-display text-lg font-bold">Be kind</h2>
+          <p>Every child is different. Share what worked for you, never share phone numbers, addresses or where you live, and do not give medical advice. Posts show your first name, or “Anonymous” if you choose.</p>
+        </div>
       </section>
       <section aria-label="Write a post" className="card p-5"><Composer label="Share a question, a tip or a small win" onDone={refresh} /></section>
+      {onlyExamples && (
+        <p className="flex items-start gap-2 font-bold text-ink-soft"><MessageSquarePlus size={20} className="mt-0.5 shrink-0 text-brand" aria-hidden="true" />No one has posted yet. These examples show how it works. Be the first to share.</p>
+      )}
       <ul className="space-y-4">{posts.map((p) => <PostCard key={p.id} p={p} onChanged={refresh} />)}</ul>
-      {cursor && <button type="button" className="btn-secondary w-full" disabled={pending} onClick={() => start(async () => { const r = await loadMoreAction(cursor); if (r.ok) { setPosts((old) => [...old, ...r.posts]); setCursor(r.next); } })}>Show older posts</button>}
+      {cursor && <button type="button" className="btn-secondary w-full" disabled={pending} onClick={() => start(async () => { const r = await loadMoreAction(cursor); if (r.ok) { setPosts((old) => [...old, ...r.posts]); setCursor(r.next); setMore(""); } else setMore(r.error); })}>{pending ? "Loading…" : "Show older posts"}</button>}
+      <Feedback kind="error" message={more} />
     </div>
   );
 }
