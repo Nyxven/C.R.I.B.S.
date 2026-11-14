@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Baby, Bell, Bookmark, ChevronRight, QrCode, Users } from "lucide-react";
+import { Baby, Bell, BookOpen, Bookmark, ChevronRight, QrCode, Users } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
 import { getModules } from "@/server/content/service";
@@ -35,7 +36,7 @@ export default async function Home() {
     <div className="space-y-9">
       <header className="rise flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-3xl font-extrabold">Hello, {first}</h1>
+          <h1 className="h-page">Hello, {first}</h1>
           <p className="mt-1 text-ink-soft">{g.child ? `Here for you and ${g.child}.` : "Here for you and your little one."}</p>
         </div>
         <Link href="/notifications" className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink"
@@ -63,7 +64,7 @@ export default async function Home() {
 
       <section aria-labelledby="guides-title" data-tour="guides">
         <h2 id="guides-title" className="section-label">Your guides</h2>
-        {modules.length === 0 && <p className="rounded-2xl bg-white p-4 text-ink-soft">Guides are being set up. Please check back soon.</p>}
+        {modules.length === 0 && <EmptyState icon={BookOpen} title="Guides are being set up">Please check back soon. Ask CRIBS and the FAQ are ready in the menu.</EmptyState>}
         <ul className="stagger grid grid-cols-2 gap-3">
           {modules.map((m) => {
             const { box, Icon } = moduleLook(m.id);
