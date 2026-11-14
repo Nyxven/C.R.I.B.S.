@@ -21,7 +21,8 @@ export default async function Article({ params }: { params: Promise<{ module: st
   if (!a || !session) notFound();
   const [entry, m] = await Promise.all([getEntryFor(session.user.id, a.slug), getModule(a.moduleId)]);
   const list = m?.articles ?? [];
-  const next = list[list.findIndex((x) => x.slug === a.slug) + 1]; // undefined for the last guide (or if the guide is not in the list)
+  const at = list.findIndex((x) => x.slug === a.slug);
+  const next = at >= 0 ? list[at + 1] : undefined; // none for the last guide, or if this guide is not in the module list
   return (
     <article className="space-y-7">
       <BackLink href={`/learn/${a.moduleId}`}>{a.moduleShortName}</BackLink>
