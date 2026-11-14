@@ -14,11 +14,11 @@ export function AppNav() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-white/90 p-5 backdrop-blur lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-white p-5 lg:flex">
         <Link href="/home" className="mb-6 flex items-center gap-2 rounded-2xl">
           <Logo size={52} alt="" /><span className="font-display text-xl font-bold">C.R.I.B.S.</span>
         </Link>
-        <Link href="/ask" data-tour="ask" aria-current={active("/ask") ? "page" : undefined} className="btn-primary mb-4 w-full"><Logo size={30} white alt="" /> Ask CRIBS</Link>
+        <Link href="/ask" data-tour="ask" aria-current={active("/ask") ? "page" : undefined} className="btn-primary mb-5 w-full"><Sparkles size={20} aria-hidden="true" /> Ask CRIBS</Link>
         <nav aria-label="Main">
           <ul className="space-y-1">
             {navItems.filter((n) => !("center" in n)).map((n) => {
