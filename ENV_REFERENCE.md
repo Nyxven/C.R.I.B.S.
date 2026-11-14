@@ -1,6 +1,6 @@
 # ENV_REFERENCE.md — environment variable names
 
-Names only. **Never put real values in this repo.** Template: `.env.example`. Production values live in Vercel (see `VERCEL_ENV.md`). Env changes apply only after a redeploy. The session 7 UI/UX work added **no** new variables.
+Names only. **Never put real values in this repo.** Template: `.env.example`. Production values live in Vercel (see `VERCEL_ENV.md`). Env changes apply only after a redeploy. The session 7 and session 8 UI/UX work added **no** new variables.
 
 | Variable | Required? | Secret? | Used in |
 |---|---|---|---|
