@@ -2,6 +2,7 @@ import { Baby, FileText, History, LifeBuoy, Lock, ScrollText, Type, User } from 
 import { TEXT_SIZES, normalizeTextSize } from "@/lib/domain/textSize";
 import { getSession } from "@/server/auth/session";
 import { getPreferences } from "@/server/account/service";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { RowLink, SettingsGroup } from "@/components/settings/SettingsParts";
 import { DeleteAccountRow, DownloadDataRow, NotificationsSwitch, RestartWalkthroughRow, SignOutRow } from "@/components/settings/SettingsActions";
 
@@ -14,10 +15,7 @@ export default async function Page() {
   const name = prefs.displayName || session.user.name;
   return (
     <div className="space-y-7">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-extrabold">Settings</h1>
-        <p className="break-all text-ink-soft">{name} · {session.user.email}</p>
-      </header>
+      <PageHeader title="Settings" intro={<span className="break-all">{name} · {session.user.email}</span>} />
 
       <SettingsGroup id="grp-account" label="Account">
         <RowLink href="/settings/profile" icon={User} title="Your profile" sub="Your name and how you relate to your child" />
