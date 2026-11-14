@@ -1,0 +1,11 @@
+You are continuing **C.R.I.B.S.** (parenting guidance web app for parents of children with ASD). We are still on **Phase 4B**; do NOT start Phase 5 / Stage 5.
+
+Read first, in this order: `CONTEXT.md` (top "Session 7" block), `HANDOFF.md`, `BUILD_CRIBS.md` (Session 7 addendum), `ENV_REFERENCE.md`. Session 7 built a UI/UX pass (git `phase-4b-baseline..HEAD`) in a sandbox with **no network**, so nothing was typechecked, built or seen in a browser.
+
+Do this, in order, and report what you actually ran:
+1. `npm ci`, `npm run typecheck`, `npm test`, `npm run build`. Fix errors introduced by session 7 (likely small type errors in `PanelFields`, Home `rows`, the dialogs, `Tour`).
+2. Run the app and verify with a real browser (Playwright is fine) at 360, 390, 768, 1024, 1440 px, with screenshots: `/onboarding` (all 19 questions, Back keeps answers, resume after reload, skip rules, age picker), `/home` walkthrough (appears once, Skip, Esc, keyboard, restart from Settings, tips never cover targets, mobile and desktop), `/settings`, `/settings/profile`, `/settings/security`, delete dialog, `/child` (edit each section, authorization), `/find` QR privacy defaults, `/privacy`, `/terms`, a 404, an error boundary, offline banner, reduced motion, horizontal overflow, layout shift. Fix what you see.
+3. Then continue the UI pass on screens not yet redesigned: Home, Learn/article, Directory, FAQ, Ask, Community, Notifications, Saved, Find, sign-in/sign-up. Add proper empty states (no saved guides, no notifications, no posts, no search results, incomplete child profile) with a next action, skeletons, success/failure feedback. Add Appearance/text-size settings only if implemented fully.
+4. Keep the rules: no schema change without a migration; keep auth/authorization; no fake data or dead buttons; WCAG 2.2 AA; motion 150-250 ms and `prefers-reduced-motion`; granular commits, no force push, no secrets.
+5. Update `CONTEXT.md`, `HANDOFF.md`, `BUILD_CRIBS.md`, rebuild the ZIP (project at its root, no `node_modules`, `.next`, or `.env*` except `.env.example`). At about 20-25% context left, stop and write the handoff.
+Legal pages are drafts: do not claim compliance; leave open questions for the adviser.

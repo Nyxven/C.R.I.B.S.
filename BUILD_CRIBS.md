@@ -352,3 +352,22 @@ Required handoff files, every time, in `/mnt/user-data/outputs` (or the repo roo
 5. A fresh zip: `zip -r cribs-app.zip . -x "node_modules/*" ".next/*" ".env" ".env.*" "!.env.example"` (never include real `.env` files in the zip; the user keeps their own `.env.local`).
 
 Steps: (a) all work committed in granular commits (no `wip:` pile; if budget forces it, one `chore(wip): ...` commit at most, and note it in CONTEXT.md); (b) update files above; (c) present the files; (d) final message: what's done, what's next, "Start a new chat with BUILD_CRIBS.md + CONTEXT.md"; (e) ask the user what they want next.
+
+
+---
+
+## Session 7 addendum — UI/UX design system and screens (Phase 4B baseline, no new phase)
+
+**Phase status:** still Phase 4B (notifications + community). P5/Stage 5 not started. No schema change.
+
+**Design system (in `src/app/globals.css`, Tailwind v4 `@theme` tokens):** palette and fonts unchanged (the "ribbon": periwinkle/mint/yellow/orange/coral on cream; Baloo 2 + Nunito; dark-ink text, AA pairs tested by `src/lib/contrast.ts`). Motion tokens `--dur-fast 150ms / --dur-base 200ms / --dur-slow 250ms`, one easing. Components: `.btn-primary/.btn-secondary/.btn-ghost/.btn-danger`, `.field`, `.card` (use sparingly), `.list-group` + `.list-row` + `.section-label` (grouped lists, no cards-in-cards), `.notice-{info,success,warn,error}` (always icon + words), `.skeleton`, `.rise/.stagger` entrances, `dialog.sheet` (native `<dialog>` modals), tour classes. Everything animated is disabled by the existing `prefers-reduced-motion` rule. Icons: `lucide-react` only. Animation library `motion` is installed but unused; CSS transitions were chosen for reliability.
+
+**Rules for new UI:** one clear primary action per screen; 44px+ touch targets; real radio/checkbox/switch semantics; status is never color-only; errors are plain language with a next action; no fake or decorative controls; destructive actions use a confirmation dialog; don't add a setting that does nothing.
+
+**Onboarding:** 19 one-question screens ("panels", `src/lib/domain/panels.ts`) mapped onto the 10 server steps (unchanged). Answers live in client state (Back never loses them); the server saves a step when its last question is completed.
+
+**Walkthrough:** `data-tour="<id>"` on real elements; steps in `src/lib/domain/tour.ts`; completion in localStorage (open question: move to `profile` table).
+
+**Legal pages:** structured drafts, `LEGAL_VERSION` in `src/components/ui/LegalPage.tsx`; every claim must match code; unresolved items stay in each page's `openQuestions`.
+
+**Routes added:** `/child`, `/settings/profile`, `/settings/security`. **Removed:** inline delete form and "Download my data" button components (replaced by `SettingsActions`).
