@@ -143,7 +143,8 @@ export function VerifyForm() {
 
 export function SignInForm() {
   const r = useRouter();
-  const justReset = useSearchParams().get("reset") === "1";
+  const query = useSearchParams();
+  const justReset = query.get("reset") === "1";
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
@@ -156,7 +157,7 @@ export function SignInForm() {
   }
   return (
     <Shell title="Welcome back" sub="Sign in to continue.">
-      {params.get("expired") === "1" && <p role="status" className="notice notice-info">You were signed out for your security. Please sign in again.</p>}
+      {query.get("expired") === "1" && <p role="status" className="notice notice-info">You were signed out for your security. Please sign in again.</p>}
       {justReset && <p role="status" className="rounded-xl bg-tint-sage p-3 text-sm font-bold">Password updated. Sign in with your new password.</p>}
       <form onSubmit={submit} className="space-y-4">
         <div>
