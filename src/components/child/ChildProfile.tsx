@@ -2,7 +2,7 @@
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Pencil, Plus, QrCode, ShieldCheck } from "lucide-react";
+import { ChevronRight, Pencil, Plus, QrCode, ShieldCheck, Sparkles } from "lucide-react";
 import { saveProfileStepAction } from "@/features/account/actions";
 import { pickStep, reviewSections, type DataStepId, type OnboardingData, type ReviewSection } from "@/lib/domain/onboarding";
 import { panelsOf, validatePanel } from "@/lib/domain/panels";
@@ -33,6 +33,7 @@ export function ChildProfile({ initial, tagName }: { initial: OnboardingData; ta
   const filled = sections.filter((s) => s.step !== "about" && s.lines.length > 0).length;
   const total = sections.filter((s) => s.step !== "about").length;
   const name = data.nickname || "your child";
+  const firstEmpty = GROUPS.flatMap((g) => g.steps).find((step) => (byStep.get(step)?.lines.length ?? 1) === 0);
 
   const open = (step: DataStepId) => { setDraft(data); setEditing(step); setError(""); setSaved(""); dialog.current?.showModal(); };
   const close = () => { dialog.current?.close(); setEditing(null); };
@@ -50,10 +51,18 @@ export function ChildProfile({ initial, tagName }: { initial: OnboardingData; ta
   return (
     <div className="space-y-7">
       <header className="rise space-y-2">
-        <h1 className="text-3xl font-extrabold">{data.nickname ? `${data.nickname}'s profile` : "Child profile"}</h1>
+        <h1 className="h-page">{data.nickname ? `${data.nickname}'s profile` : "Child profile"}</h1>
         <p className="text-ink-soft">Short notes that help us fit your guidance to {name}. Only you can see this, and every answer is optional.</p>
         <p className="text-sm font-bold text-ink-soft" role="status">{filled} of {total} sections filled in{saved ? ` · ${saved}` : ""}</p>
       </header>
+
+      {firstEmpty && (
+        <section className="notice notice-info rise items-center" aria-label="Next step">
+          <Sparkles size={22} className="shrink-0 text-brand" aria-hidden="true" />
+          <p className="min-w-0 flex-1 font-semibold">{filled === 0 ? `Start with a few notes about ${name}.` : `A few more notes help guidance fit ${name} better.`}</p>
+          <button type="button" className="btn-secondary min-h-11 shrink-0 px-4" onClick={() => open(firstEmpty)}>Add {byStep.get(firstEmpty)?.title.toLowerCase()}</button>
+        </section>
+      )}
 
       {GROUPS.map((g) => (
         <section key={g.id} aria-labelledby={`g-${g.id}`} className="rise">
