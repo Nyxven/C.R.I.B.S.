@@ -13,7 +13,7 @@ export function LegalPage({ title, intro, sections, openQuestions }: {
     <main className="mx-auto max-w-2xl space-y-8 px-5 py-8">
       <Link href="/" className="flex items-center gap-2 rounded-xl"><Logo size={48} alt="" /><span className="font-display text-xl font-bold">C.R.I.B.S.</span></Link>
       <header className="space-y-3">
-        <h1 className="text-3xl font-extrabold">{title}</h1>
+        <h1 className="h-page">{title}</h1>
         <p className="text-sm font-bold text-ink-soft">{LEGAL_VERSION}</p>
         <div role="note" className="notice notice-warn">
           <p><b>Draft pending review.</b> This text was written for the C.R.I.B.S. school research project and has not been reviewed by the research adviser or a privacy professional. It is not legal advice, and publishing it does not mean the app is compliant with any law.</p>
