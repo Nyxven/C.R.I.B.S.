@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Bookmark, ChevronRight, MapPin, QrCode, Users } from "lucide-react";
+import { Baby, Bell, Bookmark, ChevronRight, QrCode, Users } from "lucide-react";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
 import { getModules } from "@/server/content/service";
@@ -7,13 +7,13 @@ import { getRecommendations } from "@/server/content/recommendations";
 import { countUnread } from "@/server/notifications/service";
 import { getProgress } from "@/server/progress/service";
 import { moduleProgress, progressLabel } from "@/lib/domain/progress";
-import { brand } from "@/config/brand";
 import { SearchBox } from "@/components/content/SearchBox";
 import { directoryLook, faqLook, moduleLook } from "@/components/content/moduleStyle";
 
 export const metadata = { title: "Home" };
 
 const rows = [
+  { href: "/child", title: "Child profile", sub: "What helps your child, in one place", look: { box: "bg-tint-yellow", Icon: Baby }, tour: "child" },
   { href: "/community", title: "Parent community", sub: "Share tips and small wins", look: { box: "bg-tint-sage", Icon: Users } },
   { href: "/find", title: "Find CRIBS", sub: "Your tag and the if-found page", look: { box: "bg-tint-pink", Icon: QrCode } },
   { href: "/saved", title: "Saved guides", sub: "Guides you saved for later", look: { box: "bg-tint-purple", Icon: Bookmark } },
@@ -39,17 +39,7 @@ export default async function Home() {
         <div className="ribbon-bar w-24" aria-hidden="true" />
       </header>
 
-      <SearchBox />
-
-      {/* Not a link yet: the Find page arrives in a later phase. */}
-      <div className="card flex items-center gap-4 p-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-tint-coral text-coral-dark"><MapPin size={24} aria-hidden="true" /></span>
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-lg font-bold leading-tight">Find {brand.tagName}</p>
-          <p className="text-sm text-ink-soft">Locate your child's smart bear or keychain</p>
-        </div>
-        <span className="chip shrink-0">Coming soon</span>
-      </div>
+      <div data-tour="search"><SearchBox /></div>
 
       {rec.guides.length > 0 && (
         <section aria-labelledby="rec-title">
@@ -71,10 +61,10 @@ export default async function Home() {
         </section>
       )}
 
-      <section aria-labelledby="guides-title">
+      <section aria-labelledby="guides-title" data-tour="guides">
         <h2 id="guides-title" className="mb-3 text-xl font-bold">Your guides</h2>
         {modules.length === 0 && <p className="card p-4 text-ink-soft">Guides are being set up. Please check back soon.</p>}
-        <ul className="grid grid-cols-2 gap-3">
+        <ul className="stagger grid grid-cols-2 gap-3">
           {modules.map((m) => {
             const { box, Icon } = moduleLook(m.id);
             return (
@@ -95,8 +85,8 @@ export default async function Home() {
       <section aria-labelledby="help-title">
         <h2 id="help-title" className="mb-3 text-xl font-bold">Help along the way</h2>
         <ul className="space-y-3">
-          {rows.map(({ href, title, sub, look }) => (
-            <li key={href}>
+          {rows.map(({ href, title, sub, look, ...r }) => (
+            <li key={href} data-tour={"tour" in r ? r.tour : undefined}>
               <Link href={href} className="card flex min-h-20 items-center gap-4 p-4 transition active:scale-[.99]">
                 <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-ink ${look.box}`}><look.Icon size={24} aria-hidden="true" /></span>
                 <span className="min-w-0 flex-1"><span className="block font-display text-lg font-bold leading-tight">{title}</span><span className="block text-sm text-ink-soft">{sub}</span></span>
