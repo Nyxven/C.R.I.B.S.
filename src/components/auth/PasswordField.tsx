@@ -1,4 +1,5 @@
 "use client";
+import { CircleAlert } from "lucide-react";
 import { useState } from "react";
 import { Check, Eye, EyeOff } from "lucide-react";
 import { PASSWORD_MIN } from "@/lib/formChecks";
@@ -37,7 +38,7 @@ export function PasswordField({ id, label, value, onChange, autoComplete, error,
           {ok && <Check size={16} aria-hidden="true" />}At least {PASSWORD_MIN} characters{ok ? ". Good." : ""}
         </p>
       )}
-      {error && <p id={errId} role="alert" className="mt-1 text-sm font-semibold text-red-700">{error}</p>}
+      {error && <p id={errId} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm font-bold text-coral-dark"><CircleAlert size={16} className="mt-0.5 shrink-0" aria-hidden="true" />{error}</p>}
     </div>
   );
 }
