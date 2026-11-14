@@ -1,10 +1,11 @@
 "use client";
 import { Bookmark, BookmarkCheck, Check, Circle } from "lucide-react";
+import { Feedback } from "@/components/ui/Feedback";
 import { useArticleActions } from "@/features/content/useArticleActions";
 
 export function ArticleActions({ slug, initial }: { slug: string; initial: { saved: boolean; read: boolean } }) {
   const a = useArticleActions(slug, initial);
-  const base = "flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 font-extrabold active:scale-[.98]";
+  const base = "flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 font-extrabold transition-[transform,background-color,border-color] duration-150 active:scale-[.98]";
   return (
     <section aria-label="Your progress" className="space-y-2">
       <div className="flex gap-3">
@@ -19,7 +20,7 @@ export function ArticleActions({ slug, initial }: { slug: string; initial: { sav
           {a.saved ? "Saved" : "Save for later"}
         </button>
       </div>
-      <p role="status" className="min-h-5 text-sm font-bold text-coral-dark">{a.error ?? ""}</p>
+      <Feedback kind={a.error ? "error" : "success"} message={a.error ?? a.done} />
     </section>
   );
 }

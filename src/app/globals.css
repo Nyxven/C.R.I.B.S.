@@ -187,6 +187,8 @@ html, body { height: 100%; }
   background: transparent; color: var(--color-ink); transition: background-color var(--dur-fast);
 }
 a.list-row:hover, button.list-row:hover { background: var(--color-cream); }
+/* The group clips its corners, so the keyboard ring is drawn inside the row (an outside ring would be cut off). */
+.list-row:focus-visible { outline-offset: -3px; border-radius: 16px; }
 .list-row .row-icon { display: flex; height: 40px; width: 40px; flex: none; align-items: center; justify-content: center; border-radius: 12px; background: var(--color-tint-purple); color: var(--color-brand); }
 .list-row .row-title { font-weight: 800; }
 .list-row .row-sub { font-size: .875rem; color: var(--color-ink-soft); }
