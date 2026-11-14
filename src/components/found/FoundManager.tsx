@@ -1,6 +1,9 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Baby } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Feedback } from "@/components/ui/Feedback";
 import { createTagAction, revokeTagAction, saveFieldsAction, switchTagAction } from "@/features/found/actions";
 import { FIELD_LABELS, type FoundFields } from "@/lib/found/card";
 
@@ -11,20 +14,25 @@ export function FoundManager({ hasChild, hasContact, tag }: Props) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
+  const [done, setDone] = useState("");
   const [fresh, setFresh] = useState<{ url: string; qr: string } | null>(null); // shown once, then gone
   const [fields, setFields] = useState<FoundFields | null>(tag?.fields ?? null);
   const [confirmRevoke, setConfirmRevoke] = useState(false);
 
-  const act = (fn: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) =>
-    start(async () => { setError(""); const r = await fn(); if (r.ok) { after?.(); router.refresh(); } else setError(r.error ?? "Please try again."); });
+  const act = (fn: () => Promise<{ ok: boolean; error?: string }>, success: string, after?: () => void) =>
+    start(async () => { setError(""); setDone(""); const r = await fn(); if (r.ok) { after?.(); setDone(success); router.refresh(); } else setError(r.error ?? "Please try again."); });
 
-  if (!hasChild) return <p className="card p-5">Finish your child's profile first. Then you can make an "if found" tag here.</p>;
+  if (!hasChild) return (
+    <EmptyState icon={Baby} title="Add your child's profile first" actionHref="/child" actionLabel="Open child profile">
+      The if-found page is built from your child's profile. Once it is filled in, you can make a tag here. Nothing is public until you do.
+    </EmptyState>
+  );
 
   function make() {
     start(async () => {
-      setError("");
+      setError(""); setDone("");
       const r = await createTagAction();
-      if (r.ok) { setFresh({ url: r.url, qr: r.qr }); setFields(null); router.refresh(); } else setError(r.error);
+      if (r.ok) { setFresh({ url: r.url, qr: r.qr }); setFields(null); setDone("New QR made. Any older QR has stopped working."); router.refresh(); } else setError(r.error);
     });
   }
   const download = () => {
@@ -64,7 +72,7 @@ export function FoundManager({ hasChild, hasContact, tag }: Props) {
             <p className="font-display text-lg font-bold">{tag.enabled ? "Your tag is on" : "Your tag is switched off"}</p>
             <p className="text-ink-soft">Made {tag.createdAt}. Opened {tag.accessCount} {tag.accessCount === 1 ? "time" : "times"}. We keep only this count, nothing about who opened it.</p>
             <div className="flex flex-wrap gap-3">
-              <button type="button" disabled={pending} onClick={() => act(() => switchTagAction(!tag.enabled))} className="btn-secondary">{tag.enabled ? "Switch off for now" : "Switch on"}</button>
+              <button type="button" disabled={pending} onClick={() => act(() => switchTagAction(!tag.enabled), tag.enabled ? "Your tag is switched off. The QR shows nothing." : "Your tag is on.")} className="btn-secondary">{tag.enabled ? "Switch off for now" : "Switch on"}</button>
               <button type="button" disabled={pending} onClick={make} className="btn-secondary">Make a new QR</button>
             </div>
             <p className="text-sm text-ink-soft">Making a new QR stops the old one at once.</p>
@@ -79,7 +87,7 @@ export function FoundManager({ hasChild, hasContact, tag }: Props) {
                   <span><span className="block font-bold">{FIELD_LABELS[k].label}</span><span className="block text-sm text-ink-soft">{FIELD_LABELS[k].help}</span></span>
                 </label>
               ))}
-              <button type="button" disabled={pending} onClick={() => act(() => saveFieldsAction(shown))} className="btn-primary w-full">Save what people see</button>
+              <button type="button" disabled={pending} onClick={() => act(() => saveFieldsAction(shown), "Saved. The page now shows only what you ticked.")} className="btn-primary w-full">Save what people see</button>
             </section>
           )}
 
@@ -90,7 +98,7 @@ export function FoundManager({ hasChild, hasContact, tag }: Props) {
               <div role="alertdialog" aria-label="Confirm stop this tag" className="space-y-2">
                 <p className="font-bold">The QR will stop working and cannot be turned back on. Continue?</p>
                 <div className="flex gap-3">
-                  <button type="button" disabled={pending} onClick={() => act(() => revokeTagAction(), () => { setConfirmRevoke(false); setFresh(null); })} className="btn-primary flex-1">Yes, stop it</button>
+                  <button type="button" disabled={pending} onClick={() => act(() => revokeTagAction(), "This tag has been stopped for good.", () => { setConfirmRevoke(false); setFresh(null); })} className="btn-primary flex-1">Yes, stop it</button>
                   <button type="button" onClick={() => setConfirmRevoke(false)} className="btn-secondary flex-1">Keep it</button>
                 </div>
               </div>
@@ -98,7 +106,7 @@ export function FoundManager({ hasChild, hasContact, tag }: Props) {
           </section>
         </>
       )}
-      <p role="status" className="min-h-5 font-bold text-coral-dark">{error}</p>
+      <Feedback kind={error ? "error" : "success"} message={error || done} />
     </div>
   );
 }
