@@ -1,15 +1,13 @@
 "use client";
-import Link from "next/link";
+import { StatePage, HomeLink } from "@/components/ui/StatePage";
 
-export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+// Shown when a page fails. Never shows technical details; the digest is only a support reference.
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-5 px-5 text-center">
-      <h1 className="text-3xl font-extrabold">Something went wrong on our side</h1>
-      <p className="text-lg text-ink-soft">It's not you. Please try again. If it keeps happening, come back in a little while.</p>
-      <div className="flex flex-wrap justify-center gap-3">
-        <button type="button" onClick={reset} className="btn-primary">Try again</button>
-        <Link href="/home" className="btn-secondary">Go to Home</Link>
-      </div>
-    </main>
+    <StatePage title="Something went wrong on our side"
+      actions={<><button type="button" onClick={reset} className="btn-primary">Try again</button><HomeLink /></>}>
+      <p>It&apos;s not you. Your information is safe. Please try again, and if it keeps happening, come back in a little while.</p>
+      {error.digest && <p className="mt-3 text-sm">Support reference: <span className="font-mono">{error.digest}</span></p>}
+    </StatePage>
   );
 }
