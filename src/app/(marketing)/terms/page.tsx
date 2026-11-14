@@ -27,7 +27,7 @@ const openQuestions = [
   "Is the liability wording suitable under Philippine law and school policy?",
   "Which law governs disputes, and where would a dispute be heard?",
   "What contact details and response time should be published?",
-  "Should accepting these Terms be recorded at sign-up (a checkbox and a timestamp)? The app does not record this yet.",
+  "Sign-up has a required acceptance checkbox, but the database does not store which version was accepted or when. Should it?",
 ];
 
 export default function Page() {
