@@ -23,8 +23,9 @@ export async function createPost(ctx: { userId: string; accountAgeHours: number 
   if (!p.success) return { ok: false, error: "Please write something first." };
   const checked = checkPostText(p.data.body);
   if (!checked.ok) return { ok: false, error: checked.error };
-  const day = ctx.accountAgeHours < 24 ? 2 : 20;
-  if (!(await guard.consume(`comm:post:hr:${ctx.userId}`, 1, 5, 3600)).allowed || !(await guard.consume(`comm:post:day:${ctx.userId}`, 1, day, 86_400)).allowed) return { ok: false, error: TRY_LATER };
+  // Room for a real conversation (several posts and replies in a row), still a cap on spam. New accounts get less.
+  const day = ctx.accountAgeHours < 24 ? 10 : 50;
+  if (!(await guard.consume(`comm:post:hr:${ctx.userId}`, 1, 15, 3600)).allowed || !(await guard.consume(`comm:post:day:${ctx.userId}`, 1, day, 86_400)).allowed) return { ok: false, error: TRY_LATER };
 
   let parent: repo.PostRow | undefined;
   if (p.data.parentId) {

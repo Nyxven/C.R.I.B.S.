@@ -48,12 +48,12 @@ describe("writing posts", () => {
     expect((await createPost({ userId: "u1", ...old }, {}, guard)).ok).toBe(false);
   });
   it("limits posts per hour, and gives new accounts a lower daily limit", async () => {
-    for (let i = 0; i < 5; i++) await post("u1", `Question number ${i} here`);
+    for (let i = 0; i < 15; i++) await post("u1", `Question number ${i} here`);
     expect((await createPost({ userId: "u1", ...old }, { body: "One more question" }, guard)).ok).toBe(false);
     const fresh = { userId: "u9", accountAgeHours: 1 };
-    expect((await createPost(fresh, { body: "First post here" }, guard)).ok).toBe(true);
-    expect((await createPost(fresh, { body: "Second post here" }, guard)).ok).toBe(true);
-    expect((await createPost(fresh, { body: "Third post here" }, guard)).ok).toBe(false);
+    // a new account can still hold a short conversation (at least 5 in a row), up to 10 a day
+    for (let i = 0; i < 10; i++) expect((await createPost(fresh, { body: `Post number ${i} here` }, guard)).ok).toBe(true);
+    expect((await createPost(fresh, { body: "Eleventh post here" }, guard)).ok).toBe(false);
   });
 });
 
