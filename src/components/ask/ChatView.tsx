@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { History, MessageCircle, RotateCcw, WifiOff } from "lucide-react";
+import { History, RotateCcw, WifiOff } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { ChatMessage } from "@/features/ask/chatState";
@@ -37,15 +38,15 @@ export function ChatView({ starters, available, initial }: { starters: string[];
           {chat.messages.length === 0 ? (
             <section className="space-y-4" aria-labelledby="ask-intro">
               <div className="card flex items-start gap-3 p-5">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-tint-purple"><MessageCircle size={22} aria-hidden="true" /></span>
+                <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-tint-purple"><Logo size={30} alt="" /></span>
                 <div>
-                  <p id="ask-intro" className="font-display text-lg font-bold">Ask me about the guides</p>
+                  <p id="ask-intro" className="h-section">Hi, what would you like to know?</p>
                   <p className="text-ink-soft">I answer from the guides in this app. I can’t give medical advice.</p>
                 </div>
               </div>
               <div role="group" aria-label="Question ideas" className="flex flex-col gap-2">
                 {starters.map((s) => (
-                  <button key={s} type="button" onClick={() => void chat.send(s)} className="card min-h-14 px-4 py-3 text-left font-bold text-ink active:scale-[.99]">{s}</button>
+                  <button key={s} type="button" onClick={() => void chat.send(s)} className="min-h-14 rounded-full border-2 border-tint-purple bg-white px-5 py-3 text-left font-bold text-brand transition hover:border-brand active:scale-[.99]">{s}</button>
                 ))}
               </div>
             </section>
