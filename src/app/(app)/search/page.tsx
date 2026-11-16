@@ -4,7 +4,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkRow } from "@/components/ui/LinkRow";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { isSearchable, type SearchKind } from "@/lib/domain/search";
-import { searchContent } from "@/server/content/service";
+import { topicFor } from "@/lib/domain/suggest";
+import { getSuggestIndex, searchContent } from "@/server/content/service";
 
 export const metadata = { title: "Search" };
 
@@ -18,19 +19,27 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const { q } = await searchParams;
   const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? "";
   const searched = isSearchable(query);
-  const hits = searched ? await searchContent(query) : [];
+  const [direct, suggestions] = await Promise.all([searched ? searchContent(query) : Promise.resolve([]), getSuggestIndex()]);
+  // Nothing matched the exact words: try the topic those words point to ("tantrum" -> meltdown, "bedtime" -> routine).
+  const topic = searched && direct.length === 0 ? topicFor(query) : null;
+  const hits = topic ? await searchContent(topic.term) : direct;
+  const shownFor = topic && hits.length > 0 ? topic.term : query;
 
   return (
     <div className="space-y-6">
       <PageHeader title="Search" intro="Find a guide, a common question or a specialist." />
-      <SearchBox defaultValue={query} />
+      <SearchBox key={query} defaultValue={query} suggestions={suggestions} />
 
       {query !== "" && !searched && <p role="status" className="notice notice-info">Type at least 2 letters to search.</p>}
 
       {searched && (
         <p role="status" className="font-bold text-ink-soft">
-          {hits.length === 0 ? `No results for “${query}”.` : `${hits.length} ${hits.length === 1 ? "result" : "results"} for “${query}”`}
+          {hits.length === 0 ? `No results for “${query}”.` : `${hits.length} ${hits.length === 1 ? "result" : "results"} for “${shownFor}”`}
         </p>
+      )}
+
+      {topic && hits.length > 0 && (
+        <p className="notice notice-info" role="note">No guide uses the word “{query}”, so here is what we have about “{topic.term}”.</p>
       )}
 
       {hits.length > 0 && (
