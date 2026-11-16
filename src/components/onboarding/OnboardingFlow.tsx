@@ -46,7 +46,7 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
   const submitLabel = isReview ? (o.pending ? "Creating…" : "Create profile") : o.pending ? "Saving…" : o.fromReview && o.isLast ? "Save" : "Continue";
 
   return (
-    <div className="mx-auto max-w-xl px-5 pt-[max(1.5rem,env(safe-area-inset-top))]">
+    <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <header className="mb-6">
         <div className="mb-4 flex items-center gap-2">
           <Logo size={44} alt="" />
@@ -66,7 +66,7 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
         </div>
       </header>
 
-      <form noValidate onSubmit={(e) => { e.preventDefault(); void (isReview ? o.finish() : o.next()); }}>
+      <form noValidate className="flex flex-1 flex-col" onSubmit={(e) => { e.preventDefault(); void (isReview ? o.finish() : o.next()); }}>
         <div key={o.panel.id} className="step-in">
         <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-extrabold leading-tight outline-none sm:text-3xl">{copy.question}</h1>
         {copy.intro && <p className="mt-2 text-base text-ink-soft">{copy.intro}</p>}
@@ -91,7 +91,7 @@ export function OnboardingFlow({ initial, tagName }: { initial: { step: number; 
         </div>
 
         {/* Stays at the bottom of the screen, so Continue is always in reach. */}
-        <div className="sticky bottom-0 -mx-5 mt-8 flex items-center gap-3 border-t border-line bg-cream px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+        <div className="sticky bottom-0 -mx-5 mt-auto flex items-center gap-3 border-t border-line bg-cream/90 px-5 backdrop-blur pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
           {showBack && (
             <button type="button" onClick={o.back} disabled={o.pending} className="btn-secondary min-h-14 shrink-0 px-4" aria-label="Back">
               <ArrowLeft size={20} aria-hidden="true" /> Back
