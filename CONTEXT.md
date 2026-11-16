@@ -1,3 +1,20 @@
+> **SESSION 11 — SEARCH SUGGESTIONS + DEPLOY — READ THIS BLOCK FIRST.** Still Phase 4B; Stage 5 NOT started. No schema, migration, environment-variable or dependency change in code.
+
+## Session 11 — status (2026-11-17)
+**Inputs:** the team's two papers (July "C.R.I.B.S." proposal, October "CRIBSEER"). Both evaluate the app with Nielsen's 10 heuristics; parents' named worries are tantrums/meltdowns, wandering, sudden silence and "where do I start after diagnosis".
+**Built (verified: typecheck 0 errors, 55 files / 512 tests, `next build`, used in the browser at 390 px):**
+1. `src/lib/domain/suggest.ts` (+10 tests on the real seed): `TOPICS` (everyday English/Filipino/Taglish words -> the words our guides use), `PLACES` (app pages people may look for, e.g. "nawawala"/"running off" -> `/find`), `POPULAR`, `topicFor`, `suggest`, `buildSuggestIndex` (titles/labels only, no bodies, nothing personal).
+2. `SearchBox` is an ARIA 1.2 combobox when given `suggestions`: popular-topic chips on focus, up to 7 ranked suggestions while typing (guide / FAQ / specialist / page / related topic), Arrow keys, Enter, Escape, polite count announcement. Still a plain GET form without JS. Hook `src/features/content/useSuggest.ts`; data from `getSuggestIndex()` on Home and Search.
+3. `/search` falls back to the related topic when nothing matches ("sleep" -> routine results, with a note saying so).
+4. FAQ: `/faq?open=<id>#<id>` opens and scrolls to that answer (suggestions link there).
+5. Article: "Ask CRIBS about this guide" -> `/ask?about=<slug>` pre-fills (does not send) a question naming the guide; only real titles from the database are used.
+6. i18n keys added in `en.ts` and `fil.ts` (Filipino still draft).
+**Deploy:** GitHub `main` had the same files as local `896fbf8` under different commit ids; merged with `-s ours` (nothing lost, verified by diff) so the push is a fast-forward. PR #2 `feat/ui-verify-polish` -> `main`. Vercel deploys `main` to production. Production DB already had migrations and seed content (checked by count query).
+**Dev account:** `ravenyx.dev@gmail.com` already exists and is verified in production. The only elevated role in the code is moderator (`MODERATOR_EMAILS`). See HANDOFF.md for whether the env change was applied.
+**Note:** the GitHub repo `Nyxven/C.R.I.B.S.` is **public** (BUILD_CRIBS assumed private). No secrets are in it; decide with the team.
+
+---
+
 > **SESSION 10 — FIRST VERIFIED SESSION — READ THIS BLOCK FIRST.** Still Phase 4B; Stage 5 NOT started. Branch `feat/ui-verify-polish` (9 commits after `9f4e3e7`). No database change, no new environment variable, no new dependency.
 
 ## Session 10 — status (2026-11-16)
