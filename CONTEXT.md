@@ -1,5 +1,19 @@
 # CONTEXT.md — C.R.I.B.S. Web App (living state file)
 
+> **BRAND RESTORATION (after session 8) — READ THIS BLOCK FIRST.** The user judged the flat UI "bland" and "bad" and said the gradient of the earlier version "looked cool". Done on top of session 8, unverified like the rest.
+
+## Brand restoration — status
+Cause: Phase 1 (`4534bdb`) removed the gradients and wash; session 7 swapped the Ask CRIBS logo for a sparkle icon; Phase 1 Home showed one recommended guide instead of three. **Restored (code only, never seen in a browser, nothing typechecked or built):**
+1. `globals.css` tokens: `--grad-brand` (`#5B49A8` to `#B8441A`, white text 5.4:1 or better along its whole length), `--ribbon` (rainbow, decoration only), `--grad-wash` (warm and mint glow behind every screen, `background-attachment: fixed`). Layering fix (`@layer`) kept.
+2. `.btn-primary` and the `.search` button use `--grad-brand` with the soft coloured shadow; hover only darkens (`filter: brightness(.92)`) so contrast cannot drop. `contrast.test.ts` checks the gradient at five points again and that both buttons use the token (not run).
+3. Desktop sidebar: original logo mark on the Ask CRIBS pill; translucent sidebar. (Mobile bubble with the ribbon ring was never changed.)
+4. Home: "Hello, Raven!", coral "You and Raven!", ribbon line, bell kept, **three** "Recommended for {child}" cards with coral reason lines, guide tiles with white icon chips and shadow, "Help along the way" rows with tinted icon chips. Tour targets (`data-tour`) kept. Names show with a capital first letter (`src/lib/domain/names.ts` + test, display only).
+5. `PageHeader` now draws the ribbon line under every page title (Saved, Search, Settings, ...); `ProgressBar` fill is the ribbon.
+**Still to judge by eye:** how much gradient is enough (it appears on primary buttons, search button, Ask pill, page wash, ribbon lines, progress; cards, rows and inputs stay quiet on purpose); the wash behind marketing and auth pages; text on the wash; `.section-label` uppercase style still used in Settings and Child profile (consider sentence case).
+**Not seen:** any session 9 work (if-found page, Ask bubbles, walkthrough) may exist elsewhere; merge carefully.
+
+---
+
 > **SESSION 8 (UI pass, Phase 2 + part of Phase 3) — READ THIS BLOCK FIRST, then the Session 7 block below it.** Handoff files: `HANDOFF.md`, `NEXT_PROMPT.md`, `ENV_REFERENCE.md`.
 
 ## Session 8 — status (2026-11-14)
