@@ -1,12 +1,22 @@
-You are continuing **C.R.I.B.S.** (parenting guidance web app for parents of children with ASD). We are still on **Phase 4B**; do NOT start Phase 5 / Stage 5.
+You are continuing **C.R.I.B.S.** (parenting guidance web app for parents of children with ASD). We are still on **Phase 4B**. Do NOT start Stage 5 / Phase 5 until the user says so.
 
-Read first, in this order: `CONTEXT.md` (top "Session 8" block, then "Session 7"), `HANDOFF.md`, `BUILD_CRIBS.md` (Session 7 and 8 addenda), `ENV_REFERENCE.md`. Sessions 7 and 8 built a large UI/UX pass (`git log phase-4b-baseline..HEAD`) in a sandbox with **no network**, so none of it has been typechecked, built, linted or seen in a browser.
+Read first, in this order: `CONTEXT.md` (top block first), `HANDOFF.md`, `BUILD_CRIBS.md`, `ENV_REFERENCE.md`. Unzip `cribs-app.zip` and work in that repo; its working tree and git history are the source of truth. If a session 9 handoff exists, read it too and merge carefully.
 
-The brand look (gradient buttons, page wash, Ask CRIBS logo button, three recommended guides, ribbon lines) was restored after session 8 at the user's request; see the top block of `CONTEXT.md`. Keep it, and check it by eye. If a session 9 handoff exists, read it too and merge carefully.
+## Where we are
+The UI pass is mostly built. The brand look (purple-to-coral gradient buttons, warm/mint page wash, ribbon line under titles, the logo on the Ask CRIBS button, three "Recommended for {child}" guides on Home) was restored after the user said the flat version looked bland. Keep it. Every screen follows one pattern: back link, page header, grouped list, empty state with a next step, skeleton, and a feedback line after actions.
 
-Do this, in order, and report what you actually ran:
-1. `npm ci`, `npm run typecheck`, `npm test`, `npm run lint`, `npm run build`. Fix errors introduced by sessions 7 and 8 (likely small type errors in `PanelFields`, Home, the dialogs, `Tour`, `ChatView` header, `FoundManager.act`, `ChildProfile`).
-2. Run the app and verify with a real browser (Playwright is fine) at 360, 390, 768, 1024, 1440 px, with screenshots: `/onboarding`, `/home` walkthrough, `/settings` (+ profile, security, appearance), delete dialog, `/child`, `/find`, `/saved`, `/notifications`, `/search`, `/learn/...` (module and article), `/faq`, `/directory`, `/ask` (+ history), `/community`, `/privacy`, `/terms`, a 404, an error boundary, offline banner, reduced motion, horizontal overflow, layout shift. Also at text size Large and Extra large, and keyboard only (focus ring inside list rows and FAQ summaries). Fix what you see.
-3. Then: redesign the public if-found page `/f/[token]` (privacy defaults must stay), polish Ask bubbles and composer, extend the walkthrough only where a real target exists.
-4. Rules: no schema change without a migration; keep auth/authorization; no fake data or dead buttons; WCAG 2.2 AA; motion 150-250 ms and `prefers-reduced-motion`; granular commits, no force push, no secrets. Legal pages are drafts: do not claim compliance.
-5. Update `CONTEXT.md`, `HANDOFF.md`, `BUILD_CRIBS.md`, rebuild the ZIP (project at its root, no `node_modules`, `.next`, or `.env*` except `.env.example`). At about 20-25% context left, stop and write the handoff.
+## What to build next, in this order
+1. **Public if-found page `/f/[token]`**: redesign it in the brand look. It must stay safe: only fields the parent switched on are shown, the autism line is off by default, and nothing private appears when the tag is off or stopped. Big, calm layout for a stranger on a phone: a clear heading, the child's name, a one-tap Call button when a contact exists, and short plain instructions.
+2. **Ask CRIBS chat**: polish the message bubbles, source chips, retry and feedback buttons, the composer, and the starter chips so they match the brand (gradient send button, friendly empty state). Keep the emergency check and the "not medical advice" line.
+3. **Carry the brand across every screen** that still looks flat: sign-in and sign-up, onboarding, Settings, Child profile, Community, Directory, FAQ, Learn and article pages. Use gradient only on primary actions, ribbon lines and progress. Keep cards, rows and inputs quiet. Consider sentence-case headings instead of the small uppercase labels.
+4. **Walkthrough**: extend it beyond Home only where a real, visible element exists (for example Ask, the child profile, Settings, and Saved on first visit). Keep it short, skippable, once by default, and restartable from Settings.
+5. When the user asks for more, offer the next candidates: Language and Theme settings (only if they really work), a better Learn reading experience, and then Stage 5 from `CONTEXT.md` "Next tasks" (with the user's "go").
+
+## Rules
+- Tell the user your plan first (files, commits, what you will change) and wait for "go".
+- Granular Conventional Commits with short subjects, no force push, no secrets in the repo or chat, logic separate from UI.
+- No schema change without a migration. Keep auth, authorization and privacy defaults. No fake data and no dead buttons.
+- Accessible (WCAG 2.2 AA): white text on gradients stays at 4.5:1 or better, visible focus, `prefers-reduced-motion`, motion 150 to 250 ms, no layout shift. Mobile first.
+- The legal pages are drafts. Do not claim legal compliance.
+- Be honest about what was and was not tested. Never say something works if it was not run.
+- At about 20 to 25 percent context left, stop and update `CONTEXT.md`, `HANDOFF.md`, `BUILD_CRIBS.md`, `NEXT_PROMPT.md`, and rebuild the ZIP (project at its root, no `node_modules`, `.next` or `.env*` except `.env.example`).
