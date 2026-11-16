@@ -32,10 +32,12 @@ export default async function Article({ params }: { params: Promise<{ module: st
       <header className={`rise space-y-3 rounded-3xl p-5 ${box}`}>
         <p className="flex items-center gap-2 font-bold text-ink">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm" aria-hidden="true"><Icon size={20} /></span>
-          {a.moduleShortName}{at >= 0 && <span className="font-semibold text-ink-soft"> · {t("article.guideOf", { n: at + 1, total: list.length })}</span>}
+          {a.moduleShortName}
         </p>
         <h1 className="h-page">{a.title}</h1>
-        <div className="flex flex-wrap gap-2"><p className="chip bg-white">{a.readTime}</p>{isExpertReviewed(a) && <p className="chip bg-white">{t("article.reviewed")}</p>}</div>
+        <div className="flex flex-wrap gap-2">
+          {at >= 0 && <p className="chip bg-white">{t("article.guideOf", { n: at + 1, total: list.length })}</p>}
+          <p className="chip bg-white">{a.readTime}</p>{isExpertReviewed(a) && <p className="chip bg-white">{t("article.reviewed")}</p>}</div>
       </header>
       <div className="prose-cribs" dangerouslySetInnerHTML={{ __html: a.html }} />
       <ArticleActions slug={a.slug} initial={entry} />
