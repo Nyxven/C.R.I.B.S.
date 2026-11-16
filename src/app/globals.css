@@ -236,3 +236,9 @@ dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(-
 .tour-ring { position: fixed; z-index: 70; pointer-events: none; border-radius: 16px; outline: 3px solid #fff; box-shadow: 0 0 0 5px var(--color-brand), 0 0 0 9999px rgba(55, 47, 74, .55); transition: top var(--dur-base) var(--ease-out), left var(--dur-base) var(--ease-out), width var(--dur-base) var(--ease-out), height var(--dur-base) var(--ease-out); }
 .tour-tip { position: fixed; z-index: 71; width: min(20rem, calc(100vw - 1.5rem)); background: #fff; border-radius: 20px; padding: 1rem 1.1rem; box-shadow: 0 18px 44px -14px rgba(55,47,74,.6); animation: rise var(--dur-base) var(--ease-out) both; }
 }
+
+/* Sideways chip rows (Directory filters): the cut-off chip already shows there is more, so the bar is hidden. Still scrolls by touch, wheel and keyboard. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
