@@ -385,3 +385,13 @@ Still Phase 4B. No schema, migration or environment change.
 **Article reader.** "Up next" is the next article in the module's own order; the last guide shows "Back to <module>".
 
 **Status.** Syntax-parsed only; not typechecked, tested, built or viewed. See CONTEXT.md "Session 8" for the open list and the exact next step.
+
+## Session 9 additions (UI pass, unverified)
+
+**If-found page.** Markup only. Heading, optional Call button, facts and four plain steps come from `buildFoundCard`; nothing the parent switched off is rendered. Same page for unknown, off or stopped links (`notFound()`).
+
+**Ask chat.** Brand bubbles, avatar, source pills, round gradient send button, pill starters. Logic in `useChat` and the emergency/"not medical advice" wording unchanged.
+
+**Walkthrough.** 8 steps, each tied to a real `data-tour` element and a page path. Seen steps are stored per user in `localStorage` (`cribs:tour:v2:<user>`); the v1 "done" flag still means finished. Skip marks all seen; Settings restarts it.
+
+**Status.** Syntax-parsed and the tour logic harness only; not typechecked, tested, built or viewed. See CONTEXT.md "Session 9".

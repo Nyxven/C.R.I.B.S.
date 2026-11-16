@@ -1,3 +1,17 @@
+> **SESSION 9 — READ THIS BLOCK FIRST (above the brand restoration block).** Still Phase 4B. Same unverified state: no typecheck, test, lint, build or browser run (user chose to skip; sandbox has no network and no `node_modules`). No database change, no new environment variable.
+
+## Session 9 — status
+Built (code only, never seen in a browser):
+1. **`/f/[token]`**: ribbon bar, "If found" label, 4xl heading (child's name or the generic line), full-width 64px gradient Call button with the number below, facts in one quiet card (larger text), numbered "What you can do" steps, "Please wait" state with a 911 note. `lookupPublic`, `buildFoundCard` and the page's `notFound()` path were **not touched**, so field switches, the autism default (off) and off/stopped tags behave as before.
+2. **Ask chat**: parent bubbles use `--grad-brand` with white text; CRIBS answers get a logo avatar and a card (emergency answers on a coral tint with the same border); source chips are tinted pills; Try again has an icon; copy/rate buttons have a hover tint; composer is a rounded field plus a round gradient send button; starter chips are pill buttons; empty state uses the logo. Emergency check, "not medical advice" line and `useChat` logic unchanged.
+3. **Section headings**: `.section-label` is now sentence case, 1.125rem (used by Settings groups, Child profile groups, "Up next").
+4. **Walkthrough**: 8 steps now (Home 4, Ask composer, Child profile progress line, Saved header, Settings restart row). Storage v2 keeps a list of seen step ids (`cribs:tour:v2:<user>`); the old v1 "done" flag still counts as finished. A step on another page waits until that page is opened; Skip marks every step seen; Settings > Restart clears both keys. New pure helper `unseenSteps` with two new tests (not run in Vitest; the same checks ran in a small harness and passed).
+**Checked this session:** TypeScript syntax parse of all 12 changed `.ts/.tsx` files (0 errors) and the tour logic harness. **Not checked:** types, Vitest, lint, build, any browser view, contrast of the new bubble (it reuses the checked gradient), reduced motion.
+**Judged "already branded", left alone:** sign-in/sign-up (ribbon card), onboarding (ribbon progress, gradient buttons). Settings, Child profile, Community, Directory, FAQ and Learn only got the heading change; look at them by eye before adding more.
+**Known risks to check first:** Tour ring around the Ask composer area on mobile (sticky bar above the nav); the Saved ring wraps the header only; `data-tour="restart-tour"` wrapper div inside `.list-group`; the new `max-w-[calc(100%-2.75rem)]` on answer cards; `/f/[token]` on a 360px screen.
+
+---
+
 # CONTEXT.md — C.R.I.B.S. Web App (living state file)
 
 > **BRAND RESTORATION (after session 8) — READ THIS BLOCK FIRST.** The user judged the flat UI "bland" and "bad" and said the gradient of the earlier version "looked cool". Done on top of session 8, unverified like the rest.

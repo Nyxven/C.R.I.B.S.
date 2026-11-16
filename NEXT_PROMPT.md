@@ -6,11 +6,9 @@ Read first, in this order: `CONTEXT.md` (top block first), `HANDOFF.md`, `BUILD_
 The UI pass is mostly built. The brand look (purple-to-coral gradient buttons, warm/mint page wash, ribbon line under titles, the logo on the Ask CRIBS button, three "Recommended for {child}" guides on Home) was restored after the user said the flat version looked bland. Keep it. Every screen follows one pattern: back link, page header, grouped list, empty state with a next step, skeleton, and a feedback line after actions.
 
 ## What to build next, in this order
-1. **Public if-found page `/f/[token]`**: redesign it in the brand look. It must stay safe: only fields the parent switched on are shown, the autism line is off by default, and nothing private appears when the tag is off or stopped. Big, calm layout for a stranger on a phone: a clear heading, the child's name, a one-tap Call button when a contact exists, and short plain instructions.
-2. **Ask CRIBS chat**: polish the message bubbles, source chips, retry and feedback buttons, the composer, and the starter chips so they match the brand (gradient send button, friendly empty state). Keep the emergency check and the "not medical advice" line.
-3. **Carry the brand across every screen** that still looks flat: sign-in and sign-up, onboarding, Settings, Child profile, Community, Directory, FAQ, Learn and article pages. Use gradient only on primary actions, ribbon lines and progress. Keep cards, rows and inputs quiet. Consider sentence-case headings instead of the small uppercase labels.
-4. **Walkthrough**: extend it beyond Home only where a real, visible element exists (for example Ask, the child profile, Settings, and Saved on first visit). Keep it short, skippable, once by default, and restartable from Settings.
-5. When the user asks for more, offer the next candidates: Language and Theme settings (only if they really work), a better Learn reading experience, and then Stage 5 from `CONTEXT.md` "Next tasks" (with the user's "go").
+0. Session 9 built the if-found page, Ask polish, sentence-case headings and the 8-step walkthrough (all unverified, see CONTEXT.md top block). If the user can run `npm`, verify first: `npm ci && npm run typecheck && npm test && npm run lint && npm run build`, fix failures, then check screens at 360/390/768/1024/1440 px.
+1. Judge by eye with the user: Settings, Child profile, Community, Directory, FAQ, Learn and article pages. Ask "more or less gradient?" before spreading it. Gradient only on primary actions, ribbon lines and progress.
+2. Offer next candidates: Language and Theme settings (only if they really work), a better Learn reading experience, then Stage 5 from `CONTEXT.md` "Next tasks" (only with the user's "go").
 
 ## Rules
 - Tell the user your plan first (files, commits, what you will change) and wait for "go".

@@ -1,3 +1,9 @@
+# HANDOFF.md — Session 9 (if-found page, Ask polish, walkthrough)
+Session 9 work (see CONTEXT.md top block): `/f/[token]` redesigned (markup only, safety logic untouched), Ask bubbles/chips/composer/starters in brand, sentence-case section headings, walkthrough extended to 8 steps with per-step "seen" storage. 4 feature commits after `896fbf8`. **Still nothing typechecked, tested, built or seen in a browser.** Release-readiness: `/f/[token]` and Ask polish move from 6 to 1; walkthrough beyond Home 6 to 1; everything else as below.
+Continue: run `npm ci && npm run typecheck && npm test && npm run lint && npm run build`, fix failures, then look at `/f/[token]` (tag on and off), Ask, Home and one list screen at 360 and 1440 px, text size Large, keyboard only, reduced motion.
+
+---
+
 # HANDOFF.md — Session 8 (UI pass: Phase 2 and part of Phase 3) + brand restoration
 
 ## Brand restoration (latest, same unverified state)
