@@ -9,6 +9,7 @@ import { getEntryFor } from "@/server/progress/service";
 import { ArticleActions } from "@/components/content/ArticleActions";
 import { isExpertReviewed } from "@/lib/domain/content";
 import { moduleLook } from "@/components/content/moduleStyle";
+import { getT } from "@/lib/i18n/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ module: string; slug: string }> }) {
   const { module, slug } = await params;
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ module: s
 // Seed HTML is trusted, static, first-party content. Sanitize before rendering any user/AI-authored HTML (see BUILD §6.6).
 export default async function Article({ params }: { params: Promise<{ module: string; slug: string }> }) {
   const { module, slug } = await params;
-  const [a, session] = await Promise.all([getArticleBySlug(module, slug), getSession()]);
+  const [a, session, t] = await Promise.all([getArticleBySlug(module, slug), getSession(), getT()]);
   if (!a || !session) notFound();
   const [entry, m] = await Promise.all([getEntryFor(session.user.id, a.slug), getModule(a.moduleId)]);
   const list = m?.articles ?? [];
@@ -31,21 +32,21 @@ export default async function Article({ params }: { params: Promise<{ module: st
       <header className={`rise space-y-3 rounded-3xl p-5 ${box}`}>
         <p className="flex items-center gap-2 font-bold text-ink">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm" aria-hidden="true"><Icon size={20} /></span>
-          {a.moduleShortName}{at >= 0 && <span className="font-semibold text-ink-soft"> · Guide {at + 1} of {list.length}</span>}
+          {a.moduleShortName}{at >= 0 && <span className="font-semibold text-ink-soft"> · {t("article.guideOf", { n: at + 1, total: list.length })}</span>}
         </p>
         <h1 className="h-page">{a.title}</h1>
-        <div className="flex flex-wrap gap-2"><p className="chip bg-white">{a.readTime}</p>{isExpertReviewed(a) && <p className="chip bg-white">Reviewed by experts</p>}</div>
+        <div className="flex flex-wrap gap-2"><p className="chip bg-white">{a.readTime}</p>{isExpertReviewed(a) && <p className="chip bg-white">{t("article.reviewed")}</p>}</div>
       </header>
       <div className="prose-cribs" dangerouslySetInnerHTML={{ __html: a.html }} />
       <ArticleActions slug={a.slug} initial={entry} />
       {next && (
         <section aria-labelledby="next-title">
-          <h2 id="next-title" className="section-label">Up next</h2>
+          <h2 id="next-title" className="section-label">{t("article.upNext")}</h2>
           <div className="list-group"><LinkRow href={`/learn/${a.moduleId}/${next.slug}`} title={next.title} sub={next.readTime} /></div>
         </section>
       )}
-      <p className="notice notice-warn text-sm"><Info size={20} className="mt-0.5 shrink-0 text-amber-dark" aria-hidden="true" /><span>General guidance only. It does not replace advice from a licensed professional.</span></p>
-      {!next && <Link href={`/learn/${a.moduleId}`} className="btn-secondary w-full">Back to {a.moduleShortName}</Link>}
+      <p className="notice notice-warn text-sm"><Info size={20} className="mt-0.5 shrink-0 text-amber-dark" aria-hidden="true" /><span>{t("article.note")}</span></p>
+      {!next && <Link href={`/learn/${a.moduleId}`} className="btn-secondary w-full">{t("article.backTo", { module: a.moduleShortName })}</Link>}
     </article>
   );
 }
