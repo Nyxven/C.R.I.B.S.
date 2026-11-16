@@ -6,6 +6,7 @@ Read first, in this order: `CONTEXT.md` (top block first), `HANDOFF.md`, `BUILD_
 The UI pass is mostly built. The brand look (purple-to-coral gradient buttons, warm/mint page wash, ribbon line under titles, the logo on the Ask CRIBS button, three "Recommended for {child}" guides on Home) was restored after the user said the flat version looked bland. Keep it. Every screen follows one pattern: back link, page header, grouped list, empty state with a next step, skeleton, and a feedback line after actions.
 
 ## What to build next, in this order
+00. Session 9b added Filipino (see CONTEXT.md top block). If asked to continue languages: translate more screens (key in `en.ts` first, then `fil.ts`), Ask replies in the chosen language, then more languages. Stage 5 stays postponed until the user says so.
 0. Session 9 built the if-found page, Ask polish, sentence-case headings and the 8-step walkthrough (all unverified, see CONTEXT.md top block). If the user can run `npm`, verify first: `npm ci && npm run typecheck && npm test && npm run lint && npm run build`, fix failures, then check screens at 360/390/768/1024/1440 px.
 1. Judge by eye with the user: Settings, Child profile, Community, Directory, FAQ, Learn and article pages. Ask "more or less gradient?" before spreading it. Gradient only on primary actions, ribbon lines and progress.
 2. Offer next candidates: Language and Theme settings (only if they really work), a better Learn reading experience, then Stage 5 from `CONTEXT.md` "Next tasks" (only with the user's "go").

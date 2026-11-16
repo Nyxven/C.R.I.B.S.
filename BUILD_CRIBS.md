@@ -395,3 +395,7 @@ Still Phase 4B. No schema, migration or environment change.
 **Walkthrough.** 8 steps, each tied to a real `data-tour` element and a page path. Seen steps are stored per user in `localStorage` (`cribs:tour:v2:<user>`); the v1 "done" flag still means finished. Skip marks all seen; Settings restarts it.
 
 **Status.** Syntax-parsed and the tour logic harness only; not typechecked, tested, built or viewed. See CONTEXT.md "Session 9".
+
+## Session 9b: language
+
+`src/lib/i18n/*`: English is the source of truth; Filipino is a draft that falls back to English per key. The language is a cookie (`cribs_lang`), not an account setting, so no migration. Guides, FAQ, specialists and AI answers are still English. See CONTEXT.md "Session 9b" for the untranslated list and the next steps.
