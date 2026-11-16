@@ -38,12 +38,11 @@ export function AppNav() {
             {navItems.filter((n) => !("center" in n)).map((n) => {
               const Icon = icons[n.icon];
               const on = active(n.href);
-              const find = n.href === "/find";
               return (
                 <li key={n.href}>
                   <Link href={n.href} data-tour={`nav-${n.href.slice(1)}`} aria-current={on ? "page" : undefined}
-                    className={rowClass(on, find ? "bg-tint-coral text-coral-dark hover:brightness-95" : "")}>
-                    <Icon size={22} aria-hidden="true" /> {find ? t("home.find") : label(n.href)}
+                    className={rowClass(on)}>
+                    <Icon size={22} aria-hidden="true" /> {n.href === "/find" ? t("home.find") : label(n.href)}
                   </Link>
                 </li>
               );
@@ -85,12 +84,11 @@ export function AppNav() {
               );
             }
             const Icon = icons[n.icon];
-            const find = n.href === "/find";
             return (
               <li key={n.href} className="flex-1">
                 <Link href={n.href} data-tour={`nav-${n.href.slice(1)}`} aria-current={on ? "page" : undefined}
-                  className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl text-xs font-extrabold ${on ? "text-brand" : find ? "text-coral-dark" : "text-ink-soft"}`}>
-                  <span className={`flex h-7 w-14 items-center justify-center rounded-full transition ${on ? "bg-tint-purple" : find ? "bg-tint-coral" : ""}`}><Icon size={22} aria-hidden="true" /></span>
+                  className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl text-xs font-extrabold ${on ? "text-brand" : "text-ink-soft"}`}>
+                  <span className={`flex h-7 w-14 items-center justify-center rounded-full transition ${on ? "bg-tint-purple" : ""}`}><Icon size={22} aria-hidden="true" /></span>
                   {label(n.href)}
                 </Link>
               </li>
