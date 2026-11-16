@@ -31,9 +31,10 @@ export default function Landing() {
           </div>
           <p className="text-sm text-ink-soft">Takes about 2 minutes. Every question about your child is optional.</p>
         </div>
-        <div className="relative mx-auto flex aspect-square w-full max-w-xs items-center justify-center rounded-full bg-tint-purple/60">
-          <Logo size={230} animate />
-        </div>
+        {/* Just the logo, no backdrop. Tapping it starts sign-up, like the main button. */}
+        <Link href="/sign-up" aria-label="Create your account" className="mx-auto flex w-full max-w-xs items-center justify-center rounded-full transition-transform duration-200 hover:scale-105 active:scale-95">
+          <Logo size={230} animate alt="" />
+        </Link>
       </section>
 
       <div className="ribbon-bar" aria-hidden="true" />
