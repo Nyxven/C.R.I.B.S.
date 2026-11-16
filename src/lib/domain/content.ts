@@ -37,3 +37,8 @@ export const rolesOf = (list: readonly { role: string }[]): string[] => [...new 
 export function filterByRole<T extends { role: string }>(list: readonly T[], role: string | undefined): T[] {
   return role && rolesOf(list).includes(role) ? list.filter((p) => p.role === role) : [...list];
 }
+
+/** A Google Maps search for a listing (name + location), so a parent can check the clinic exists and find its contact details. */
+export function mapsSearchUrl(name: string, location: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name}, ${location}`.slice(0, 200))}`;
+}

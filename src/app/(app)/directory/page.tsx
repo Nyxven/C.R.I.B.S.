@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Info, MapPin, Stethoscope } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { BookSpecialist } from "@/components/content/BookSpecialist";
 import { getProfessionals } from "@/server/content/service";
 import { filterByRole, isSampleListing, rolesOf } from "@/lib/domain/content";
 
@@ -40,7 +41,10 @@ export default async function Directory({ searchParams }: { searchParams: Promis
                 <p className="font-bold text-pink-dark">{p.role}</p>
                 <p className="flex items-start gap-2 text-sm text-ink-soft"><MapPin size={16} className="mt-0.5 shrink-0" aria-hidden="true" />{p.location}</p>
                 <p>{p.note}</p>
-                {isSampleListing(p) && <span className="chip">Sample listing</span>}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <BookSpecialist name={p.name} role={p.role} location={p.location} sample={isSampleListing(p)} />
+                  {isSampleListing(p) && <span className="chip">Sample listing</span>}
+                </div>
                 </div>
               </li>
             ))}
