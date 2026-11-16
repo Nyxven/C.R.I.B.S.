@@ -36,20 +36,18 @@ export default async function Home() {
   const child = capitalizeFirst(g.child);
   return (
     <div className="space-y-8">
-      {/* Welcome card: brand gradient (white text stays 5.4:1 or better along it), greeting and search together. */}
-      <section className="hero-card rise">
-      <header className="flex items-start justify-between gap-4">
-        <div className="min-w-0 space-y-1">
-          <h1 className="h-page text-white">{t("home.hello", { name: first })}</h1>
-          <p className="text-lg font-bold text-white">{child ? t("home.youAnd", { child }) : t("home.youAndDefault")}</p>
+      <header className="rise flex items-start justify-between gap-4">
+        <div className="min-w-0 space-y-2">
+          <h1 className="h-page">{t("home.hello", { name: first })}</h1>
+          <p className="text-lg font-bold text-coral-dark">{child ? t("home.youAnd", { child }) : t("home.youAndDefault")}</p>
+          <div className="ribbon-bar w-24" aria-hidden="true" />
         </div>
-        <Link href="/notifications" className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-white/60 bg-white/15 text-white"
+        <Link href="/notifications" className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm"
           aria-label={unread > 0 ? t("home.notifNew", { n: unread }) : t("home.notifNone")}>
           <Bell size={22} aria-hidden="true" />
           {unread > 0 && <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-1 text-xs font-extrabold text-white" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
         </Link>
       </header>
-      </section>
 
       {/* Its own layer, so the suggestion list opens over the cards below it. */}
       <div data-tour="search" className="relative z-20"><SearchBox suggestions={suggestions} /></div>
