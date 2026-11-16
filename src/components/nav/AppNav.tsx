@@ -1,13 +1,19 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MapPin, Sparkles, HelpCircle, Settings } from "lucide-react";
+import { Home, MapPin, Sparkles, HelpCircle, Settings, Smile, Users, Bookmark, QrCode } from "lucide-react";
 import { navItems } from "@/config/nav";
 import { Logo } from "@/components/Logo";
 import { useT } from "@/lib/i18n/client";
 import type { Key } from "@/lib/i18n/en";
 
 const icons = { home: Home, "map-pin": MapPin, sparkles: Sparkles, help: HelpCircle, settings: Settings };
+const more = [
+  { href: "/child", key: "home.child", icon: Smile },
+  { href: "/community", key: "home.community", icon: Users },
+  { href: "/saved", key: "home.saved", icon: Bookmark },
+  { href: "/find", key: "home.find", icon: QrCode },
+] as const;
 
 export function AppNav() {
   const path = usePathname();
@@ -19,7 +25,7 @@ export function AppNav() {
     <>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-white/90 p-5 backdrop-blur lg:flex">
-        <Link href="/home" className="mb-6 flex items-center gap-2 rounded-2xl">
+        <Link href="/home" aria-label="C.R.I.B.S. home" className="mb-6 flex items-center gap-2 rounded-2xl">
           <Logo size={52} alt="" /><span className="font-display text-xl font-bold">C.R.I.B.S.</span>
         </Link>
         <Link href="/ask" data-tour="ask" aria-current={active("/ask") ? "page" : undefined} className="btn-primary mb-5 w-full"><Logo size={30} white alt="" /> Ask CRIBS</Link>
@@ -33,6 +39,21 @@ export function AppNav() {
                   <Link href={n.href} data-tour={`nav-${n.href.slice(1)}`} aria-current={on ? "page" : undefined}
                     className={`flex min-h-12 items-center gap-3 rounded-2xl px-4 text-base font-bold transition ${on ? "bg-tint-purple text-brand" : "text-ink-soft hover:bg-cream hover:text-ink"}`}>
                     <Icon size={22} aria-hidden="true" /> {label(n.href)}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          {/* The same places as Home's "Help along the way" list, so desktop users reach them without going Home first. */}
+          <p className="mb-2 mt-6 px-4 text-sm font-extrabold text-ink-soft">{t("home.help")}</p>
+          <ul className="space-y-1">
+            {more.map((m) => {
+              const on = active(m.href);
+              return (
+                <li key={m.href}>
+                  <Link href={m.href} aria-current={on ? "page" : undefined}
+                    className={`flex min-h-11 items-center gap-3 rounded-2xl px-4 text-base font-bold transition ${on ? "bg-tint-purple text-brand" : "text-ink-soft hover:bg-cream hover:text-ink"}`}>
+                    <m.icon size={20} aria-hidden="true" /> {t(m.key)}
                   </Link>
                 </li>
               );
