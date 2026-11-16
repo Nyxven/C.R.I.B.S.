@@ -228,7 +228,8 @@ a.list-row:hover, button.list-row:hover { background: var(--color-cream); }
 .stagger > *:nth-child(4) { animation-delay: 120ms; } .stagger > *:nth-child(n+5) { animation-delay: 160ms; }
 
 /* Modal dialogs (native <dialog>): focus trap and Esc come from the browser. */
-dialog.sheet { border: 0; padding: 0; border-radius: 24px; max-width: min(92vw, 28rem); width: 100%; color: var(--color-ink); background: #fff; box-shadow: 0 24px 60px -20px rgba(55,47,74,.55); animation: rise var(--dur-base) var(--ease-out) both; }
+/* margin:auto: the CSS reset removes the browser default that centers a dialog. */
+dialog.sheet { margin: auto; border: 0; padding: 0; border-radius: 24px; max-width: min(92vw, 28rem); width: 100%; color: var(--color-ink); background: #fff; box-shadow: 0 24px 60px -20px rgba(55,47,74,.55); animation: rise var(--dur-base) var(--ease-out) both; }
 dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(--dur-base) ease both; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
@@ -263,3 +264,22 @@ dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(-
   }
   .suggest-chip.is-active, .suggest-chip:hover { border-color: var(--color-brand); background: var(--color-tint-purple); }
 }
+
+/* Home welcome card and child-safety card. White text on --grad-brand is 5.4:1 or better (contrast.test.ts). */
+@layer components {
+  .hero-card {
+    position: relative; border-radius: 1.75rem; padding: 1.5rem 1.25rem 1.25rem; color: #fff;
+    background: var(--grad-brand); box-shadow: 0 22px 44px -24px color-mix(in srgb, var(--accent-a) 80%, transparent);
+  }
+  .hero-card::after { content: ""; position: absolute; inset-inline: 1.25rem; bottom: .55rem; height: 4px; border-radius: 999px; background: var(--ribbon); opacity: .9; }
+  .hero-card .search { border-color: transparent; }
+  .hero-card .search button { background: var(--color-ink); box-shadow: none; } /* a gradient button on the gradient card would vanish */
+  .find-card {
+    display: flex; align-items: center; gap: 1rem; min-height: 88px; padding: 1rem 1.1rem; border-radius: 1.5rem;
+    background: var(--color-tint-coral); border: 2px solid color-mix(in srgb, var(--color-coral-dark) 35%, transparent);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .find-card:active { transform: scale(.99); }
+}
+/* Bottom sheet (phone "More" menu): sits on the bottom edge, full width, above the home indicator. */
+dialog.sheet.sheet-bottom { margin: auto 0 0; max-width: 100%; border-radius: 24px 24px 0 0; padding: 1.25rem 1.25rem max(1.25rem, env(safe-area-inset-bottom)); max-height: 85dvh; overflow-y: auto; }

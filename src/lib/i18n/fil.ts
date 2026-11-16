@@ -5,7 +5,11 @@ import type { Key } from "./en";
 export const fil: Partial<Record<Key, string>> = {
   "nav.main": "Pangunahin",
   "nav.home": "Home",
-  "nav.directory": "Direktoryo",
+  "nav.directory": "Espesyalista",
+  "nav.find": "Find",
+  "nav.more": "Iba pa",
+  "nav.close": "Isara",
+  "nav.notifications": "Mga abiso",
   "nav.ask": "Magtanong",
   "nav.faq": "Mga Tanong",
   "nav.settings": "Mga Setting",
@@ -29,6 +33,9 @@ export const fil: Partial<Record<Key, string>> = {
   "home.saved": "Mga na-save na gabay",
   "home.savedSub": "Basahin ang mga ito mamaya",
   "home.find": "Find CRIBS",
+  "home.safeTitle": "Panatilihing ligtas si {child}",
+  "home.safeTitleDefault": "Panatilihing ligtas ang iyong anak",
+  "home.safeBody": "Kung mawala sila: buksan ang tracker o ipakita ang if-found page, sa isang pindot.",
   "home.findSub": "Ang iyong tag at ang if-found page",
 
   "search.label": "Maghanap ng gabay, tanong at espesyalista",

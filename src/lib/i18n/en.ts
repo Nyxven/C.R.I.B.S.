@@ -2,7 +2,11 @@
 export const en = {
   "nav.main": "Main",
   "nav.home": "Home",
-  "nav.directory": "Directory",
+  "nav.directory": "Specialists",
+  "nav.find": "Find",
+  "nav.more": "More",
+  "nav.close": "Close",
+  "nav.notifications": "Notifications",
   "nav.ask": "Ask",
   "nav.faq": "FAQ",
   "nav.settings": "Settings",
@@ -26,6 +30,9 @@ export const en = {
   "home.saved": "Saved guides",
   "home.savedSub": "Read these later",
   "home.find": "Find CRIBS",
+  "home.safeTitle": "Keep {child} safe",
+  "home.safeTitleDefault": "Keep your child safe",
+  "home.safeBody": "If they wander off: open the tracker or show the if-found page, in one tap.",
   "home.findSub": "Your tag and if-found page",
 
   "search.label": "Search guides, questions and specialists",
