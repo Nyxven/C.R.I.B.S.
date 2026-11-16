@@ -31,7 +31,7 @@ export const PLACES: readonly SuggestItem[] = [
   { kind: "page", title: "Find CRIBS and the if-found page", meta: "Safety", href: "/find", keywords: "wandering wander lost missing running off run away nawawala nawala tumakbo tag qr tracker safety find" },
   { kind: "page", title: "Child profile", meta: "Your child", href: "/child", keywords: "child profile calm avoid emergency contact anak" },
   { kind: "page", title: "Parent community", meta: "Other parents", href: "/community", keywords: "community parents support group magulang kapwa tips stress tired pagod" },
-  { kind: "page", title: "Specialists near Taguig", meta: "Directory", href: "/directory", keywords: "directory specialist doctor therapist clinic taguig pateros near malapit" },
+  { kind: "page", title: "Specialists near Taguig", meta: "Specialists", href: "/directory", keywords: "directory specialist doctor therapist clinic taguig pateros near malapit" },
   { kind: "page", title: "Text size", meta: "Settings", href: "/settings/appearance", keywords: "text size bigger larger font laki letra" },
 ];
 

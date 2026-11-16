@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { getProfessionals } from "@/server/content/service";
 import { filterByRole, isSampleListing, rolesOf } from "@/lib/domain/content";
 
-export const metadata = { title: "Directory" };
+export const metadata = { title: "Specialists" };
 
 export default async function Directory({ searchParams }: { searchParams: Promise<{ role?: string | string[] }> }) {
   const { role: raw } = await searchParams;
