@@ -35,7 +35,7 @@ export const fil: Partial<Record<Key, string>> = {
   "home.find": "Find CRIBS",
   "home.safeTitle": "Panatilihing ligtas si {child}",
   "home.safeTitleDefault": "Panatilihing ligtas ang iyong anak",
-  "home.safeBody": "Kung mawala sila: buksan ang tracker o ipakita ang if-found page, sa isang pindot.",
+  "home.safeBody": "Tracker at if-found page, isang pindot lang.",
   "home.findSub": "Ang iyong tag at ang if-found page",
 
   "search.label": "Maghanap ng gabay, tanong at espesyalista",

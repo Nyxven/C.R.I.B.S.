@@ -272,10 +272,8 @@ dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(-
     background: var(--grad-brand); box-shadow: 0 22px 44px -24px color-mix(in srgb, var(--accent-a) 80%, transparent);
   }
   .hero-card::after { content: ""; position: absolute; inset-inline: 1.25rem; bottom: .55rem; height: 4px; border-radius: 999px; background: var(--ribbon); opacity: .9; }
-  .hero-card .search { border-color: transparent; }
-  .hero-card .search button { background: var(--color-ink); box-shadow: none; } /* a gradient button on the gradient card would vanish */
   .find-card {
-    display: flex; align-items: center; gap: 1rem; min-height: 88px; padding: 1rem 1.1rem; border-radius: 1.5rem;
+    display: flex; align-items: center; gap: .75rem; min-height: 60px; padding: .6rem .9rem; border-radius: 1.25rem;
     background: var(--color-tint-coral); border: 2px solid color-mix(in srgb, var(--color-coral-dark) 35%, transparent);
     transition: transform var(--dur-fast) var(--ease-out);
   }

@@ -32,7 +32,7 @@ export const en = {
   "home.find": "Find CRIBS",
   "home.safeTitle": "Keep {child} safe",
   "home.safeTitleDefault": "Keep your child safe",
-  "home.safeBody": "If they wander off: open the tracker or show the if-found page, in one tap.",
+  "home.safeBody": "Tracker and if-found page, one tap away.",
   "home.findSub": "Your tag and if-found page",
 
   "search.label": "Search guides, questions and specialists",
