@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Baby, Bell, BookOpen, Bookmark, ChevronRight, QrCode, Users } from "lucide-react";
+import { capitalizeFirst } from "@/lib/domain/names";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
@@ -13,12 +14,12 @@ import { moduleLook } from "@/components/content/moduleStyle";
 
 export const metadata = { title: "Home" };
 
-// Directory, FAQ and Ask already live in the navigation, so Home does not repeat them.
+// Directory, FAQ and Ask already live in the navigation, so Home does not repeat them. Each row keeps its own tint.
 const space = [
-  { href: "/child", title: "Child profile", sub: "What helps your child", Icon: Baby, tour: "child" },
-  { href: "/saved", title: "Saved guides", sub: "Read these later", Icon: Bookmark },
-  { href: "/community", title: "Parent community", sub: "Tips and small wins", Icon: Users },
-  { href: "/find", title: "Find CRIBS", sub: "Your tag and if-found page", Icon: QrCode },
+  { href: "/child", title: "Child profile", sub: "What helps your child, in one place", Icon: Baby, tint: "bg-tint-yellow", tour: "child" },
+  { href: "/community", title: "Parent community", sub: "Share tips and small wins", Icon: Users, tint: "bg-tint-sage" },
+  { href: "/saved", title: "Saved guides", sub: "Read these later", Icon: Bookmark, tint: "bg-tint-purple" },
+  { href: "/find", title: "Find CRIBS", sub: "Your tag and if-found page", Icon: QrCode, tint: "bg-tint-pink" },
 ] as const;
 
 export default async function Home() {
@@ -30,16 +31,17 @@ export default async function Home() {
     uid ? getRecommendations(uid) : { child: "", guides: [] },
   ]);
   const unread = uid ? await countUnread(uid).catch(() => 0) : 0;
-  const first = (g.parent || session?.user.name || "friend").trim().split(" ")[0];
-  const top = rec.guides[0];
+  const first = capitalizeFirst((g.parent || session?.user.name || "friend").trim().split(" ")[0] ?? "friend");
+  const child = capitalizeFirst(g.child);
   return (
-    <div className="space-y-9">
+    <div className="space-y-8">
       <header className="rise flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="h-page">Hello, {first}</h1>
-          <p className="mt-1 text-ink-soft">{g.child ? `Here for you and ${g.child}.` : "Here for you and your little one."}</p>
+        <div className="min-w-0 space-y-2">
+          <h1 className="h-page">Hello, {first}!</h1>
+          <p className="text-lg font-bold text-coral-dark">{child ? `You and ${child}!` : "You and your little one!"}</p>
+          <div className="ribbon-bar w-24" aria-hidden="true" />
         </div>
-        <Link href="/notifications" className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink"
+        <Link href="/notifications" className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm"
           aria-label={unread > 0 ? `Notifications, ${unread} new` : "Notifications, nothing new"}>
           <Bell size={22} aria-hidden="true" />
           {unread > 0 && <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-1 text-xs font-extrabold text-white" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
@@ -48,30 +50,36 @@ export default async function Home() {
 
       <div data-tour="search"><SearchBox /></div>
 
-      {top && (
-        <section aria-labelledby="start-title" className="rise">
-          <h2 id="start-title" className="section-label">{rec.child ? `Start here for ${rec.child}` : "Start here"}</h2>
-          <Link href={`/learn/${top.moduleId}/${top.slug}`} className="flex min-h-24 items-center gap-4 rounded-3xl bg-tint-purple p-5 transition-transform duration-150 active:scale-[.99]">
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-bold text-brand">{top.reason}</span>
-              <span className="mt-0.5 block font-display text-xl font-bold leading-snug">{top.title}</span>
-              <span className="mt-1 block text-sm text-ink-soft">{top.moduleShortName} · {top.readTime}</span>
-            </span>
-            <ChevronRight size={22} className="shrink-0 text-brand" aria-hidden="true" />
-          </Link>
+      {rec.guides.length > 0 && (
+        <section aria-labelledby="rec-title" className="rise">
+          <h2 id="rec-title" className="mb-3 text-xl font-bold">{rec.child ? `Recommended for ${capitalizeFirst(rec.child)}` : "Recommended for you"}</h2>
+          <ul className="stagger space-y-3">
+            {rec.guides.map((a) => (
+              <li key={a.slug}>
+                <Link href={`/learn/${a.moduleId}/${a.slug}`} className="card flex min-h-20 items-center gap-4 p-4 transition-transform duration-150 active:scale-[.99]">
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold text-coral-dark">{a.reason}</span>
+                    <span className="block font-display text-lg font-bold leading-tight">{a.title}</span>
+                    <span className="block text-sm text-ink-soft">{a.moduleShortName} · {a.readTime}</span>
+                  </span>
+                  <ChevronRight size={22} className="shrink-0 text-ink-soft" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
       <section aria-labelledby="guides-title" data-tour="guides">
-        <h2 id="guides-title" className="section-label">Your guides</h2>
+        <h2 id="guides-title" className="mb-3 text-xl font-bold">Your guides</h2>
         {modules.length === 0 && <EmptyState icon={BookOpen} title="Guides are being set up">Please check back soon. Ask CRIBS and the FAQ are ready in the menu.</EmptyState>}
         <ul className="stagger grid grid-cols-2 gap-3">
           {modules.map((m) => {
             const { box, Icon } = moduleLook(m.id);
             return (
               <li key={m.id}>
-                <Link href={`/learn/${m.id}`} className={`flex h-full min-h-36 flex-col justify-between rounded-3xl p-4 transition-transform duration-150 active:scale-[.98] ${box}`}>
-                  <Icon size={26} aria-hidden="true" />
+                <Link href={`/learn/${m.id}`} className={`flex h-full min-h-40 flex-col justify-between rounded-3xl p-4 shadow-sm transition-transform duration-150 active:scale-[.98] ${box}`}>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ink shadow-sm"><Icon size={22} aria-hidden="true" /></span>
                   <span>
                     <span className="block font-display text-lg font-bold leading-tight">{m.shortName}</span>
                     <span className="mt-1 block text-sm font-semibold text-ink-soft">{progressLabel(moduleProgress(m.articles.map((a) => a.slug), entries))}</span>
@@ -84,11 +92,11 @@ export default async function Home() {
       </section>
 
       <section aria-labelledby="space-title">
-        <h2 id="space-title" className="section-label">Your space</h2>
+        <h2 id="space-title" className="mb-3 text-xl font-bold">Help along the way</h2>
         <div className="list-group">
-          {space.map(({ href, title, sub, Icon, ...r }) => (
+          {space.map(({ href, title, sub, Icon, tint, ...r }) => (
             <Link key={href} href={href} className="list-row" data-tour={"tour" in r ? r.tour : undefined}>
-              <span className="row-icon"><Icon size={20} aria-hidden="true" /></span>
+              <span className={`row-icon ${tint}`} style={{ color: "var(--color-ink)" }}><Icon size={20} aria-hidden="true" /></span>
               <span className="min-w-0 flex-1"><span className="row-title block">{title}</span><span className="row-sub block">{sub}</span></span>
               <ChevronRight size={20} className="shrink-0 text-ink-soft" aria-hidden="true" />
             </Link>
