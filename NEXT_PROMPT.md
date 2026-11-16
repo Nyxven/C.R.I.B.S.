@@ -10,6 +10,7 @@ Session 10 was the first verified session: typecheck clean, 502/502 tests, `next
 - To see signed-in screens without touching production: create a Neon branch, put its URL and fresh dev `AUTH_SECRET`/`PASSWORD_PEPPER` in `.env.local` with `MAIL_DRIVER=console`, run `npm run db:seed`, `npm run dev`, sign up; the OTP prints in the server log. Delete the branch afterwards.
 
 ## What to do next, in this order
+0. Session 11: if PR #2 is not merged yet, ask the user to merge it (production deploys from `main`). Then, with Vercel team access approved, add `ravenyx.dev@gmail.com` to `MODERATOR_EMAILS` (Production) and redeploy. Search suggestions live in `src/lib/domain/suggest.ts`: add new parent words to `TOPICS`/`PLACES` with a test.
 1. Decide with the user how to fix `npm run lint` (Next 16 removed `next lint`): add ESLint 9 flat config with the import-boundary rule from BUILD_CRIBS 0.4, or remove the script.
 2. Check what session 10 did not: 768 and 1024 px, Large text, keyboard only, walkthrough steps on Ask/Child/Saved/Settings, Filipino screens, a real AI answer (needs the user's provider key in Vercel, never in chat).
 3. Push the branch and open a PR (ask first); delete the Neon dev branch `dev-ui-preview-2026-11-16` (ask first).

@@ -1,3 +1,9 @@
+# HANDOFF.md — Session 11 (search suggestions, Ask-about-guide, deploy prep)
+Search suggestions while typing (English/Filipino/Taglish parent words -> guides, FAQs, specialists, pages), topic fallback on /search, FAQ deep links, "Ask CRIBS about this guide". Verified: typecheck, 512 tests, build, browser at 390 px. PR #2 (`feat/ui-verify-polish` -> `main`) has all checks green (CI verify, secret scan, Vercel preview).
+**Waiting on the user:** (1) merge PR #2; Vercel then deploys production automatically. (2) Vercel connector team access ("gabaii") must be approved before an agent can set env vars; then add `ravenyx.dev@gmail.com` to `MODERATOR_EMAILS` (Production) and redeploy. That account already exists and is verified in production. (3) Delete Neon dev branch `dev-ui-preview-2026-11-16` when done.
+
+---
+
 # HANDOFF.md — Session 10 (verification + fixes)
 First session with a real toolchain and browser. Typecheck 0 errors, 502/502 tests, `next build` green; every main screen was used in a browser at 390 and 1440 px against a throwaway Neon branch. Nine small fixes on branch `feat/ui-verify-polish` (Ask scroll and composer, Enter to send, header wrap, if-found "not active" page for finders, onboarding bar, desktop sidebar links, directory scrollbar, article chip, search hint). Details, what was and was not checked, and the local-secrets note are in CONTEXT.md (top block). `npm run lint` is broken (Next 16 removed `next lint`). Phase 5 not started.
 
