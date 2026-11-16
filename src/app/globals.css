@@ -242,3 +242,24 @@ dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(-
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+/* Search suggestions under the search box (SearchBox). Quiet card; the active option gets the brand tint and a left bar, never colour alone. */
+@layer components {
+  .suggest-panel {
+    position: absolute; inset-inline: 0; top: calc(100% + .5rem); z-index: 30; overflow: hidden;
+    background: #fff; border: 1px solid var(--color-line); border-radius: 1.25rem;
+    box-shadow: 0 18px 40px -18px rgba(55, 47, 74, .45);
+    animation: rise var(--dur-fast) var(--ease-out) both;
+  }
+  .suggest-row {
+    display: flex; align-items: center; gap: .75rem; min-height: 56px; padding: .5rem 1rem; cursor: pointer;
+    border-left: 4px solid transparent;
+  }
+  .suggest-row + .suggest-row { border-top: 1px solid var(--color-line); }
+  .suggest-row.is-active { background: var(--color-tint-purple); border-left-color: var(--color-brand); }
+  .suggest-chip {
+    display: inline-flex; align-items: center; gap: .35rem; min-height: 44px; padding: 0 1rem; cursor: pointer;
+    border-radius: 999px; border: 2px solid var(--color-tint-purple); background: #fff; font-weight: 800; color: var(--color-brand);
+  }
+  .suggest-chip.is-active, .suggest-chip:hover { border-color: var(--color-brand); background: var(--color-tint-purple); }
+}

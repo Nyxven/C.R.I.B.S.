@@ -4,7 +4,7 @@ import { capitalizeFirst } from "@/lib/domain/names";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getSession } from "@/server/auth/session";
 import { getGreeting } from "@/server/onboarding/service";
-import { getModules } from "@/server/content/service";
+import { getModules, getSuggestIndex } from "@/server/content/service";
 import { getRecommendations } from "@/server/content/recommendations";
 import { countUnread } from "@/server/notifications/service";
 import { getProgress } from "@/server/progress/service";
@@ -25,7 +25,7 @@ const space = [
 ] as const satisfies readonly { href: string; title: Key; sub: Key; Icon: unknown; tint: string; tour?: string }[];
 
 export default async function Home() {
-  const [session, modules, t] = await Promise.all([getSession(), getModules(), getT()]);
+  const [session, modules, t, suggestions] = await Promise.all([getSession(), getModules(), getT(), getSuggestIndex()]);
   const uid = session?.user.id;
   const [g, entries, rec] = await Promise.all([
     uid ? getGreeting(uid) : { parent: "", child: "" },
@@ -50,7 +50,7 @@ export default async function Home() {
         </Link>
       </header>
 
-      <div data-tour="search"><SearchBox /></div>
+      <div data-tour="search"><SearchBox suggestions={suggestions} /></div>
 
       {rec.guides.length > 0 && (
         <section aria-labelledby="rec-title" className="rise">

@@ -34,6 +34,11 @@ export const fil: Partial<Record<Key, string>> = {
   "search.label": "Maghanap ng gabay, tanong at espesyalista",
   "search.placeholder": "Maghanap ng gabay at tanong",
   "search.button": "Hanapin",
+  "search.suggestions": "Mga mungkahi",
+  "search.popular": "Mga madalas hanapin",
+  "search.countOne": "1 mungkahi. Gamitin ang pataas at pababang arrow para pumili.",
+  "search.count": "{n} mungkahi. Gamitin ang pataas at pababang arrow para pumili.",
+  "search.none": "Walang mungkahi. Pindutin ang Enter para maghanap.",
 
   "settings.title": "Mga Setting",
   "settings.account": "Account",

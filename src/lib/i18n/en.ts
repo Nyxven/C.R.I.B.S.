@@ -31,6 +31,11 @@ export const en = {
   "search.label": "Search guides, questions and specialists",
   "search.placeholder": "Search guides and questions",
   "search.button": "Search",
+  "search.suggestions": "Suggestions",
+  "search.popular": "Popular topics",
+  "search.countOne": "1 suggestion. Use the up and down arrows to choose.",
+  "search.count": "{n} suggestions. Use the up and down arrows to choose.",
+  "search.none": "No suggestions. Press Enter to search.",
 
   "settings.title": "Settings",
   "settings.account": "Account",

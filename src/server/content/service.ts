@@ -1,6 +1,7 @@
 import { cache } from "react";
 import type { ArticleFull, ArticleSummary, FaqItem, ModuleWithArticles, Professional } from "@/lib/domain/content";
 import { buildSearchDocs, isSearchable, search, type SearchHit } from "@/lib/domain/search";
+import { buildSuggestIndex, type SuggestItem } from "@/lib/domain/suggest";
 import * as repo from "./repo";
 
 // Pages call these. They return plain objects, never database rows.
@@ -46,4 +47,11 @@ export async function searchContent(query: string): Promise<SearchHit[]> {
   if (!isSearchable(query)) return [];
   const [articles, faqs, professionals] = await Promise.all([getAllArticles(), getFaqs(), getProfessionals()]);
   return search(buildSearchDocs({ articles, faqs, professionals }), query);
+}
+
+/** Titles and labels for search suggestions in the browser (no article bodies, nothing personal). */
+export async function getSuggestIndex(): Promise<SuggestItem[]> {
+  const [mods, faqs, professionals] = await Promise.all([getModules(), getFaqs(), getProfessionals()]);
+  const articles = mods.flatMap((m) => m.articles.map((a) => ({ slug: a.slug, moduleId: a.moduleId, title: a.title, moduleShortName: m.shortName })));
+  return buildSuggestIndex({ articles, faqs, professionals });
 }
