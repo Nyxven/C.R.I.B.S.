@@ -55,3 +55,9 @@ export async function getSuggestIndex(): Promise<SuggestItem[]> {
   const articles = mods.flatMap((m) => m.articles.map((a) => ({ slug: a.slug, moduleId: a.moduleId, title: a.title, moduleShortName: m.shortName })));
   return buildSuggestIndex({ articles, faqs, professionals });
 }
+
+/** A guide's title by slug, or null. Used to pre-fill Ask from an article (only real titles, never text from the URL). */
+export async function getArticleTitle(slug: string): Promise<string | null> {
+  for (const m of await getModules()) { const a = m.articles.find((x) => x.slug === slug); if (a) return a.title; }
+  return null;
+}

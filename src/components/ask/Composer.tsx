@@ -4,9 +4,9 @@ import { SendHorizontal } from "lucide-react";
 import { MAX_INPUT_CHARS } from "@/lib/ai/limits";
 import { useT } from "@/lib/i18n/client";
 
-export function Composer({ busy, onSend }: { busy: boolean; onSend: (text: string) => void }) {
+export function Composer({ busy, onSend, initial = "" }: { busy: boolean; onSend: (text: string) => void; initial?: string }) {
   const t = useT();
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initial);
   const ref = useRef<HTMLTextAreaElement>(null);
   const empty = text.trim() === "";
 

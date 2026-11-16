@@ -10,6 +10,7 @@ import { ArticleActions } from "@/components/content/ArticleActions";
 import { isExpertReviewed } from "@/lib/domain/content";
 import { moduleLook } from "@/components/content/moduleStyle";
 import { getT } from "@/lib/i18n/server";
+import { Logo } from "@/components/Logo";
 
 export async function generateMetadata({ params }: { params: Promise<{ module: string; slug: string }> }) {
   const { module, slug } = await params;
@@ -41,6 +42,7 @@ export default async function Article({ params }: { params: Promise<{ module: st
       </header>
       <div className="prose-cribs" dangerouslySetInnerHTML={{ __html: a.html }} />
       <ArticleActions slug={a.slug} initial={entry} />
+      <Link href={`/ask?about=${encodeURIComponent(a.slug)}`} className="btn-secondary w-full"><Logo size={26} alt="" /> {t("article.ask")}</Link>
       {next && (
         <section aria-labelledby="next-title">
           <h2 id="next-title" className="section-label">{t("article.upNext")}</h2>

@@ -11,7 +11,7 @@ import { useT } from "@/lib/i18n/client";
 import { Composer } from "./Composer";
 import { Message } from "./Message";
 
-export function ChatView({ starters, available, initial }: { starters: string[]; available: boolean; initial?: { threadId: string; messages: ChatMessage[] } }) {
+export function ChatView({ starters, available, initial, prefill }: { starters: string[]; available: boolean; initial?: { threadId: string; messages: ChatMessage[] }; prefill?: string }) {
   const t = useT();
   const chat = useChat(initial);
   const endRef = useRef<HTMLDivElement>(null);
@@ -62,7 +62,7 @@ export function ChatView({ starters, available, initial }: { starters: string[];
           )}
 
           <div data-tour="composer" className="sticky bottom-[calc(5.75rem+env(safe-area-inset-bottom))] -mx-5 mt-auto space-y-2 border-t border-line bg-cream/90 px-5 pb-2 pt-3 backdrop-blur lg:bottom-0 lg:mx-0 lg:px-0 lg:pb-4">
-            <Composer busy={chat.busy} onSend={(t) => void chat.send(t)} />
+            <Composer initial={prefill} busy={chat.busy} onSend={(t) => void chat.send(t)} />
             <p className="text-center text-xs font-semibold text-ink-soft">{t("ask.disclaimer")}</p>
           </div>
         </>
