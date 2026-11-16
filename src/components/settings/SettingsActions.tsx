@@ -6,6 +6,7 @@ import { deleteAccountAction, exportDataAction, updateSettingsAction } from "@/f
 import { signOutAction } from "@/features/auth/actions";
 import { restartTour } from "@/components/tour/storage";
 import { RowButton } from "./SettingsParts";
+import { useT } from "@/lib/i18n/client";
 
 /** Short status line that screen readers announce. */
 function Status({ ok, text }: { ok: boolean; text: string }) {
@@ -14,6 +15,7 @@ function Status({ ok, text }: { ok: boolean; text: string }) {
 
 /** On/off switch row for notifications. Updates at once and goes back if saving fails. */
 export function NotificationsSwitch({ initial }: { initial: boolean }) {
+  const t = useT();
   const [on, setOn] = useState(initial);
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState({ ok: true, text: "" });
@@ -22,7 +24,7 @@ export function NotificationsSwitch({ initial }: { initial: boolean }) {
     setOn(next); setMsg({ ok: true, text: "" });
     start(async () => {
       const r = await updateSettingsAction({ notifOn: next });
-      if (!r.ok) { setOn(!next); setMsg({ ok: false, text: r.error }); } else setMsg({ ok: true, text: next ? "Notifications are on." : "Notifications are off. Account and safety notices still arrive." });
+      if (!r.ok) { setOn(!next); setMsg({ ok: false, text: r.error }); } else setMsg({ ok: true, text: next ? t("settings.notifOn") : t("settings.notifOff") });
     });
   };
   return (
@@ -30,15 +32,15 @@ export function NotificationsSwitch({ initial }: { initial: boolean }) {
       <div className="list-row">
         <span className="row-icon"><Bell size={20} aria-hidden="true" /></span>
         <span className="min-w-0 flex-1">
-          <span id="notif-label" className="row-title block">Notifications</span>
-          <span id="notif-sub" className="row-sub block">Replies and helpful marks on your posts</span>
+          <span id="notif-label" className="row-title block">{t("settings.notif")}</span>
+          <span id="notif-sub" className="row-sub block">{t("settings.notifSub")}</span>
         </span>
         <button type="button" role="switch" aria-checked={on} aria-labelledby="notif-label" aria-describedby="notif-sub" disabled={pending} onClick={toggle}
           className={`relative h-8 w-14 shrink-0 rounded-full border-2 transition-colors duration-200 ${on ? "border-brand bg-brand" : "border-field bg-white"}`}>
           <span className={`absolute top-0.5 flex h-6 w-6 items-center justify-center rounded-full transition-all duration-200 ${on ? "left-[26px] bg-white text-brand" : "left-0.5 bg-field text-white"}`}>
             {on && <Check size={14} aria-hidden="true" />}
           </span>
-          <span className="sr-only">{on ? "On" : "Off"}</span>
+          <span className="sr-only">{on ? t("settings.on") : t("settings.off")}</span>
         </button>
       </div>
       {msg.text && <Status {...msg} />}
@@ -48,22 +50,24 @@ export function NotificationsSwitch({ initial }: { initial: boolean }) {
 
 export function RestartWalkthroughRow({ userId }: { userId: string }) {
   const router = useRouter();
-  return <RowButton icon={Play} title="Restart the app walkthrough" sub="A short tour of the main buttons" onClick={() => { restartTour(userId); router.push("/home"); }} />;
+  const t = useT();
+  return <RowButton icon={Play} title={t("settings.restart")} sub={t("settings.restartSub")} onClick={() => { restartTour(userId); router.push("/home"); }} />;
 }
 
 export function DownloadDataRow() {
+  const t = useT();
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState({ ok: true, text: "" });
   return (
     <div>
-      <RowButton icon={Download} title="Download my data" sub="A readable copy of what we hold about you" disabled={pending}
+      <RowButton icon={Download} title={t("settings.download")} sub={t("settings.downloadSub")} disabled={pending}
         onClick={() => start(async () => {
           const r = await exportDataAction();
           if (!r.ok) return setMsg({ ok: false, text: r.error });
           const a = document.createElement("a");
           a.href = URL.createObjectURL(new Blob([r.json], { type: "application/json" }));
           a.download = r.fileName; a.click(); URL.revokeObjectURL(a.href);
-          setMsg({ ok: true, text: "Your file was downloaded." });
+          setMsg({ ok: true, text: t("settings.downloaded") });
         })} />
       {msg.text && <Status {...msg} />}
     </div>
@@ -71,15 +75,17 @@ export function DownloadDataRow() {
 }
 
 export function SignOutRow() {
+  const t = useT();
   return (
     <form action={signOutAction}>
-      <button className="list-row"><span className="row-icon"><LogOut size={20} aria-hidden="true" /></span><span className="row-title">Sign out</span></button>
+      <button className="list-row"><span className="row-icon"><LogOut size={20} aria-hidden="true" /></span><span className="row-title">{t("settings.signOut")}</span></button>
     </form>
   );
 }
 
 /** Delete account: a confirmation dialog first, then the same checks as before (typed word + password). */
 export function DeleteAccountRow() {
+  const t = useT();
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [pending, start] = useTransition();
@@ -88,7 +94,7 @@ export function DeleteAccountRow() {
   const close = () => { dialog.current?.close(); setF({ password: "", confirm: "" }); setError(""); };
   return (
     <>
-      <RowButton danger icon={Trash2} title="Delete my account" sub="Removes your account and your child's profile for good" onClick={() => dialog.current?.showModal()} />
+      <RowButton danger icon={Trash2} title={t("settings.delete")} sub={t("settings.deleteSub")} onClick={() => dialog.current?.showModal()} />
       <dialog ref={dialog} className="sheet" aria-labelledby="del-h" onClose={() => setError("")}>
         <form className="space-y-4 p-6" onSubmit={(e) => {
           e.preventDefault();
