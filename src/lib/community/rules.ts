@@ -63,3 +63,16 @@ export function decodeCursor(c: unknown): { createdAt: Date; id: string } | null
     return Number.isFinite(ms) && ms > 0 && id && /^[0-9a-f-]{36}$/i.test(id) ? { createdAt: new Date(ms), id } : null;
   } catch { return null; }
 }
+
+/** Stable avatar colour (0-5) for a display name, so the same parent always gets the same tint. Decorative only. */
+export function avatarTone(name: string): number {
+  let h = 0;
+  for (const ch of name.trim().toLowerCase()) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
+  return h % 6;
+}
+
+/** The letter shown in a post avatar ("?" for anonymous or empty names). */
+export const avatarLetter = (name: string): string => (/^anonymous/i.test(name.trim()) ? "?" : (name.trim().charAt(0) || "?").toUpperCase());
+
+/** Ideas that start a post, shown as chips above the composer. */
+export const POST_STARTERS = ["A small win today: ", "Has anyone tried ", "A tip that helped us: ", "I need advice about "] as const;

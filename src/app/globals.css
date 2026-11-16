@@ -265,13 +265,8 @@ dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(-
   .suggest-chip.is-active, .suggest-chip:hover { border-color: var(--color-brand); background: var(--color-tint-purple); }
 }
 
-/* Home welcome card and child-safety card. White text on --grad-brand is 5.4:1 or better (contrast.test.ts). */
+/* Home child-safety card. */
 @layer components {
-  .hero-card {
-    position: relative; border-radius: 1.75rem; padding: 1.5rem 1.25rem 1.25rem; color: #fff;
-    background: var(--grad-brand); box-shadow: 0 22px 44px -24px color-mix(in srgb, var(--accent-a) 80%, transparent);
-  }
-  .hero-card::after { content: ""; position: absolute; inset-inline: 1.25rem; bottom: .55rem; height: 4px; border-radius: 999px; background: var(--ribbon); opacity: .9; }
   .find-card {
     display: flex; align-items: center; gap: .75rem; min-height: 60px; padding: .6rem .9rem; border-radius: 1.25rem;
     background: var(--color-tint-coral); border: 2px solid color-mix(in srgb, var(--color-coral-dark) 35%, transparent);
@@ -281,3 +276,10 @@ dialog.sheet::backdrop { background: rgba(55, 47, 74, .5); animation: fade var(-
 }
 /* Bottom sheet (phone "More" menu): sits on the bottom edge, full width, above the home indicator. */
 dialog.sheet.sheet-bottom { margin: auto 0 0; max-width: 100%; border-radius: 24px 24px 0 0; padding: 1.25rem 1.25rem max(1.25rem, env(safe-area-inset-bottom)); max-height: 85dvh; overflow-y: auto; }
+
+/* Parent community: a warm composer card with the ribbon on top, and roomy post cards. */
+@layer components {
+  .composer-card { position: relative; overflow: hidden; background: #fff; border-radius: 1.5rem; padding: 1.4rem 1.1rem 1.1rem; box-shadow: 0 16px 36px -22px rgba(55,47,74,.45); }
+  .composer-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 5px; background: var(--ribbon); }
+  .post-card { background: #fff; border-radius: 1.5rem; padding: 1.1rem; border: 1px solid var(--color-line); box-shadow: 0 10px 26px -20px rgba(55,47,74,.4); }
+}

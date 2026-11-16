@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { containsBlockedWord, normalizeForFilter } from "./blocked";
-import { checkPostText, decodeCursor, displayNameFor, encodeCursor, isModerator, isReason, POST_MAX, shouldHide } from "./rules";
+import { avatarLetter, avatarTone, checkPostText, decodeCursor, displayNameFor, encodeCursor, isModerator, isReason, POST_MAX, POST_STARTERS, shouldHide } from "./rules";
 
 describe("checkPostText", () => {
   it("accepts a normal kind post and tidies spaces", () => {
@@ -78,5 +78,20 @@ describe("names, moderators, reports, cursors", () => {
   it("knows the report reasons", () => {
     expect(isReason("spam")).toBe(true);
     expect(isReason("hate")).toBe(false);
+  });
+});
+
+describe("post avatars and starters", () => {
+  it("gives the same name the same tone, within 0-5", () => {
+    expect(avatarTone("Ana")).toBe(avatarTone(" ana "));
+    for (const n of ["Ana", "Ben", "Carla", "Anonymous parent", ""]) expect(avatarTone(n)).toBeGreaterThanOrEqual(0), expect(avatarTone(n)).toBeLessThan(6);
+  });
+  it("uses ? for anonymous", () => {
+    expect(avatarLetter("Anonymous parent")).toBe("?");
+    expect(avatarLetter("maria")).toBe("M");
+    expect(avatarLetter("  ")).toBe("?");
+  });
+  it("starter ideas are short enough to leave room to write", () => {
+    for (const s of POST_STARTERS) expect(s.length).toBeLessThan(40);
   });
 });
