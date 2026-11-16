@@ -31,7 +31,7 @@ export default async function Page() {
 
       <SettingsGroup id="grp-support" label="Support">
         <RowLink href="/faq" icon={LifeBuoy} title="Help center" sub="Answers to common questions" />
-        <RestartWalkthroughRow userId={session.user.id} />
+        <div data-tour="restart-tour"><RestartWalkthroughRow userId={session.user.id} /></div>
         <RowLink href="/privacy" icon={ScrollText} title="Privacy Policy" sub="Draft, pending review" external />
         <RowLink href="/terms" icon={FileText} title="Terms and Conditions" sub="Draft, pending review" external />
       </SettingsGroup>

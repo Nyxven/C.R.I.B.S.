@@ -57,7 +57,7 @@ export function ChatView({ starters, available, initial }: { starters: string[];
             </div>
           )}
 
-          <div className="sticky bottom-[calc(5.75rem+env(safe-area-inset-bottom))] -mx-5 space-y-2 border-t border-line bg-cream px-5 pb-2 pt-3 lg:bottom-0 lg:mx-0 lg:px-0">
+          <div data-tour="composer" className="sticky bottom-[calc(5.75rem+env(safe-area-inset-bottom))] -mx-5 space-y-2 border-t border-line bg-cream px-5 pb-2 pt-3 lg:bottom-0 lg:mx-0 lg:px-0">
             <Composer busy={chat.busy} onSend={(t) => void chat.send(t)} />
             <p className="text-center text-xs font-semibold text-ink-soft">Guidance only, not medical advice. In an emergency call 911.</p>
           </div>

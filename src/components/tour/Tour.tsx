@@ -1,8 +1,8 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { TOUR_STEPS, nextReadyStep, placeTip, type Rect, type TourStep } from "@/lib/domain/tour";
-import { TOUR_RESTART_EVENT, isTourDone, markTourDone } from "./storage";
+import { TOUR_STEPS, nextReadyStep, placeTip, unseenSteps, type Rect, type TourStep } from "@/lib/domain/tour";
+import { TOUR_RESTART_EVENT, readSeen, writeSeen } from "./storage";
 
 /** First element for a selector that is really on screen (hidden copies, such as the other nav, are skipped). */
 function findVisible(selector: string): HTMLElement | null {
@@ -23,7 +23,7 @@ const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)"
 export function Tour({ userId }: { userId: string }) {
   const path = usePathname();
   const [active, setActive] = useState(false);
-  const [from, setFrom] = useState(0); // first step still to show
+  const [seen, setSeen] = useState<string[]>([]); // steps already shown or skipped
   const [cur, setCur] = useState(-1); // step shown right now, -1 = none ready
   const [hasLater, setHasLater] = useState(false);
   const [rect, setRect] = useState<Rect | null>(null);
@@ -32,19 +32,27 @@ export function Tour({ userId }: { userId: string }) {
   const nextBtn = useRef<HTMLButtonElement>(null);
   const frame = useRef(0);
 
-  // Start once per person, or again when Settings asks for it.
+  // Start once per person, or again when Settings asks for it. Steps on other pages wait until that page is opened.
   useEffect(() => {
-    if (!isTourDone(userId)) setActive(true);
-    const again = () => { setFrom(0); setActive(true); };
+    const stored = readSeen(userId);
+    if (stored !== null && unseenSteps(TOUR_STEPS, stored).length > 0) { setSeen(stored); setActive(true); }
+    const again = () => { setSeen([]); setActive(true); };
     window.addEventListener(TOUR_RESTART_EVENT, again);
     return () => window.removeEventListener(TOUR_RESTART_EVENT, again);
   }, [userId]);
 
-  const finish = useCallback(() => { markTourDone(userId); setActive(false); setCur(-1); setRect(null); }, [userId]);
+  const mark = useCallback((ids: string[]) => {
+    const next = Array.from(new Set([...seen, ...ids]));
+    writeSeen(userId, next);
+    setSeen(next);
+    if (unseenSteps(TOUR_STEPS, next).length === 0) { setActive(false); setCur(-1); setRect(null); }
+  }, [seen, userId]);
+  const finish = useCallback(() => mark(TOUR_STEPS.map((s) => s.id)), [mark]); // skip: nothing is shown again
 
   // Work out which step is ready and where its target is. Re-run whenever the page changes or scrolls.
   const measure = useCallback(() => {
-    const i = nextReadyStep(TOUR_STEPS, from, path, isReady);
+    const ready = (s: TourStep) => !seen.includes(s.id) && isReady(s);
+    const i = nextReadyStep(TOUR_STEPS, 0, path, ready);
     setCur(i);
     if (i < 0) { setRect(null); setHasLater(false); return; }
     const el = findVisible(TOUR_STEPS[i].target)!;
@@ -56,8 +64,8 @@ export function Tour({ userId }: { userId: string }) {
     }
     const top = Math.max(r.top, 0), left = Math.max(r.left, 0);
     setRect({ top, left, width: Math.min(r.right, vw) - left, height: Math.min(r.bottom, vh) - top });
-    setHasLater(TOUR_STEPS.some((s, k) => k > i && s.path === path && isReady(s)));
-  }, [from, path]);
+    setHasLater(TOUR_STEPS.some((s, k) => k > i && s.path === path && ready(s)));
+  }, [seen, path]);
 
   useEffect(() => {
     if (!active) return;
@@ -90,7 +98,7 @@ export function Tour({ userId }: { userId: string }) {
   const step = TOUR_STEPS[cur];
   const number = TOUR_STEPS.filter((s) => s.path === path).findIndex((s) => s.id === step.id) + 1;
   const total = TOUR_STEPS.filter((s) => s.path === path).length;
-  const onNext = () => { if (hasLater) setFrom(cur + 1); else finish(); };
+  const onNext = () => mark([step.id]);
 
   return (
     <>

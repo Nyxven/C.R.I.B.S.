@@ -16,7 +16,7 @@ export default async function Saved() {
   return (
     <div className="space-y-6">
       <BackLink href="/home">Home</BackLink>
-      <PageHeader title="Saved guides" intro={guides.length > 0 ? `${guides.length} ${guides.length === 1 ? "guide" : "guides"} to read when you have a quiet moment.` : undefined} />
+      <div data-tour="saved-list"><PageHeader title="Saved guides" intro={guides.length > 0 ? `${guides.length} ${guides.length === 1 ? "guide" : "guides"} to read when you have a quiet moment.` : undefined} /></div>
       {guides.length === 0 ? (
         <EmptyState icon={Bookmark} title="No saved guides yet" actionHref="/home" actionLabel="Browse guides">
           Open a guide and tap “Save for later”. It will wait for you here.
