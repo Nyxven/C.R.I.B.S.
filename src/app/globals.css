@@ -38,14 +38,23 @@
   --font-sans: var(--font-nunito), system-ui, sans-serif;
 }
 
-/* The logo's rainbow loop is a rare signature (logo, progress, one accent line). Buttons are flat brand purple. */
-:root { --ribbon: linear-gradient(90deg, #8E7BD1, #7FD6C2, #F0C15C, #F2A759, #E96B57); --ring: color-mix(in srgb, #8E7BD1 38%, transparent); }
+/* The brand gradient is the logo's colour loop. Two looks, both defined once here:
+   --grad-brand: purple to deep coral, dark enough at every point for white text (checked in contrast.test.ts). Buttons, the Ask pill.
+   --ribbon: the full rainbow, decoration only (never behind text): accent lines, progress, the Ask bubble ring.
+   --grad-wash: the soft warm and mint glow behind every screen. */
+:root {
+  --accent-a: #5B49A8; --accent-b: #B8441A;
+  --grad-brand: linear-gradient(120deg, var(--accent-a), var(--accent-b));
+  --ribbon: linear-gradient(90deg, #8E7BD1, #7FD6C2, #F0C15C, #F2A759, #E96B57);
+  --grad-wash: radial-gradient(circle at 12% 6%, #F6E2C9 0%, transparent 42%), radial-gradient(circle at 88% 94%, #D5F2E3 0%, transparent 42%);
+  --ring: color-mix(in srgb, #8E7BD1 38%, transparent);
+}
 
 html, body { height: 100%; }
 
 /* Base rules live in the base layer so Tailwind utilities (pl-12, py-3, ...) can always override them. */
 @layer base {
-  body { font-family: var(--font-sans); color: var(--color-ink); background: var(--color-cream); -webkit-tap-highlight-color: transparent; }
+  body { font-family: var(--font-sans); color: var(--color-ink); background: var(--grad-wash), var(--color-cream); background-attachment: fixed; -webkit-tap-highlight-color: transparent; }
   h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.01em; }
   :focus-visible { outline: 3px solid var(--color-brand); outline-offset: 3px; }
 }
@@ -60,11 +69,12 @@ html, body { height: 100%; }
   .btn-primary {
     display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
     min-height: 52px; padding: 0 1.75rem; border-radius: 999px; border: 0; font-weight: 800; font-size: 1.0625rem;
-    color: #fff; background: var(--color-brand); cursor: pointer;
-    box-shadow: 0 8px 16px -10px color-mix(in srgb, var(--color-brand) 85%, transparent);
-    transition: transform .12s ease, box-shadow .12s ease, background-color .15s ease;
+    color: #fff; background: var(--grad-brand); cursor: pointer;
+    box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--accent-a) 75%, transparent);
+    transition: transform .12s ease, box-shadow .12s ease, filter .15s ease;
   }
-  .btn-primary:hover { background: #4D3D95; }
+  /* Hover only darkens, so white text never loses contrast. */
+  .btn-primary:hover { filter: brightness(.92); transform: translateY(-1px); }
   .btn-primary:active { transform: scale(.97); }
   .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
   .btn-secondary {
@@ -97,8 +107,8 @@ html, body { height: 100%; }
   .search input:focus, .search input:focus-visible { outline: none; }
   .search input::placeholder { color: var(--color-ink-soft); }
   .search .search-icon { flex: none; color: var(--color-ink-soft); }
-  .search button { flex: none; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; font-weight: 800; color: #fff; background: var(--color-brand); cursor: pointer; }
-  .search button:hover { background: #4D3D95; }
+  .search button { flex: none; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; font-weight: 800; color: #fff; background: var(--grad-brand); box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--accent-a) 75%, transparent); cursor: pointer; transition: filter var(--dur-fast, 150ms); }
+  .search button:hover { filter: brightness(.92); }
   /* Type scale: page title, section title, lead paragraph. */
   .h-page { font-family: var(--font-display); font-size: 1.875rem; line-height: 1.15; font-weight: 700; }
   .h-section { font-family: var(--font-display); font-size: 1.25rem; line-height: 1.25; font-weight: 700; }
@@ -161,7 +171,7 @@ html, body { height: 100%; }
 /* Motion: short and purposeful. Everything here is switched off by the reduced-motion rule above. */
 :root { --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --ease-out: cubic-bezier(.2, .7, .2, 1); }
 
-.btn-primary, .btn-secondary, .field { transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast); }
+.btn-primary, .btn-secondary, .field { transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background-color var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast), filter var(--dur-fast); }
 .btn-secondary:hover { background: var(--color-tint-purple); }
 .btn-ghost {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; padding: 0 1rem;
