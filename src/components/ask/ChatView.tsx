@@ -20,7 +20,8 @@ export function ChatView({ starters, available, initial }: { starters: string[];
   useEffect(() => { endRef.current?.scrollIntoView({ block: "end" }); }, [chat.messages.length, last?.text]);
 
   return (
-    <div className="space-y-5">
+    // Fills the screen so the composer rests just above the bottom nav (main's pb-40 is trimmed to the nav's height here).
+    <div className="-mb-16 flex min-h-[calc(100dvh-10.75rem)] flex-col gap-5 lg:mb-0 lg:min-h-[calc(100dvh-5.5rem)]">
       <PageHeader title="Ask CRIBS" intro={t("ask.intro")}
         action={
           <div className="-mr-2 flex items-center">
@@ -55,11 +56,12 @@ export function ChatView({ starters, available, initial }: { starters: string[];
           ) : (
             <div role="log" aria-label={t("ask.conversation")} aria-busy={chat.busy} className="space-y-4">
               {chat.messages.map((m) => <Message key={m.id} message={m} onRetry={chat.retry} onRate={m.role === "assistant" ? (v) => void chat.rate(m.id, v) : undefined} />)}
-              <div ref={endRef} />
+              {/* Lands above the sticky composer and the bottom nav, not behind them. */}
+              <div ref={endRef} className="scroll-mb-[calc(12rem+env(safe-area-inset-bottom))] lg:scroll-mb-36" />
             </div>
           )}
 
-          <div data-tour="composer" className="sticky bottom-[calc(5.75rem+env(safe-area-inset-bottom))] -mx-5 space-y-2 border-t border-line bg-cream px-5 pb-2 pt-3 lg:bottom-0 lg:mx-0 lg:px-0">
+          <div data-tour="composer" className="sticky bottom-[calc(5.75rem+env(safe-area-inset-bottom))] -mx-5 mt-auto space-y-2 border-t border-line bg-cream/90 px-5 pb-2 pt-3 backdrop-blur lg:bottom-0 lg:mx-0 lg:px-0 lg:pb-4">
             <Composer busy={chat.busy} onSend={(t) => void chat.send(t)} />
             <p className="text-center text-xs font-semibold text-ink-soft">{t("ask.disclaimer")}</p>
           </div>
