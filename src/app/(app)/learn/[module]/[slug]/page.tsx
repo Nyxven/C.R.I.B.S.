@@ -8,6 +8,7 @@ import { getSession } from "@/server/auth/session";
 import { getEntryFor } from "@/server/progress/service";
 import { ArticleActions } from "@/components/content/ArticleActions";
 import { isExpertReviewed } from "@/lib/domain/content";
+import { moduleLook } from "@/components/content/moduleStyle";
 
 export async function generateMetadata({ params }: { params: Promise<{ module: string; slug: string }> }) {
   const { module, slug } = await params;
@@ -23,12 +24,17 @@ export default async function Article({ params }: { params: Promise<{ module: st
   const list = m?.articles ?? [];
   const at = list.findIndex((x) => x.slug === a.slug);
   const next = at >= 0 ? list[at + 1] : undefined; // none for the last guide, or if this guide is not in the module list
+  const { box, Icon } = moduleLook(a.moduleId);
   return (
     <article className="space-y-7">
       <BackLink href={`/learn/${a.moduleId}`}>{a.moduleShortName}</BackLink>
-      <header className="rise space-y-3">
+      <header className={`rise space-y-3 rounded-3xl p-5 ${box}`}>
+        <p className="flex items-center gap-2 font-bold text-ink">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm" aria-hidden="true"><Icon size={20} /></span>
+          {a.moduleShortName}{at >= 0 && <span className="font-semibold text-ink-soft"> · Guide {at + 1} of {list.length}</span>}
+        </p>
         <h1 className="h-page">{a.title}</h1>
-        <div className="flex flex-wrap gap-2"><p className="chip">{a.readTime}</p>{isExpertReviewed(a) && <p className="chip">Reviewed by experts</p>}</div>
+        <div className="flex flex-wrap gap-2"><p className="chip bg-white">{a.readTime}</p>{isExpertReviewed(a) && <p className="chip bg-white">Reviewed by experts</p>}</div>
       </header>
       <div className="prose-cribs" dangerouslySetInnerHTML={{ __html: a.html }} />
       <ArticleActions slug={a.slug} initial={entry} />
