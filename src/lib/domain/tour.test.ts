@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TOUR_STEPS, isUsableRect, nextReadyStep, placeTip } from "./tour";
+import { TOUR_STEPS, isUsableRect, nextReadyStep, placeTip, unseenSteps } from "./tour";
 
 const view = { width: 390, height: 800 };
 describe("tour rules", () => {
@@ -32,5 +32,14 @@ describe("tour rules", () => {
   });
   it("only points at data-tour targets", () => {
     for (const s of TOUR_STEPS) expect(s.target).toMatch(/^\[data-tour="[a-z-]+"\]$/);
+  });
+  it("has unique step ids and only ever points at pages that exist", () => {
+    expect(new Set(TOUR_STEPS.map((s) => s.id)).size).toBe(TOUR_STEPS.length);
+    for (const s of TOUR_STEPS) expect(["/home", "/ask", "/child", "/saved", "/settings"]).toContain(s.path);
+  });
+  it("lists only steps not seen yet", () => {
+    expect(unseenSteps(TOUR_STEPS, []).length).toBe(TOUR_STEPS.length);
+    expect(unseenSteps(TOUR_STEPS, TOUR_STEPS.map((s) => s.id))).toEqual([]);
+    expect(unseenSteps(TOUR_STEPS, ["ask"]).some((s) => s.id === "ask")).toBe(false);
   });
 });

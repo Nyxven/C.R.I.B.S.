@@ -1,3 +1,70 @@
+> **SESSION 11 — SEARCH SUGGESTIONS + DEPLOY — READ THIS BLOCK FIRST.** Still Phase 4B; Stage 5 NOT started. No schema, migration, environment-variable or dependency change in code.
+
+## Session 11 — status (2026-11-17)
+**Inputs:** the team's two papers (July "C.R.I.B.S." proposal, October "CRIBSEER"). Both evaluate the app with Nielsen's 10 heuristics; parents' named worries are tantrums/meltdowns, wandering, sudden silence and "where do I start after diagnosis".
+**Built (verified: typecheck 0 errors, 55 files / 512 tests, `next build`, used in the browser at 390 px):**
+1. `src/lib/domain/suggest.ts` (+10 tests on the real seed): `TOPICS` (everyday English/Filipino/Taglish words -> the words our guides use), `PLACES` (app pages people may look for, e.g. "nawawala"/"running off" -> `/find`), `POPULAR`, `topicFor`, `suggest`, `buildSuggestIndex` (titles/labels only, no bodies, nothing personal).
+2. `SearchBox` is an ARIA 1.2 combobox when given `suggestions`: popular-topic chips on focus, up to 7 ranked suggestions while typing (guide / FAQ / specialist / page / related topic), Arrow keys, Enter, Escape, polite count announcement. Still a plain GET form without JS. Hook `src/features/content/useSuggest.ts`; data from `getSuggestIndex()` on Home and Search.
+3. `/search` falls back to the related topic when nothing matches ("sleep" -> routine results, with a note saying so).
+4. FAQ: `/faq?open=<id>#<id>` opens and scrolls to that answer (suggestions link there).
+5. Article: "Ask CRIBS about this guide" -> `/ask?about=<slug>` pre-fills (does not send) a question naming the guide; only real titles from the database are used.
+6. i18n keys added in `en.ts` and `fil.ts` (Filipino still draft).
+**Deploy:** GitHub `main` had the same files as local `896fbf8` under different commit ids; merged with `-s ours` (nothing lost, verified by diff) so the push is a fast-forward. PR #2 `feat/ui-verify-polish` -> `main`. Vercel deploys `main` to production. Production DB already had migrations and seed content (checked by count query).
+**Dev account:** `ravenyx.dev@gmail.com` already exists and is verified in production. The only elevated role in the code is moderator (`MODERATOR_EMAILS`). See HANDOFF.md for whether the env change was applied.
+**Note:** the GitHub repo `Nyxven/C.R.I.B.S.` is **public** (BUILD_CRIBS assumed private). No secrets are in it; decide with the team.
+
+---
+
+> **SESSION 10 — FIRST VERIFIED SESSION — READ THIS BLOCK FIRST.** Still Phase 4B; Stage 5 NOT started. Branch `feat/ui-verify-polish` (9 commits after `9f4e3e7`). No database change, no new environment variable, no new dependency.
+
+## Session 10 — status (2026-11-16)
+**Verified for the first time (on the user's Windows PC, Node 26, real network):** `npm ci --ignore-scripts` (plain `npm ci` fails: drizzle-kit's old nested esbuild has no Windows binary; the app does not need it), `npx tsc --noEmit` **0 errors**, `npx vitest run` **54 files / 502 tests pass**, `next build` **succeeds** (all 36 routes). This covers all code from sessions 7, 8, 9 and 9b, which had never been checked before.
+**Not working:** `npm run lint` — Next 16 removed `next lint` and ESLint is not installed. Needs a decision (add ESLint 9 flat config, or drop the script). The import-boundary ESLint rule from BUILD_CRIBS 0.4 is therefore not enforced right now.
+**Seen in a real browser (dev server, 390x844 and 1440x900), against a throwaway Neon branch `dev-ui-preview-2026-11-16` of project `cribs`, content seeded, mail via console:** landing, sign-up (+ consent), 6-box OTP verify, all 19 onboarding questions + review, Home (3 recommendations, guide tiles, help rows), the 8-step walkthrough (first 2 steps clicked, Skip works), Ask (empty state, emergency pre-check gives the fixed 911 reply with no model call, failure + Try again state with a dummy provider), Find (make tag, field switches: autism line **off** by default, others on), public `/f/[token]` (only switched-on fields; headers `Cache-Control: no-store`, `X-Robots-Tag: noindex`, `Referrer-Policy: no-referrer`; made-up token 404), tag switched off (nothing private shown), Child profile, Settings, Text size Extra large (no sideways scroll), Learn module, article reader, Directory, FAQ, Community, Search, Saved, Notifications, sign-out, sign-in, desktop sidebar.
+**Fixed this session (each seen working in the browser after the change):**
+1. `fix(ask)`: new replies scrolled behind the sticky composer and the nav; now they land above it. The chat fills the screen so the composer rests just above the nav instead of floating mid-page.
+2. `feat(ask)`: Enter sends, Shift+Enter makes a new line, nothing fires while an IME is composing (was Ctrl+Enter only).
+3. `fix(ui)`: `PageHeader` actions wrap under the title on narrow phones (Ask with "New chat" + "History" squeezed the title into a thin column).
+4. `feat(found)`: new `src/app/f/[token]/not-found.tsx`. A made-up, switched-off or stopped tag used to show the app's generic 404 ("Go to Home"); a finder now sees "This tag is not active right now", a Call 911 button (`EMERGENCY_NUMBER`) and 3 safe steps. Same page for all three cases, so nothing leaks.
+5. `fix(onboarding)`: Back/Continue bar is pinned to the bottom of the screen (it floated mid-screen on short questions).
+6. `feat(nav)`: desktop sidebar gets the "Help along the way" links (Child profile, Community, Saved, Find) with active state; logo links get the label "C.R.I.B.S. home".
+7. `style(directory)`: filter chip row hides its scrollbar (`@utility no-scrollbar` in `globals.css`).
+8. `style(learn)`: article header shows "Guide n of N" as a chip next to the read time (it wrapped into two cramped columns).
+9. `fix(search)`: the no-results hint suggested "sleep", which matches nothing in the content; now "routine" or "school".
+**Checked and left alone (not bugs):** radio/checkbox names showing raw values in the browser tool's tree (inputs are inside real `<label>`s); "You are their: mother" lowercase (intentional, tested); faded screenshots (the 250 ms entrance animation; `prefers-reduced-motion` turns it off — checked in CSS only, emulation was not available).
+**Not checked:** Large text size (Extra large was), 768/1024 widths, keyboard-only pass, screen reader, real AI answers (no provider key; only the error path and the emergency path were seen), walkthrough steps 3-8 and on other pages, Filipino screens, contrast tooling (the `contrast.test.ts` suite passes), any deploy.
+**Dev branch / local secrets:** `.env.local` (gitignored, excluded from the ZIP) holds dev-only `AUTH_SECRET`/`PASSWORD_PEPPER` and the Neon dev-branch connection string. Neon branches share the owner role, so that string's password also opens the main branch: keep the file private, and delete the Neon branch when done. The dev branch also holds two local test accounts (`*@cribs.test`).
+**Next:** decide on lint; look at 768/1024 and keyboard-only; push the branch and open a PR; run the pending SQL + env steps from SETUP_GUIDE section 0 if not done; delete the Neon dev branch; then the user's choice (more languages, Theme setting, Learn reading experience, or Stage 5).
+
+---
+
+> **SESSION 9b — LANGUAGE (Filipino/Tagalog) — READ THIS BLOCK FIRST.** UI/UX focus; Phase 5 / Stage 5 NOT started (the user postponed it). Still Phase 4B. Same unverified state: no typecheck, test, lint, build or browser run. No database change, no new environment variable, no new dependency.
+
+## Language support — status
+**Design:** hand-made, no library (none is installed and the sandbox has no network). `src/lib/i18n/`: `en.ts` (source of truth, 111 keys, typed `Key`), `fil.ts` (Filipino, **draft translations, no native review**; missing keys fall back to English), `core.ts` (pure: `LOCALES`, `normalizeLocale`, `translate` with `{placeholders}`, `makeT`, `missingKeys`), `server.ts` (`getLocale`/`getT` read the `cribs_lang` cookie), `client.tsx` (`I18nProvider`, `useT`, `useLocale`). The root layout is now `async`, sets `<html lang>` and wraps the app in the provider. `features/account/language.ts` (`setLanguageAction`) sets the cookie (1 year, whitelist of known codes). The choice is **per browser, not per account** (no migration).
+**Screens translated:** nav (desktop and mobile), search box, Home, Settings hub and rows, notification switch, restart/download/delete/sign-out rows, new **Settings > Language** page (`LanguageForm`, radio rows, saves on tap, shows a note that content is English and translations are drafts), Ask chat (`ChatView`, `Composer`, `Message`), Saved, article header/actions/"Up next"/notice and the save/read feedback lines.
+**NOT translated (still English):** guides, FAQ answers and specialist listings (database content; needs translation columns + migration); Ask starter questions (`lib/ai/starters`); **Ask answers and the canned emergency reply (`lib/ai/safety`)**; Notifications, Search results, Find CRIBS, Community, Child profile, Directory, FAQ page chrome, Learn module page, onboarding quiz, sign-in/sign-up/verify, landing, Terms/Privacy, the walkthrough, "n of m read" progress text, page `<title>`s, server error messages, and the public `/f/[token]` page (the finder is a stranger; their language is unknown). Date/number formats unchanged.
+**Checked:** syntax parse of 24 changed `.ts/.tsx` files (0 errors); the pure core ran in a harness (111 en keys, 111 fil keys, no missing keys, no extra keys, no placeholder mismatches, fallback and normalize work); a script confirmed every `t("...")` key used in code (99) exists in `en.ts` and none is unused. `src/lib/i18n/i18n.test.ts` was written but **not run in Vitest**.
+**Risks to check first:** (1) reading the cookie in the root layout makes every page dynamic (marketing pages are no longer static): check this is acceptable; (2) Home's `space` table uses `satisfies` with `Key` and `t(title)`: expect a possible small type error; (3) `SearchBox` became a client component; (4) `AppNav` builds keys as `nav.<slug>` (a new nav item needs a `nav.*` key); (5) Tagalog wording (e.g. "Mga Setting", "Tulong sa daan", "Delikadong bahagi") needs a native reader.
+**Next for language (only when asked):** translate the rest screen by screen (add the key to `en.ts` first, then `fil.ts`; `i18n.test.ts` fails if a key is missing in Filipino); make Ask reply in the chosen language with a small prompt line, and translate the emergency reply (needs native review: safety text); translated guide content (migration). Theme settings were not built (nothing works yet to switch to).
+
+---
+
+> **SESSION 9 — READ THIS BLOCK FIRST (above the brand restoration block).** Still Phase 4B. Same unverified state: no typecheck, test, lint, build or browser run (user chose to skip; sandbox has no network and no `node_modules`). No database change, no new environment variable.
+
+## Session 9 — status
+Built (code only, never seen in a browser):
+1. **`/f/[token]`**: ribbon bar, "If found" label, 4xl heading (child's name or the generic line), full-width 64px gradient Call button with the number below, facts in one quiet card (larger text), numbered "What you can do" steps, "Please wait" state with a 911 note. `lookupPublic`, `buildFoundCard` and the page's `notFound()` path were **not touched**, so field switches, the autism default (off) and off/stopped tags behave as before.
+2. **Ask chat**: parent bubbles use `--grad-brand` with white text; CRIBS answers get a logo avatar and a card (emergency answers on a coral tint with the same border); source chips are tinted pills; Try again has an icon; copy/rate buttons have a hover tint; composer is a rounded field plus a round gradient send button; starter chips are pill buttons; empty state uses the logo. Emergency check, "not medical advice" line and `useChat` logic unchanged.
+3. **Section headings**: `.section-label` is now sentence case, 1.125rem (used by Settings groups, Child profile groups, "Up next").
+4. **Walkthrough**: 8 steps now (Home 4, Ask composer, Child profile progress line, Saved header, Settings restart row). Storage v2 keeps a list of seen step ids (`cribs:tour:v2:<user>`); the old v1 "done" flag still counts as finished. A step on another page waits until that page is opened; Skip marks every step seen; Settings > Restart clears both keys. New pure helper `unseenSteps` with two new tests (not run in Vitest; the same checks ran in a small harness and passed).
+**Checked this session:** TypeScript syntax parse of all 12 changed `.ts/.tsx` files (0 errors) and the tour logic harness. **Not checked:** types, Vitest, lint, build, any browser view, contrast of the new bubble (it reuses the checked gradient), reduced motion.
+**Judged "already branded", left alone:** sign-in/sign-up (ribbon card), onboarding (ribbon progress, gradient buttons). Settings, Child profile, Community, Directory, FAQ and Learn only got the heading change; look at them by eye before adding more.
+**Added later in session 9 (same unverified state):** article header is now a module-tinted card (module icon, short name, "Guide n of N", read time chips) like the module page; `.prose-cribs` gained h2/h3 and link styles; Directory rows have an initial avatar (decorative, from the listing name). Community feed and FAQ were reviewed and left as they are (post cards are real discrete content; FAQ already follows the page pattern). A scroll-progress bar on articles was considered and skipped because the mobile header already carries a ribbon line.
+**Known risks to check first:** Tour ring around the Ask composer area on mobile (sticky bar above the nav); the Saved ring wraps the header only; `data-tour="restart-tour"` wrapper div inside `.list-group`; the new `max-w-[calc(100%-2.75rem)]` on answer cards; `/f/[token]` on a 360px screen.
+
+---
+
 # CONTEXT.md — C.R.I.B.S. Web App (living state file)
 
 > **BRAND RESTORATION (after session 8) — READ THIS BLOCK FIRST.** The user judged the flat UI "bland" and "bad" and said the gradient of the earlier version "looked cool". Done on top of session 8, unverified like the rest.

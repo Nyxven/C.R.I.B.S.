@@ -1,16 +1,20 @@
 You are continuing **C.R.I.B.S.** (parenting guidance web app for parents of children with ASD). We are still on **Phase 4B**. Do NOT start Stage 5 / Phase 5 until the user says so.
 
-Read first, in this order: `CONTEXT.md` (top block first), `HANDOFF.md`, `BUILD_CRIBS.md`, `ENV_REFERENCE.md`. Unzip `cribs-app.zip` and work in that repo; its working tree and git history are the source of truth. If a session 9 handoff exists, read it too and merge carefully.
+Read first, in this order: `CONTEXT.md` (top block first), `HANDOFF.md`, `BUILD_CRIBS.md`, `ENV_REFERENCE.md`. Unzip `cribs-app.zip` and work in that repo; its working tree and git history are the source of truth. Work continues on branch `feat/ui-verify-polish` (or `main` once it is merged).
 
 ## Where we are
-The UI pass is mostly built. The brand look (purple-to-coral gradient buttons, warm/mint page wash, ribbon line under titles, the logo on the Ask CRIBS button, three "Recommended for {child}" guides on Home) was restored after the user said the flat version looked bland. Keep it. Every screen follows one pattern: back link, page header, grouped list, empty state with a next step, skeleton, and a feedback line after actions.
+Session 10 was the first verified session: typecheck clean, 502/502 tests, `next build` green, and every main screen was used in a real browser at 390 and 1440 px. The brand look (purple-to-coral gradient on primary actions, warm/mint wash, ribbon lines, logo on Ask CRIBS) is in place everywhere. Keep it. The if-found page, Ask chat and walkthrough from earlier NEXT_PROMPTs are built and were seen working.
 
-## What to build next, in this order
-1. **Public if-found page `/f/[token]`**: redesign it in the brand look. It must stay safe: only fields the parent switched on are shown, the autism line is off by default, and nothing private appears when the tag is off or stopped. Big, calm layout for a stranger on a phone: a clear heading, the child's name, a one-tap Call button when a contact exists, and short plain instructions.
-2. **Ask CRIBS chat**: polish the message bubbles, source chips, retry and feedback buttons, the composer, and the starter chips so they match the brand (gradient send button, friendly empty state). Keep the emergency check and the "not medical advice" line.
-3. **Carry the brand across every screen** that still looks flat: sign-in and sign-up, onboarding, Settings, Child profile, Community, Directory, FAQ, Learn and article pages. Use gradient only on primary actions, ribbon lines and progress. Keep cards, rows and inputs quiet. Consider sentence-case headings instead of the small uppercase labels.
-4. **Walkthrough**: extend it beyond Home only where a real, visible element exists (for example Ask, the child profile, Settings, and Saved on first visit). Keep it short, skippable, once by default, and restartable from Settings.
-5. When the user asks for more, offer the next candidates: Language and Theme settings (only if they really work), a better Learn reading experience, and then Stage 5 from `CONTEXT.md` "Next tasks" (with the user's "go").
+## Setup on a new machine
+- `npm ci --ignore-scripts` (plain `npm ci` fails on Windows because of drizzle-kit's old nested esbuild).
+- To see signed-in screens without touching production: create a Neon branch, put its URL and fresh dev `AUTH_SECRET`/`PASSWORD_PEPPER` in `.env.local` with `MAIL_DRIVER=console`, run `npm run db:seed`, `npm run dev`, sign up; the OTP prints in the server log. Delete the branch afterwards.
+
+## What to do next, in this order
+0. Session 11: if PR #2 is not merged yet, ask the user to merge it (production deploys from `main`). Then, with Vercel team access approved, add `ravenyx.dev@gmail.com` to `MODERATOR_EMAILS` (Production) and redeploy. Search suggestions live in `src/lib/domain/suggest.ts`: add new parent words to `TOPICS`/`PLACES` with a test.
+1. Decide with the user how to fix `npm run lint` (Next 16 removed `next lint`): add ESLint 9 flat config with the import-boundary rule from BUILD_CRIBS 0.4, or remove the script.
+2. Check what session 10 did not: 768 and 1024 px, Large text, keyboard only, walkthrough steps on Ask/Child/Saved/Settings, Filipino screens, a real AI answer (needs the user's provider key in Vercel, never in chat).
+3. Push the branch and open a PR (ask first); delete the Neon dev branch `dev-ui-preview-2026-11-16` (ask first).
+4. Then offer: more languages, a Theme setting (only if it really works), a better Learn reading experience (e.g. "Ask about this guide"), and Stage 5 from `CONTEXT.md` "Next tasks" (only with the user's "go").
 
 ## Rules
 - Tell the user your plan first (files, commits, what you will change) and wait for "go".

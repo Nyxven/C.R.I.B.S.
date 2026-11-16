@@ -16,6 +16,10 @@ export const TOUR_STEPS: readonly TourStep[] = [
   { id: "guides", target: '[data-tour="guides"]', path: "/home", title: "Your guides", body: "Four topics of practical guidance. Open one, read at your own pace, and mark guides as read to track your progress." },
   { id: "child", target: '[data-tour="child"]', path: "/home", title: "Your child's profile", body: "Everything you told us lives here. Update it any time and your guidance follows." },
   { id: "settings", target: '[data-tour="nav-settings"]', path: "/home", title: "Settings and help", body: "Account, privacy, your data, and this walkthrough all live in Settings." },
+  { id: "composer", target: '[data-tour="composer"]', path: "/ask", title: "Type your question here", body: "Write it the way you would say it. Answers come with the guides they are based on." },
+  { id: "child-progress", target: '[data-tour="child-progress"]', path: "/child", title: "Fill in at your own pace", body: "Every section is optional. The more you add, the better your guidance fits your child." },
+  { id: "saved-list", target: '[data-tour="saved-list"]', path: "/saved", title: "Guides to come back to", body: "Guides you save for later wait for you here." },
+  { id: "restart-tour", target: '[data-tour="restart-tour"]', path: "/settings", title: "See this tour again", body: "You can restart this walkthrough here whenever you like." },
 ];
 
 export type Rect = { top: number; left: number; width: number; height: number };
@@ -45,4 +49,9 @@ export function isUsableRect(r: Rect, view: { width: number; height: number }): 
 export function nextReadyStep(steps: readonly TourStep[], from: number, path: string, isReady: (s: TourStep) => boolean): number {
   for (let i = from; i < steps.length; i++) if (steps[i].path === path && isReady(steps[i])) return i;
   return -1;
+}
+
+/** Steps the person has not seen yet. Seeing or skipping a step marks it; the tour is over when none are left. */
+export function unseenSteps(steps: readonly TourStep[], seen: readonly string[]): TourStep[] {
+  return steps.filter((s) => !seen.includes(s.id));
 }

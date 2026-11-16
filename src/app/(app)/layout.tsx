@@ -34,7 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <AppNav />
       <header className="sticky top-0 z-10 bg-cream/90 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-2xl items-center px-5 py-2">
-          <Link href="/home" className="flex items-center gap-2"><Logo size={44} alt="" /><span className="font-display text-lg font-bold">C.R.I.B.S.</span></Link>
+          <Link href="/home" aria-label="C.R.I.B.S. home" className="flex items-center gap-2"><Logo size={44} alt="" /><span className="font-display text-lg font-bold">C.R.I.B.S.</span></Link>
         </div>
         <div className="ribbon-bar" aria-hidden="true" />
       </header>

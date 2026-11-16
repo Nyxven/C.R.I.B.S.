@@ -1,3 +1,27 @@
+# HANDOFF.md — Session 11 (search suggestions, Ask-about-guide, deploy prep)
+Search suggestions while typing (English/Filipino/Taglish parent words -> guides, FAQs, specialists, pages), topic fallback on /search, FAQ deep links, "Ask CRIBS about this guide". Verified: typecheck, 512 tests, build, browser at 390 px. PR #2 (`feat/ui-verify-polish` -> `main`) has all checks green (CI verify, secret scan, Vercel preview).
+**Waiting on the user:** (1) merge PR #2; Vercel then deploys production automatically. (2) Vercel connector team access ("gabaii") must be approved before an agent can set env vars; then add `ravenyx.dev@gmail.com` to `MODERATOR_EMAILS` (Production) and redeploy. That account already exists and is verified in production. (3) Delete Neon dev branch `dev-ui-preview-2026-11-16` when done.
+
+---
+
+# HANDOFF.md — Session 10 (verification + fixes)
+First session with a real toolchain and browser. Typecheck 0 errors, 502/502 tests, `next build` green; every main screen was used in a browser at 390 and 1440 px against a throwaway Neon branch. Nine small fixes on branch `feat/ui-verify-polish` (Ask scroll and composer, Enter to send, header wrap, if-found "not active" page for finders, onboarding bar, desktop sidebar links, directory scrollbar, article chip, search hint). Details, what was and was not checked, and the local-secrets note are in CONTEXT.md (top block). `npm run lint` is broken (Next 16 removed `next lint`). Phase 5 not started.
+
+Release-readiness changes: if-found page, Ask polish, walkthrough on Home, onboarding, text size, sign-up/OTP: **1 -> 2 (tested locally)**. Lint: **6**. Everything else as below.
+
+---
+
+# HANDOFF.md — Session 9b (Filipino language)
+Added a dependency-free language system (English + Filipino draft), a Settings > Language page and Filipino text on nav, search, Home, Settings, Ask, Saved and the article screens. 6 commits after `d8d60de`. Details, the list of untranslated screens and the risks are in CONTEXT.md (top block). **Still nothing typechecked, tested, built or seen in a browser.** Phase 5 not started. Filipino text is a draft: needs a native speaker before real use, especially anything safety-related.
+
+---
+
+# HANDOFF.md — Session 9 (if-found page, Ask polish, walkthrough)
+Session 9 work (see CONTEXT.md top block): `/f/[token]` redesigned (markup only, safety logic untouched), Ask bubbles/chips/composer/starters in brand, sentence-case section headings, walkthrough extended to 8 steps with per-step "seen" storage. 4 feature commits after `896fbf8`. **Still nothing typechecked, tested, built or seen in a browser.** Release-readiness: `/f/[token]` and Ask polish move from 6 to 1; walkthrough beyond Home 6 to 1; everything else as below.
+Continue: run `npm ci && npm run typecheck && npm test && npm run lint && npm run build`, fix failures, then look at `/f/[token]` (tag on and off), Ask, Home and one list screen at 360 and 1440 px, text size Large, keyboard only, reduced motion.
+
+---
+
 # HANDOFF.md — Session 8 (UI pass: Phase 2 and part of Phase 3) + brand restoration
 
 ## Brand restoration (latest, same unverified state)

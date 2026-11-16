@@ -53,7 +53,7 @@ export function ChildProfile({ initial, tagName }: { initial: OnboardingData; ta
       <header className="rise space-y-2">
         <h1 className="h-page">{data.nickname ? `${data.nickname}'s profile` : "Child profile"}</h1>
         <p className="text-ink-soft">Short notes that help us fit your guidance to {name}. Only you can see this, and every answer is optional.</p>
-        <p className="text-sm font-bold text-ink-soft" role="status">{filled} of {total} sections filled in{saved ? ` · ${saved}` : ""}</p>
+        <p data-tour="child-progress" className="text-sm font-bold text-ink-soft" role="status">{filled} of {total} sections filled in{saved ? ` · ${saved}` : ""}</p>
       </header>
 
       {firstEmpty && (

@@ -6,20 +6,21 @@ import { LinkRow } from "@/components/ui/LinkRow";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getSession } from "@/server/auth/session";
 import { getSavedGuides } from "@/server/progress/service";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata = { title: "Saved guides" };
 
 export default async function Saved() {
   const session = await getSession();
   if (!session) notFound();
-  const guides = await getSavedGuides(session.user.id);
+  const [guides, t] = await Promise.all([getSavedGuides(session.user.id), getT()]);
   return (
     <div className="space-y-6">
-      <BackLink href="/home">Home</BackLink>
-      <PageHeader title="Saved guides" intro={guides.length > 0 ? `${guides.length} ${guides.length === 1 ? "guide" : "guides"} to read when you have a quiet moment.` : undefined} />
+      <BackLink href="/home">{t("nav.home")}</BackLink>
+      <div data-tour="saved-list"><PageHeader title={t("saved.title")} intro={guides.length > 0 ? guides.length === 1 ? t("saved.introOne") : t("saved.introMany", { n: guides.length }) : undefined} /></div>
       {guides.length === 0 ? (
-        <EmptyState icon={Bookmark} title="No saved guides yet" actionHref="/home" actionLabel="Browse guides">
-          Open a guide and tap “Save for later”. It will wait for you here.
+        <EmptyState icon={Bookmark} title={t("saved.emptyTitle")} actionHref="/home" actionLabel={t("saved.browse")}>
+          {t("saved.emptyBody")}
         </EmptyState>
       ) : (
         <div className="list-group stagger">
