@@ -24,7 +24,8 @@ export function Composer({ busy, onSend }: { busy: boolean; onSend: (text: strin
         <textarea
           id="ask-input" ref={ref} value={text} rows={1} maxLength={MAX_INPUT_CHARS} placeholder={t("ask.placeholder")}
           onChange={(e) => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${Math.min(e.target.scrollHeight, 140)}px`; }}
-          onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } }}
+          // Enter sends, Shift+Enter starts a new line; never while an input method is still composing a word.
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }}
           className="field min-h-14 flex-1 resize-none rounded-3xl py-3.5 leading-snug"
         />
         <button type="submit" disabled={empty || busy} aria-label={t("ask.send")} className="btn-primary h-14 w-14 shrink-0 rounded-full p-0">
