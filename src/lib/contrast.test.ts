@@ -1,12 +1,13 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { contrast } from "./contrast";
+import { contrast, mix } from "./contrast";
 
 // Reads the real tokens from globals.css, so changing a color there re-checks it here.
 const css = readFileSync(path.resolve(process.cwd(), "src/app/globals.css"), "utf8");
 const tokens = new Map<string, string>();
 for (const m of css.matchAll(/--color-([a-z-]+):\s*(#[0-9a-fA-F]{6})/g)) tokens.set(m[1]!, m[2]!);
+const accent = (name: string) => css.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`))![1]!;
 const hex = (name: string) => (name === "white" ? "#FFFFFF" : tokens.get(name) ?? "missing:" + name);
 
 const tints = ["tint-purple", "tint-mint", "tint-yellow", "tint-coral", "tint-pink", "tint-sage"];
@@ -32,9 +33,14 @@ describe("brand colors (WCAG AA)", () => {
     expect(contrast(hex("field"), "#FFFFFF")).toBeGreaterThanOrEqual(3);
     expect(contrast(hex("field"), hex("cream"))).toBeGreaterThanOrEqual(3);
   });
-  it("white text stays at least 4.5:1 on the primary button in rest and hover states", () => {
-    const hover = css.match(/\.btn-primary:hover\s*\{\s*background:\s*(#[0-9a-fA-F]{6})/)![1]!;
-    expect(contrast("#FFFFFF", hex("brand"))).toBeGreaterThanOrEqual(4.5);
-    expect(contrast("#FFFFFF", hover)).toBeGreaterThanOrEqual(4.5);
+  it("white text stays at least 4.5:1 along the whole brand gradient", () => {
+    for (const s of [0, 0.25, 0.5, 0.75, 1]) {
+      expect(contrast("#FFFFFF", mix(accent("accent-a"), accent("accent-b"), s))).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+  it("the primary button and the search button both use that gradient, and hover only darkens", () => {
+    expect(css).toMatch(/\.btn-primary\s*\{[^}]*background:\s*var\(--grad-brand\)/);
+    expect(css).toMatch(/\.search button\s*\{[^}]*background:\s*var\(--grad-brand\)/);
+    expect(css).toMatch(/\.btn-primary:hover\s*\{[^}]*filter:\s*brightness\(\.\d+\)/);
   });
 });
