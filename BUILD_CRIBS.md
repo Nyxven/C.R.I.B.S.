@@ -399,3 +399,9 @@ Still Phase 4B. No schema, migration or environment change.
 ## Session 9b: language
 
 `src/lib/i18n/*`: English is the source of truth; Filipino is a draft that falls back to English per key. The language is a cookie (`cribs_lang`), not an account setting, so no migration. Guides, FAQ, specialists and AI answers are still English. See CONTEXT.md "Session 9b" for the untranslated list and the next steps.
+
+
+---
+
+## Session 10 addendum (verification + fixes)
+Still Phase 4B. No schema, migration, environment or dependency change. First real run: typecheck, 502 tests and `next build` pass; screens checked in a browser. New: `src/app/f/[token]/not-found.tsx` (finder-facing page for inactive tags, same for made-up/off/stopped), `@utility no-scrollbar`, desktop sidebar "Help along the way" links, Enter-to-send in Ask. Known gap: `npm run lint` is broken under Next 16 (no ESLint installed), so the import-boundary rule in 0.4 is not enforced until that is fixed. Install with `npm ci --ignore-scripts` on Windows.

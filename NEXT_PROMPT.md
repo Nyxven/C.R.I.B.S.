@@ -1,15 +1,19 @@
 You are continuing **C.R.I.B.S.** (parenting guidance web app for parents of children with ASD). We are still on **Phase 4B**. Do NOT start Stage 5 / Phase 5 until the user says so.
 
-Read first, in this order: `CONTEXT.md` (top block first), `HANDOFF.md`, `BUILD_CRIBS.md`, `ENV_REFERENCE.md`. Unzip `cribs-app.zip` and work in that repo; its working tree and git history are the source of truth. If a session 9 handoff exists, read it too and merge carefully.
+Read first, in this order: `CONTEXT.md` (top block first), `HANDOFF.md`, `BUILD_CRIBS.md`, `ENV_REFERENCE.md`. Unzip `cribs-app.zip` and work in that repo; its working tree and git history are the source of truth. Work continues on branch `feat/ui-verify-polish` (or `main` once it is merged).
 
 ## Where we are
-The UI pass is mostly built. The brand look (purple-to-coral gradient buttons, warm/mint page wash, ribbon line under titles, the logo on the Ask CRIBS button, three "Recommended for {child}" guides on Home) was restored after the user said the flat version looked bland. Keep it. Every screen follows one pattern: back link, page header, grouped list, empty state with a next step, skeleton, and a feedback line after actions.
+Session 10 was the first verified session: typecheck clean, 502/502 tests, `next build` green, and every main screen was used in a real browser at 390 and 1440 px. The brand look (purple-to-coral gradient on primary actions, warm/mint wash, ribbon lines, logo on Ask CRIBS) is in place everywhere. Keep it. The if-found page, Ask chat and walkthrough from earlier NEXT_PROMPTs are built and were seen working.
 
-## What to build next, in this order
-00. Session 9b added Filipino (see CONTEXT.md top block). If asked to continue languages: translate more screens (key in `en.ts` first, then `fil.ts`), Ask replies in the chosen language, then more languages. Stage 5 stays postponed until the user says so.
-0. Session 9 built the if-found page, Ask polish, sentence-case headings and the 8-step walkthrough (all unverified, see CONTEXT.md top block). If the user can run `npm`, verify first: `npm ci && npm run typecheck && npm test && npm run lint && npm run build`, fix failures, then check screens at 360/390/768/1024/1440 px.
-1. Judge by eye with the user: Settings, Child profile, Community, Directory, FAQ, Learn and article pages. Ask "more or less gradient?" before spreading it. Gradient only on primary actions, ribbon lines and progress.
-2. Offer next candidates: Language and Theme settings (only if they really work), a better Learn reading experience, then Stage 5 from `CONTEXT.md` "Next tasks" (only with the user's "go").
+## Setup on a new machine
+- `npm ci --ignore-scripts` (plain `npm ci` fails on Windows because of drizzle-kit's old nested esbuild).
+- To see signed-in screens without touching production: create a Neon branch, put its URL and fresh dev `AUTH_SECRET`/`PASSWORD_PEPPER` in `.env.local` with `MAIL_DRIVER=console`, run `npm run db:seed`, `npm run dev`, sign up; the OTP prints in the server log. Delete the branch afterwards.
+
+## What to do next, in this order
+1. Decide with the user how to fix `npm run lint` (Next 16 removed `next lint`): add ESLint 9 flat config with the import-boundary rule from BUILD_CRIBS 0.4, or remove the script.
+2. Check what session 10 did not: 768 and 1024 px, Large text, keyboard only, walkthrough steps on Ask/Child/Saved/Settings, Filipino screens, a real AI answer (needs the user's provider key in Vercel, never in chat).
+3. Push the branch and open a PR (ask first); delete the Neon dev branch `dev-ui-preview-2026-11-16` (ask first).
+4. Then offer: more languages, a Theme setting (only if it really works), a better Learn reading experience (e.g. "Ask about this guide"), and Stage 5 from `CONTEXT.md` "Next tasks" (only with the user's "go").
 
 ## Rules
 - Tell the user your plan first (files, commits, what you will change) and wait for "go".

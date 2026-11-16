@@ -1,3 +1,10 @@
+# HANDOFF.md — Session 10 (verification + fixes)
+First session with a real toolchain and browser. Typecheck 0 errors, 502/502 tests, `next build` green; every main screen was used in a browser at 390 and 1440 px against a throwaway Neon branch. Nine small fixes on branch `feat/ui-verify-polish` (Ask scroll and composer, Enter to send, header wrap, if-found "not active" page for finders, onboarding bar, desktop sidebar links, directory scrollbar, article chip, search hint). Details, what was and was not checked, and the local-secrets note are in CONTEXT.md (top block). `npm run lint` is broken (Next 16 removed `next lint`). Phase 5 not started.
+
+Release-readiness changes: if-found page, Ask polish, walkthrough on Home, onboarding, text size, sign-up/OTP: **1 -> 2 (tested locally)**. Lint: **6**. Everything else as below.
+
+---
+
 # HANDOFF.md — Session 9b (Filipino language)
 Added a dependency-free language system (English + Filipino draft), a Settings > Language page and Filipino text on nav, search, Home, Settings, Ask, Saved and the article screens. 6 commits after `d8d60de`. Details, the list of untranslated screens and the risks are in CONTEXT.md (top block). **Still nothing typechecked, tested, built or seen in a browser.** Phase 5 not started. Filipino text is a draft: needs a native speaker before real use, especially anything safety-related.
 

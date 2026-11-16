@@ -1,3 +1,26 @@
+> **SESSION 10 — FIRST VERIFIED SESSION — READ THIS BLOCK FIRST.** Still Phase 4B; Stage 5 NOT started. Branch `feat/ui-verify-polish` (9 commits after `9f4e3e7`). No database change, no new environment variable, no new dependency.
+
+## Session 10 — status (2026-11-16)
+**Verified for the first time (on the user's Windows PC, Node 26, real network):** `npm ci --ignore-scripts` (plain `npm ci` fails: drizzle-kit's old nested esbuild has no Windows binary; the app does not need it), `npx tsc --noEmit` **0 errors**, `npx vitest run` **54 files / 502 tests pass**, `next build` **succeeds** (all 36 routes). This covers all code from sessions 7, 8, 9 and 9b, which had never been checked before.
+**Not working:** `npm run lint` — Next 16 removed `next lint` and ESLint is not installed. Needs a decision (add ESLint 9 flat config, or drop the script). The import-boundary ESLint rule from BUILD_CRIBS 0.4 is therefore not enforced right now.
+**Seen in a real browser (dev server, 390x844 and 1440x900), against a throwaway Neon branch `dev-ui-preview-2026-11-16` of project `cribs`, content seeded, mail via console:** landing, sign-up (+ consent), 6-box OTP verify, all 19 onboarding questions + review, Home (3 recommendations, guide tiles, help rows), the 8-step walkthrough (first 2 steps clicked, Skip works), Ask (empty state, emergency pre-check gives the fixed 911 reply with no model call, failure + Try again state with a dummy provider), Find (make tag, field switches: autism line **off** by default, others on), public `/f/[token]` (only switched-on fields; headers `Cache-Control: no-store`, `X-Robots-Tag: noindex`, `Referrer-Policy: no-referrer`; made-up token 404), tag switched off (nothing private shown), Child profile, Settings, Text size Extra large (no sideways scroll), Learn module, article reader, Directory, FAQ, Community, Search, Saved, Notifications, sign-out, sign-in, desktop sidebar.
+**Fixed this session (each seen working in the browser after the change):**
+1. `fix(ask)`: new replies scrolled behind the sticky composer and the nav; now they land above it. The chat fills the screen so the composer rests just above the nav instead of floating mid-page.
+2. `feat(ask)`: Enter sends, Shift+Enter makes a new line, nothing fires while an IME is composing (was Ctrl+Enter only).
+3. `fix(ui)`: `PageHeader` actions wrap under the title on narrow phones (Ask with "New chat" + "History" squeezed the title into a thin column).
+4. `feat(found)`: new `src/app/f/[token]/not-found.tsx`. A made-up, switched-off or stopped tag used to show the app's generic 404 ("Go to Home"); a finder now sees "This tag is not active right now", a Call 911 button (`EMERGENCY_NUMBER`) and 3 safe steps. Same page for all three cases, so nothing leaks.
+5. `fix(onboarding)`: Back/Continue bar is pinned to the bottom of the screen (it floated mid-screen on short questions).
+6. `feat(nav)`: desktop sidebar gets the "Help along the way" links (Child profile, Community, Saved, Find) with active state; logo links get the label "C.R.I.B.S. home".
+7. `style(directory)`: filter chip row hides its scrollbar (`@utility no-scrollbar` in `globals.css`).
+8. `style(learn)`: article header shows "Guide n of N" as a chip next to the read time (it wrapped into two cramped columns).
+9. `fix(search)`: the no-results hint suggested "sleep", which matches nothing in the content; now "routine" or "school".
+**Checked and left alone (not bugs):** radio/checkbox names showing raw values in the browser tool's tree (inputs are inside real `<label>`s); "You are their: mother" lowercase (intentional, tested); faded screenshots (the 250 ms entrance animation; `prefers-reduced-motion` turns it off — checked in CSS only, emulation was not available).
+**Not checked:** Large text size (Extra large was), 768/1024 widths, keyboard-only pass, screen reader, real AI answers (no provider key; only the error path and the emergency path were seen), walkthrough steps 3-8 and on other pages, Filipino screens, contrast tooling (the `contrast.test.ts` suite passes), any deploy.
+**Dev branch / local secrets:** `.env.local` (gitignored, excluded from the ZIP) holds dev-only `AUTH_SECRET`/`PASSWORD_PEPPER` and the Neon dev-branch connection string. Neon branches share the owner role, so that string's password also opens the main branch: keep the file private, and delete the Neon branch when done. The dev branch also holds two local test accounts (`*@cribs.test`).
+**Next:** decide on lint; look at 768/1024 and keyboard-only; push the branch and open a PR; run the pending SQL + env steps from SETUP_GUIDE section 0 if not done; delete the Neon dev branch; then the user's choice (more languages, Theme setting, Learn reading experience, or Stage 5).
+
+---
+
 > **SESSION 9b — LANGUAGE (Filipino/Tagalog) — READ THIS BLOCK FIRST.** UI/UX focus; Phase 5 / Stage 5 NOT started (the user postponed it). Still Phase 4B. Same unverified state: no typecheck, test, lint, build or browser run. No database change, no new environment variable, no new dependency.
 
 ## Language support — status
