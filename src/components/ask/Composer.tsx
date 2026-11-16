@@ -2,8 +2,10 @@
 import { useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import { MAX_INPUT_CHARS } from "@/lib/ai/limits";
+import { useT } from "@/lib/i18n/client";
 
 export function Composer({ busy, onSend }: { busy: boolean; onSend: (text: string) => void }) {
+  const t = useT();
   const [text, setText] = useState("");
   const ref = useRef<HTMLTextAreaElement>(null);
   const empty = text.trim() === "";
@@ -18,14 +20,14 @@ export function Composer({ busy, onSend }: { busy: boolean; onSend: (text: strin
   return (
     <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-1">
       <div className="flex items-end gap-2">
-        <label htmlFor="ask-input" className="sr-only">Your question</label>
+        <label htmlFor="ask-input" className="sr-only">{t("ask.question")}</label>
         <textarea
-          id="ask-input" ref={ref} value={text} rows={1} maxLength={MAX_INPUT_CHARS} placeholder="Type your question"
+          id="ask-input" ref={ref} value={text} rows={1} maxLength={MAX_INPUT_CHARS} placeholder={t("ask.placeholder")}
           onChange={(e) => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${Math.min(e.target.scrollHeight, 140)}px`; }}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } }}
           className="field min-h-14 flex-1 resize-none rounded-3xl py-3.5 leading-snug"
         />
-        <button type="submit" disabled={empty || busy} aria-label="Send" className="btn-primary h-14 w-14 shrink-0 rounded-full p-0">
+        <button type="submit" disabled={empty || busy} aria-label={t("ask.send")} className="btn-primary h-14 w-14 shrink-0 rounded-full p-0">
           <SendHorizontal size={22} aria-hidden="true" />
         </button>
       </div>
