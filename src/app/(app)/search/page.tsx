@@ -50,7 +50,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
       {searched && hits.length === 0 && (
         <EmptyState icon={SearchX} title="Nothing matched that word" actionHref="/ask" actionLabel="Ask the guide" secondaryHref="/faq" secondaryLabel="Read the FAQ">
-          Short, simple words work best, like “sleep” or “school”.
+          Short, simple words work best, like “routine” or “school”.
         </EmptyState>
       )}
     </div>
