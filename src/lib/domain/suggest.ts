@@ -21,6 +21,8 @@ export const TOPICS: readonly Topic[] = [
   { term: "homework", words: ["homework", "assignment", "study", "takdang", "aralin", "aral", "pag-aaral"] },
   { term: "education plan", words: ["iep", "plan", "individualized", "education"] },
   { term: "signs", words: ["signs", "symptoms", "early", "sintomas", "palatandaan", "toddler", "baby"] },
+  { term: "level", words: ["level", "levels", "severity", "mild", "severe", "moderate", "type", "types", "antas"] },
+  { term: "older", words: ["asperger", "aspergers", "pdd", "pdd-nos", "classic", "cdd", "disintegrative", "older", "terms", "old"] },
   { term: "autism", words: ["autism", "asd", "autistic", "diagnosis", "diagnosed", "start", "simula", "new", "bago", "what"] },
   { term: "pediatrician", words: ["pediatrician", "pedia", "doctor", "doktor", "developmental"] },
   { term: "therapist", words: ["therapist", "therapy", "ot", "occupational", "slp", "speech therapist", "psychologist", "terapist"] },

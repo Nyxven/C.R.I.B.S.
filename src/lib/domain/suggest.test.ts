@@ -51,6 +51,11 @@ describe("suggest (real seed content)", () => {
     const t = suggest(index, "autism");
     expect(new Set(t.map((x) => x.id)).size).toBe(t.length);
   });
+  it("finds the new level guides", () => {
+    expect(titles("asperger")).toContain("Older Autism Terms You May Hear");
+    expect(titles("level 2")[0]).toBeDefined();
+    expect(titles("severe")).toContain("The Three Levels of Autism");
+  });
   it("needs 3+ letters to guess a topic", () => {
     expect(topicFor("ot")).toBeNull();
     expect(topicFor("tantr")?.term).toBe("meltdown");
