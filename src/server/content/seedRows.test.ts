@@ -7,7 +7,7 @@ const rows = buildSeedRows(raw as SeedFile);
 describe("buildSeedRows", () => {
   it("keeps every seed item", () => {
     expect(rows.modules).toHaveLength(4);
-    expect(rows.articles).toHaveLength(12);
+    expect(rows.articles).toHaveLength(18);
     expect(rows.faqs).toHaveLength(6);
     expect(rows.professionals).toHaveLength(5);
   });
@@ -28,6 +28,8 @@ describe("buildSeedRows", () => {
   it("points every article at a real module and orders them", () => {
     const ids = new Set(rows.modules.map((m) => m.id));
     for (const a of rows.articles) expect(ids.has(a.moduleId)).toBe(true);
-    expect(rows.articles.filter((a) => a.moduleId === "info").map((a) => a.sortOrder)).toEqual([0, 1, 2]);
+    expect(rows.articles.filter((a) => a.moduleId === "info").map((a) => a.sortOrder)).toEqual([0, 1, 2, 3, 4, 5]);
+    // the original 12 guides keep their order; new guides are added after them
+    expect(rows.articles.find((a) => a.slug === "what-is-autism-spectrum-disorder")?.sortOrder).toBe(0);
   });
 });

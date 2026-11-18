@@ -62,7 +62,7 @@ describe("search over the seed content", () => {
     professionals: rows.professionals.map((p) => ({ ...p, verifiedAt: null, source: null })),
   });
   it("covers guides, FAQs and listings", () => {
-    expect(docs).toHaveLength(12 + 6 + 5);
+    expect(docs).toHaveLength(18 + 6 + 5);
     expect(new Set(docs.map((d) => d.kind))).toEqual(new Set(["guide", "faq", "specialist"]));
   });
   it("finds the meltdown guide and a speech therapist", () => {
