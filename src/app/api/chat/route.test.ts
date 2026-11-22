@@ -76,4 +76,10 @@ describe("POST /api/chat", () => {
     expect(lines[0]).toEqual({ t: "start", kind: "emergency" });
     expect(lines[1].d).toContain("911");
   });
+  it("answers the emergency in Filipino when the app language cookie says so", async () => {
+    const res = await POST(req(ask("my child is not breathing"), { ...ok, cookie: "theme=x; cribs_lang=fil; other=1" }));
+    const lines = (await res.text()).trim().split("\n").map((l) => JSON.parse(l));
+    expect(lines[1].d).toContain("Tumawag na sa 911");
+    expect(lines[1].d).toContain("Call 911 if anyone is in danger right now.");
+  });
 });

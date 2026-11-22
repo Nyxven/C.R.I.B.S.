@@ -45,7 +45,8 @@ export function detectEmergency(text: string): EmergencyKind | null {
 const lines = (list: readonly CrisisLine[]) => list.map((l) => `${l.name}: ${l.number}`).join("\n");
 
 /** The fixed reply for an emergency. The model is never called for these. */
-export function emergencyReply(kind: EmergencyKind, crisis: readonly CrisisLine[] = CRISIS_LINES, number: string = EMERGENCY_NUMBER): string {
+export function emergencyReply(kind: EmergencyKind, crisis: readonly CrisisLine[] = CRISIS_LINES, number: string = EMERGENCY_NUMBER, locale = "en"): string {
+  if (locale === "fil") return emergencyReplyFil(kind, crisis, number);
   const call = `If anyone is in danger right now, call ${number} or go to the nearest emergency room.`;
   const extra = crisis.length ? `\n\nSupport lines:\n${lines(crisis)}` : "";
   const fil = `\n\nTumawag sa ${number} kung may panganib ngayon.`;
@@ -59,5 +60,23 @@ export function emergencyReply(kind: EmergencyKind, crisis: readonly CrisisLine[
       return `Act now.\n\nCall ${number} and stay on the line. Check the most dangerous places near you first, like water and roads. Tell them your child's name, what they are wearing, and that they may not answer when called.${extra}${fil}${close}`;
     case "medical":
       return `This sounds like a medical emergency.\n\nCall ${number} now or go to the nearest emergency room. Do not wait for an answer here. If someone can help, ask them to stay with your child.${extra}${fil}${close}`;
+  }
+}
+
+/** The same fixed replies in Filipino (draft wording: needs a native speaker's review). Ends with one English line for anyone helping. */
+function emergencyReplyFil(kind: EmergencyKind, crisis: readonly CrisisLine[], number: string): string {
+  const call = `Kung may nasa panganib ngayon, tumawag agad sa ${number} o pumunta sa pinakamalapit na emergency room.`;
+  const extra = crisis.length ? `\n\nMga linya ng tulong:\n${lines(crisis)}` : "";
+  const en = `\n\nCall ${number} if anyone is in danger right now.`;
+  const close = "\n\nHindi makakatulong ang gabay na ito sa emergency.";
+  switch (kind) {
+    case "self_harm":
+      return `Pasensya na at pinagdadaanan mo ito. Mahalaga ka, at hindi mo ito kailangang harapin nang mag-isa.\n\n${call} Sabihin din sa taong pinagkakatiwalaan mo, kapamilya, kaibigan o doktor, ang nararamdaman mo ngayon, at manatiling may kasama kung kaya.${extra}${en}${close}`;
+    case "abuse":
+      return `Salamat sa pagsasabi mo. Kaligtasan ng bata ang pinakauna.\n\n${call} Kung may batang sinasaktan, makipag-ugnayan sa lokal na awtoridad o sa propesyonal sa proteksyon ng bata. Kung natatakot kang masaktan mo ang anak mo, lumipat sa ligtas na lugar, ipaubaya muna siya sa ibang adulto, at humingi ng tulong sa taong pinagkakatiwalaan mo o sa propesyonal.${extra}${en}${close}`;
+    case "child_missing":
+      return `Kumilos agad.\n\nTumawag sa ${number} at huwag ibaba ang tawag. Unahing tingnan ang pinakadelikadong lugar sa malapit, gaya ng tubig at kalsada. Sabihin ang pangalan ng anak mo, ang suot niya, at na maaaring hindi siya sumagot kapag tinawag.${extra}${en}${close}`;
+    case "medical":
+      return `Mukhang medikal na emergency ito.\n\nTumawag na sa ${number} o pumunta sa pinakamalapit na emergency room. Huwag nang hintayin ang sagot dito. Kung may makakatulong, pasamahin siya sa anak mo.${extra}${en}${close}`;
   }
 }

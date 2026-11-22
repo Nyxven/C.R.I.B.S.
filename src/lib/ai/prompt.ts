@@ -60,7 +60,14 @@ export function buildChildContext(c: ChildContextInput): string {
   return lines.length ? `CHILD CONTEXT (non-identifying)\n${lines.join("\n")}` : "CHILD CONTEXT (non-identifying)\n- Not provided";
 }
 
-export const buildSystemPrompt = (knowledge: string, childContext: string) => `${SYSTEM_PROMPT}\n\n${knowledge}\n\n${childContext}`;
+/** Which language to answer in, from the app language the person picked. */
+export function languageLine(locale: string): string {
+  return locale === "fil"
+    ? "LANGUAGE: The parent set the app to Filipino. Answer in clear, everyday Filipino (Tagalog). Keep terms that Filipino parents usually say in English (for example AAC, IEP, SPED, therapist, meltdown) as they are. If the parent writes in English, you may answer in English."
+    : "LANGUAGE: Answer in English, unless the parent writes in Filipino or Taglish; then answer in the same language they used.";
+}
+
+export const buildSystemPrompt = (knowledge: string, childContext: string, locale = "en") => `${SYSTEM_PROMPT}\n\n${languageLine(locale)}\n\n${knowledge}\n\n${childContext}`;
 
 /** Picks only the allowed fields from a stored child row. Everything else (nickname, ids, dates) is left behind. */
 export function pickChildContext(row: {

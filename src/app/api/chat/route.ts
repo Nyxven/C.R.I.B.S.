@@ -5,12 +5,15 @@ import { chatRequestSchema } from "@/features/ask/schema";
 import { getSession } from "@/server/auth/session";
 import { defaultChatDeps } from "@/server/ai/deps";
 import { startChat } from "@/server/ai/service";
+import { LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n/core";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 const MAX_BODY_CHARS = 30_000;
+/** The app language from the request's cookie (same cookie the pages read); unknown values become English. */
+const localeFrom = (cookie: string | null) => normalizeLocale(cookie?.split(/;\s*/).find((c) => c.startsWith(`${LOCALE_COOKIE}=`))?.slice(LOCALE_COOKIE.length + 1));
 const json = (status: number, error: string) =>
   Response.json({ error }, { status, headers: { "Cache-Control": "no-store", ...(status === 429 || status === 503 ? { "Retry-After": "60" } : {}) } });
 
@@ -29,7 +32,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return json(400, "Please type a question.");
 
   const accountAgeHours = (Date.now() - session.user.createdAt.getTime()) / 3_600_000;
-  const started = await startChat(defaultChatDeps(), { userId: session.user.id, ipBucket: requestIpBucket(req.headers), accountAgeHours, threadId: parsed.data.threadId }, parsed.data.messages);
+  const started = await startChat(defaultChatDeps(), { userId: session.user.id, ipBucket: requestIpBucket(req.headers), accountAgeHours, threadId: parsed.data.threadId, locale: localeFrom(req.headers.get("cookie")) }, parsed.data.messages);
   if (started.type === "rejected") return json(started.status, started.error);
 
   const abort = new AbortController();

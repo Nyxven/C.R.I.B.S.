@@ -60,6 +60,15 @@ describe("emergencyReply", () => {
       expect(r).not.toContain("Support lines");
     }
   });
+  it("has a Filipino version with the number, an English line for helpers, and no medical advice", () => {
+    for (const k of ["self_harm", "abuse", "child_missing", "medical"] as const) {
+      const r = emergencyReply(k, [], "911", "fil");
+      expect(r).toContain("911");
+      expect(r).toContain("Call 911 if anyone is in danger right now.");
+      expect(r).toContain("Hindi makakatulong ang gabay na ito sa emergency.");
+      expect(r.toLowerCase()).not.toMatch(/medication|dose|diagnos|gamot/);
+    }
+  });
   it("lists verified support lines only when some exist", () => {
     const r = emergencyReply("self_harm", [{ name: "Test line", number: "000", source: "test" }], "911");
     expect(r).toContain("Support lines:\nTest line: 000");

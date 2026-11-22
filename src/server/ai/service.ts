@@ -21,7 +21,7 @@ export type ChatDeps = {
   loadChild(userId: string): Promise<ChildContextInput | null>;
   log(message: string, data: Record<string, string | number>): void;
 };
-export type ChatContext = { userId: string; ipBucket: string; accountAgeHours: number; threadId?: string };
+export type ChatContext = { userId: string; ipBucket: string; accountAgeHours: number; threadId?: string; locale?: string };
 
 export type StartedChat =
   | { type: "rejected"; status: 400 | 429 | 503; error: string }
@@ -60,7 +60,7 @@ export async function startChat(deps: ChatDeps, ctx: ChatContext, raw: readonly 
 
   const kind = detectEmergency(cleaned.question);
   if (kind) {
-    const text = emergencyReply(kind);
+    const text = emergencyReply(kind, undefined, undefined, ctx.locale);
     return { type: "stream", run: async (emit) => { emit({ t: "start", kind: "emergency" }); emit({ t: "text", d: text }); emit({ t: "done", sources: [] }); } };
   }
 
@@ -104,7 +104,7 @@ export async function startChat(deps: ChatDeps, ctx: ChatContext, raw: readonly 
       const started = Date.now();
       try {
         const [{ entries, sources }, child] = await Promise.all([deps.loadKnowledge(), deps.loadChild(ctx.userId)]);
-        const system = buildSystemPrompt(buildKnowledge(entries), buildChildContext(child ?? { ageYears: null, communicationLevel: null, sensory: {}, challenges: [], school: null }));
+        const system = buildSystemPrompt(buildKnowledge(entries), buildChildContext(child ?? { ageYears: null, communicationLevel: null, sensory: {}, challenges: [], school: null }), ctx.locale);
         emit({ t: "start", kind: "answer" });
         let full = "";
         const usage = await provider.stream({ system, messages, maxTokens: deps.maxOutputTokens, signal }, (d) => { full += d; emit({ t: "text", d }); });

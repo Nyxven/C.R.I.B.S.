@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageBand, buildChildContext, buildKnowledge, buildSystemPrompt, pickChildContext, SYSTEM_PROMPT } from "./prompt";
+import { ageBand, buildChildContext, buildKnowledge, buildSystemPrompt, languageLine, pickChildContext, SYSTEM_PROMPT } from "./prompt";
 
 describe("buildChildContext (privacy)", () => {
   const input = {
@@ -54,5 +54,14 @@ describe("pickChildContext", () => {
   });
   it("handles empty database values", () => {
     expect(pickChildContext({ sensory: null, challenges: null })).toEqual({ ageYears: null, communicationLevel: null, sensory: {}, challenges: [], school: null });
+  });
+});
+
+describe("languageLine", () => {
+  it("asks for Filipino when the app is in Filipino, English otherwise", () => {
+    expect(languageLine("fil")).toContain("Filipino (Tagalog)");
+    expect(languageLine("en")).toMatch(/Answer in English/);
+    expect(buildSystemPrompt("K", "C", "fil")).toContain("LANGUAGE: The parent set the app to Filipino");
+    expect(buildSystemPrompt("K", "C")).toContain("LANGUAGE: Answer in English");
   });
 });
