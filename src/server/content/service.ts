@@ -2,6 +2,8 @@ import { cache } from "react";
 import type { ArticleFull, ArticleSummary, FaqItem, ModuleWithArticles, Professional } from "@/lib/domain/content";
 import { buildSearchDocs, isSearchable, search, type SearchHit } from "@/lib/domain/search";
 import { buildSuggestIndex, type SuggestItem } from "@/lib/domain/suggest";
+import { localTitle } from "@/lib/domain/content";
+import { localModuleShort } from "@/lib/domain/localize";
 import * as repo from "./repo";
 
 // Pages call these. They return plain objects, never database rows.
@@ -32,7 +34,7 @@ export async function getAllArticles(): Promise<ArticleFull[]> {
   const [mods, rows] = await Promise.all([getModules(), repo.listArticles()]);
   return rows.map((r) => {
     const m = mods.find((x) => x.id === r.moduleId);
-    return { slug: r.slug, moduleId: r.moduleId, title: r.title, readTime: r.readTime, reviewStatus: r.reviewStatus, html: r.html, moduleName: m?.name ?? "", moduleShortName: m?.shortName ?? "" };
+    return { slug: r.slug, moduleId: r.moduleId, title: r.title, readTime: r.readTime, reviewStatus: r.reviewStatus, html: r.html, moduleName: m?.name ?? "", moduleShortName: m?.shortName ?? "", titleFil: r.titleFil, htmlFil: r.htmlFil };
   });
 }
 
@@ -50,9 +52,9 @@ export async function searchContent(query: string): Promise<SearchHit[]> {
 }
 
 /** Titles and labels for search suggestions in the browser (no article bodies, nothing personal). */
-export async function getSuggestIndex(): Promise<SuggestItem[]> {
+export async function getSuggestIndex(locale = "en"): Promise<SuggestItem[]> {
   const [mods, faqs, professionals] = await Promise.all([getModules(), getFaqs(), getProfessionals()]);
-  const articles = mods.flatMap((m) => m.articles.map((a) => ({ slug: a.slug, moduleId: a.moduleId, title: a.title, moduleShortName: m.shortName })));
+  const articles = mods.flatMap((m) => m.articles.map((a) => ({ slug: a.slug, moduleId: a.moduleId, title: localTitle(a, locale), moduleShortName: localModuleShort(m.id, m.shortName, locale), englishTitle: a.title })));
   return buildSuggestIndex({ articles, faqs, professionals });
 }
 

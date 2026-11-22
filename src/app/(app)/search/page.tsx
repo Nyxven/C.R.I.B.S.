@@ -5,7 +5,10 @@ import { LinkRow } from "@/components/ui/LinkRow";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { isSearchable, type SearchKind } from "@/lib/domain/search";
 import { topicFor } from "@/lib/domain/suggest";
-import { getSuggestIndex, searchContent } from "@/server/content/service";
+import { getModules, getSuggestIndex, searchContent } from "@/server/content/service";
+import { getLocale } from "@/lib/i18n/server";
+import { localTitle } from "@/lib/domain/content";
+import { localModule } from "@/lib/domain/localize";
 
 export const metadata = { title: "Search" };
 
@@ -19,7 +22,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const { q } = await searchParams;
   const query = (Array.isArray(q) ? q[0] : q)?.trim() ?? "";
   const searched = isSearchable(query);
-  const [direct, suggestions] = await Promise.all([searched ? searchContent(query) : Promise.resolve([]), getSuggestIndex()]);
+  const locale = await getLocale();
+  const [direct, suggestions, modules] = await Promise.all([searched ? searchContent(query) : Promise.resolve([]), getSuggestIndex(locale), getModules()]);
+  // Guide titles and module names in the chosen language (search itself matches English and Filipino).
+  const guide = new Map(modules.flatMap((m) => m.articles.map((a) => [a.slug, { title: localTitle(a, locale), module: localModule(m, locale).name }] as const)));
   // Nothing matched the exact words: try the topic those words point to ("tantrum" -> meltdown, "bedtime" -> routine).
   const topic = searched && direct.length === 0 ? topicFor(query) : null;
   const hits = topic ? await searchContent(topic.term) : direct;
@@ -48,7 +54,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             const { label, Icon, box } = KIND[h.kind];
             return (
               <li key={`${h.kind}-${h.id}`}>
-                <LinkRow href={h.href} title={h.title} sub={`${label} · ${h.meta}`} lead={<span className={`row-icon ${box}`} style={{ color: "var(--color-ink)" }}><Icon size={20} aria-hidden="true" /></span>}>
+                <LinkRow href={h.href} title={h.kind === "guide" ? guide.get(h.id)?.title ?? h.title : h.title} sub={`${label} · ${h.kind === "guide" ? guide.get(h.id)?.module ?? h.meta : h.meta}`} lead={<span className={`row-icon ${box}`} style={{ color: "var(--color-ink)" }}><Icon size={20} aria-hidden="true" /></span>}>
                   <span className="mt-1 block text-sm text-ink">{h.snippet}</span>
                 </LinkRow>
               </li>

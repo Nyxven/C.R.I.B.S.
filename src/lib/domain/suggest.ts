@@ -103,12 +103,12 @@ export function suggest(index: readonly SuggestItem[], query: string, limit = MA
 
 /** The small list the browser searches: titles and labels only (no article bodies). */
 export function buildSuggestIndex(input: {
-  articles: readonly { slug: string; moduleId: string; title: string; moduleShortName: string }[];
+  articles: readonly { slug: string; moduleId: string; title: string; moduleShortName: string; englishTitle?: string }[];
   faqs: readonly { id: string; question: string }[];
   professionals: readonly { id: string; name: string; role: string; location: string }[];
 }): SuggestItem[] {
   return [
-    ...input.articles.map((a): SuggestItem => ({ kind: "guide", title: a.title, meta: a.moduleShortName, href: `/learn/${a.moduleId}/${a.slug}` })),
+    ...input.articles.map((a): SuggestItem => ({ kind: "guide", title: a.title, meta: a.moduleShortName, href: `/learn/${a.moduleId}/${a.slug}`, keywords: a.englishTitle && a.englishTitle !== a.title ? a.englishTitle : undefined })),
     ...input.faqs.map((f): SuggestItem => ({ kind: "faq", title: f.question, meta: "FAQ", href: `/faq?open=${f.id}#${f.id}` })),
     ...input.professionals.map((p): SuggestItem => ({ kind: "specialist", title: p.name, meta: p.role, href: "/directory", keywords: p.location })),
   ];

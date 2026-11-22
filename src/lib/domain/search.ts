@@ -68,7 +68,7 @@ export function search(docs: readonly SearchDoc[], query: string, limit = 20): S
 
 export function buildSearchDocs(input: { articles: ArticleFull[]; faqs: FaqItem[]; professionals: Professional[] }): SearchDoc[] {
   return [
-    ...input.articles.map((a): SearchDoc => ({ kind: "guide", id: a.slug, title: a.title, meta: a.moduleName, text: stripHtml(a.html), href: `/learn/${a.moduleId}/${a.slug}` })),
+    ...input.articles.map((a): SearchDoc => ({ kind: "guide", id: a.slug, title: a.title, meta: a.moduleName, text: [stripHtml(a.html), a.titleFil ?? "", a.htmlFil ? stripHtml(a.htmlFil) : ""].join(" ").trim(), href: `/learn/${a.moduleId}/${a.slug}` })),
     ...input.faqs.map((f): SearchDoc => ({ kind: "faq", id: f.id, title: f.question, meta: "FAQ", text: f.answer, href: "/faq" })),
     ...input.professionals.map((p): SearchDoc => ({ kind: "specialist", id: p.id, title: p.name, meta: p.role, text: `${p.role}. ${p.location}. ${p.note}`, href: "/directory" })),
   ];
