@@ -1,13 +1,13 @@
 "use client";
 import { useRef } from "react";
-import { CalendarCheck, ExternalLink, Info, MapPin, X } from "lucide-react";
+import { CalendarCheck, ExternalLink, MapPin, X } from "lucide-react";
 import { mapsSearchUrl } from "@/lib/domain/content";
 
 /**
- * "Book" for a listing. The app cannot book appointments itself and sample listings may not be real clinics,
+ * "Book" for a listing. The app cannot book appointments itself,
  * so this opens a short, honest guide: find the clinic on the map, confirm it directly, and what to bring.
  */
-export function BookSpecialist({ name, role, location, sample }: { name: string; role: string; location: string; sample: boolean }) {
+export function BookSpecialist({ name, role, location }: { name: string; role: string; location: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const id = `book-${name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`;
   return (
@@ -24,10 +24,6 @@ export function BookSpecialist({ name, role, location, sample }: { name: string;
             </div>
             <button type="button" onClick={() => dialog.current?.close()} className="btn-ghost h-11 w-11 shrink-0 p-0" aria-label="Close"><X size={22} aria-hidden="true" /></button>
           </div>
-          {sample && (
-            <p className="notice notice-warn text-sm"><Info size={20} className="mt-0.5 shrink-0 text-amber-dark" aria-hidden="true" />
-              <span>This is a sample listing. The clinic may not exist. Check it on the map and confirm directly before you go.</span></p>
-          )}
           <p className="flex items-start gap-2 text-ink-soft"><MapPin size={18} className="mt-0.5 shrink-0" aria-hidden="true" />{location}</p>
           <a href={mapsSearchUrl(name, location)} target="_blank" rel="noopener noreferrer" className="btn-primary w-full">
             <ExternalLink size={18} aria-hidden="true" /> Find the clinic on Google Maps

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Info, MapPin, Stethoscope } from "lucide-react";
+import { MapPin, Stethoscope } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BookSpecialist } from "@/components/content/BookSpecialist";
 import { getProfessionals } from "@/server/content/service";
-import { filterByRole, isSampleListing, rolesOf } from "@/lib/domain/content";
+import { filterByRole, rolesOf } from "@/lib/domain/content";
 
 export const metadata = { title: "Specialists" };
 
@@ -18,7 +18,6 @@ export default async function Directory({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-6">
       <PageHeader title="Specialists" intro="Professionals who support children and families." />
-      <p className="notice notice-warn text-sm"><Info size={20} className="mt-0.5 shrink-0 text-amber-dark" aria-hidden="true" /><span>Sample listings near Taguig City for demonstration. Always verify credentials and availability directly.</span></p>
       {all.length === 0 ? (
         <EmptyState icon={Stethoscope} title="No specialists listed yet" actionHref="/search" actionLabel="Search the guides">
           Listings will appear here once they are added.
@@ -42,8 +41,7 @@ export default async function Directory({ searchParams }: { searchParams: Promis
                 <p className="flex items-start gap-2 text-sm text-ink-soft"><MapPin size={16} className="mt-0.5 shrink-0" aria-hidden="true" />{p.location}</p>
                 <p>{p.note}</p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <BookSpecialist name={p.name} role={p.role} location={p.location} sample={isSampleListing(p)} />
-                  {isSampleListing(p) && <span className="chip">Sample listing</span>}
+                  <BookSpecialist name={p.name} role={p.role} location={p.location} />
                 </div>
                 </div>
               </li>
