@@ -2,14 +2,14 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Bookmark, ChevronRight, HelpCircle, Home, Menu, Settings, ShieldCheck, Smile, Sparkles, Stethoscope, Users, X } from "lucide-react";
+import { Bell, Bookmark, ChevronRight, ClipboardList, HelpCircle, Home, Menu, Settings, ShieldCheck, Smile, Sparkles, Stethoscope, Users, X } from "lucide-react";
 import { moreItems, navItems } from "@/config/nav";
 import { Logo } from "@/components/Logo";
 import { useT } from "@/lib/i18n/client";
 import type { Key } from "@/lib/i18n/en";
 
-const icons = { home: Home, shield: ShieldCheck, sparkles: Sparkles, stethoscope: Stethoscope, help: HelpCircle, users: Users, bookmark: Bookmark, smile: Smile, bell: Bell, settings: Settings };
-const tint: Record<string, string> = { help: "bg-tint-sage", users: "bg-tint-mint", bookmark: "bg-tint-purple", smile: "bg-tint-yellow", bell: "bg-tint-pink", settings: "bg-tint-purple" };
+const icons = { home: Home, shield: ShieldCheck, sparkles: Sparkles, stethoscope: Stethoscope, help: HelpCircle, clipboard: ClipboardList, users: Users, bookmark: Bookmark, smile: Smile, bell: Bell, settings: Settings };
+const tint: Record<string, string> = { clipboard: "bg-tint-coral", help: "bg-tint-sage", users: "bg-tint-mint", bookmark: "bg-tint-purple", smile: "bg-tint-yellow", bell: "bg-tint-pink", settings: "bg-tint-purple" };
 
 export function AppNav() {
   const path = usePathname();

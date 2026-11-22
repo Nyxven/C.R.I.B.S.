@@ -8,6 +8,7 @@ export const navItems = [
 
 /** The "More" sheet on phones, and the second group in the desktop sidebar. */
 export const moreItems = [
+  { href: "/logs", key: "nav.logs", icon: "clipboard" },
   { href: "/faq", key: "nav.faq", icon: "help" },
   { href: "/community", key: "home.community", icon: "users" },
   { href: "/saved", key: "home.saved", icon: "bookmark" },
