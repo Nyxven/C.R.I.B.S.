@@ -31,5 +31,7 @@ describe("buildSeedRows", () => {
     expect(rows.articles.filter((a) => a.moduleId === "info").map((a) => a.sortOrder)).toEqual([0, 1, 2, 3, 4, 5]);
     // the original 12 guides keep their order; new guides are added after them
     expect(rows.articles.find((a) => a.slug === "what-is-autism-spectrum-disorder")?.sortOrder).toBe(0);
+    // every guide has a Filipino title and text
+    for (const a of rows.articles) { expect(a.titleFil, a.slug).toBeTruthy(); expect(a.htmlFil, a.slug).toBeTruthy(); }
   });
 });
