@@ -1,3 +1,18 @@
+> **SESSION 12 — LOGS, CUSTOM HOME, FILIPINO, ASK LANGUAGE — READ THIS BLOCK FIRST.** Still Phase 4B; Stage 5 not started.
+
+## Session 12 — status (2026-11-22)
+**Schema change:** `drizzle/0006_parent_logs.sql` (idempotent): `behavior_log`, `communication_log`, `profile.home_layout` (jsonb), `article.title_fil` and `article.html_fil`. **Applied to the dev branch and to production** (verified by information_schema query), before the code was pushed.
+**Built (533 tests, typecheck, build; checked in the browser at 390 px):**
+1. **Logs** `/logs` (More menu, sidebar, Home "Today's log" card with quick buttons `/logs?add=behavior|communication`). Behavior = ABC chart (antecedent, behavior, consequence) + setting, intensity 1-5, duration, context chips. Communication = mode, initiation, purpose, understood, setting, example, context. Pure logic `src/lib/domain/logs.ts` (weekly plain-count summary), Zod `src/features/logs/schema.ts`, owner-scoped repo `src/server/logs`, actions `src/features/logs/actions.ts`. Included in Download my data; deleted with the account (cascade). Rate limit 120 adds/hour.
+2. **Customize Home** `/settings/home`: show/hide and reorder safety, recommended, logs, guides, help. `src/lib/domain/homeLayout.ts` normalizes any stored value.
+3. **Filipino** rewritten in everyday wording; all new strings translated. Still draft: needs a native speaker, above all safety text.
+4. **RRL guides in Filipino:** `titleFil`/`htmlFil` on the 6 level guides in `seed/content.json`, shown when the app language is Filipino (`localTitle`/`localHtml`). Seeded to production (6 of 18 guides have Filipino). Module names, FAQs and the original 12 guides are English only.
+5. **Ask in the app language:** `languageLine(locale)` in the system prompt; `emergencyReply(..., locale)` has a Filipino version with one English 911 line. The chat route reads the `cribs_lang` cookie from the request.
+**Also:** Next.js bumped to 16.4.6 (moderate advisories; local `next build` refused to run on 16.4.4).
+**Not checked:** communication form in the browser (logic tested), a real AI answer in Filipino (no key locally), Filipino review by a native speaker.
+
+---
+
 > **SESSION 11 — SEARCH SUGGESTIONS + DEPLOY — READ THIS BLOCK FIRST.** Still Phase 4B; Stage 5 NOT started. No schema, migration, environment-variable or dependency change in code.
 
 ## Session 11 — status (2026-11-17)
