@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { behaviorInput, communicationInput } from "@/features/logs/schema";
-import { partOfDay, summarizeBehavior, summarizeCommunication, tally, toLocalInput, type BehaviorEntry, type CommunicationEntry } from "./logs";
+import { withOther, partOfDay, summarizeBehavior, summarizeCommunication, tally, toLocalInput, type BehaviorEntry, type CommunicationEntry } from "./logs";
 
 const now = new Date(2026, 10, 20, 18, 0);
 const ago = (days: number, hour = 10) => { const d = new Date(now); d.setDate(d.getDate() - days); d.setHours(hour, 0, 0, 0); return d; };
@@ -53,11 +53,23 @@ describe("log inputs", () => {
     expect(behaviorInput.safeParse({ occurredAt: recent, antecedent: "", behavior: "Cried" }).success).toBe(false);
     expect(behaviorInput.safeParse({ occurredAt: recent, antecedent: "No", behavior: "Cried", intensity: 9 }).success).toBe(false);
     expect(behaviorInput.safeParse({ occurredAt: new Date(Date.now() + 86_400_000).toISOString(), antecedent: "No", behavior: "Cried" }).success).toBe(false);
-    expect(behaviorInput.safeParse({ occurredAt: recent, antecedent: "No", behavior: "Cried", context: ["moon"] }).success).toBe(false);
+    expect(behaviorInput.safeParse({ occurredAt: recent, antecedent: "No", behavior: "Cried", context: ["x"] }).success).toBe(false); // own "Other" text needs 2+ letters
+    expect(behaviorInput.safeParse({ occurredAt: recent, antecedent: "No", behavior: "Cried", setting: "y".repeat(41) }).success).toBe(false);
     expect(behaviorInput.safeParse({ occurredAt: recent, antecedent: "No", behavior: "Cried", userId: "someone-else" }).success).toBe(false);
   });
-  it("accepts a communication entry and rejects an unknown mode", () => {
+  it("accepts a communication entry, own Other words, and rejects a bad initiation", () => {
     expect(communicationInput.safeParse({ occurredAt: recent, mode: "aac", initiation: "child", purpose: "request", understood: true, example: "AAC, 3 messages" }).success).toBe(true);
-    expect(communicationInput.safeParse({ occurredAt: recent, mode: "telepathy", initiation: "child", purpose: "request", understood: true }).success).toBe(false);
+    expect(communicationInput.safeParse({ occurredAt: recent, mode: "Sang a song", initiation: "child", purpose: "Asked to play", understood: true, setting: "Lola's house", context: ["sensory", "Loud karaoke"] }).success).toBe(true);
+    expect(communicationInput.safeParse({ occurredAt: recent, mode: "aac", initiation: "maybe", purpose: "request", understood: true }).success).toBe(false);
+  });
+});
+
+describe("withOther", () => {
+  it("stores the typed text for Other, the option otherwise", () => {
+    expect(withOther("other", "  Lola's house ")).toBe("Lola's house");
+    expect(withOther("other", " ")).toBe("other");
+    expect(withOther("home", "ignored")).toBe("home");
+    expect(withOther(undefined, "x")).toBeUndefined();
+    expect(withOther("other", "z".repeat(60))).toHaveLength(40);
   });
 });

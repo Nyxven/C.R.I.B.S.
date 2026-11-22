@@ -2,7 +2,7 @@
 // Pure: option lists, labels and the plain-count summary. No diagnosis, no AI: just what the parent wrote, counted.
 
 export const SETTINGS = ["home", "school", "community", "other"] as const;
-export const CONTEXTS = ["sleep", "sensory", "schedule", "hunger", "unwell", "new_place"] as const;
+export const CONTEXTS = ["sleep", "sensory", "schedule", "hunger", "unwell", "new_place", "other"] as const;
 export const MODES = ["speech", "aac", "sign", "gesture", "picture", "other"] as const;
 export const INITIATIONS = ["child", "prompted"] as const;
 export const PURPOSES = ["request", "reject", "comment", "greet", "other"] as const;
@@ -73,4 +73,14 @@ export function partOfDay(d: Date): "morning" | "afternoon" | "evening" | "night
 export function toLocalInput(d: Date): string {
   const p = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/** True when the value is one of the listed options (otherwise it is the parent's own "Other" text). */
+export const isOption = (list: readonly string[], v: string): boolean => list.includes(v);
+
+/** The value to store for a choice: the parent's typed text when they picked "Other" and wrote something, else the option. */
+export function withOther(choice: string | undefined, otherText: string): string | undefined {
+  if (choice !== "other") return choice;
+  const typed = otherText.trim();
+  return typed.length >= 2 ? typed.slice(0, 40) : "other";
 }
