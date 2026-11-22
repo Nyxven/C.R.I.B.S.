@@ -11,7 +11,12 @@ export function DeleteThreadButton({ id, title }: { id: string; title: string })
   return (
     <>
       <button type="button" disabled={pending} aria-label={`Delete chat: ${title}`} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-coral-dark"
-        onClick={() => start(async () => { const r = await deleteThreadAction(id); if (r.ok) router.refresh(); else setError(r.error); })}>
+        onClick={(e) => {
+          // Hides the chat's row at once; shows it again if deleting fails.
+          const row = e.currentTarget.closest("li");
+          row?.setAttribute("hidden", "");
+          start(async () => { const r = await deleteThreadAction(id); if (r.ok) router.refresh(); else { row?.removeAttribute("hidden"); setError(r.error); } });
+        }}>
         <Trash2 size={20} aria-hidden="true" />
       </button>
       {error && <span role="status" className="sr-only">{error}</span>}
@@ -37,14 +42,15 @@ export function DeleteAllButton({ disabled }: { disabled: boolean }) {
   );
 }
 
-export function HistoryToggle({ enabled }: { enabled: boolean }) {
+export function HistoryToggle({ enabled: initial }: { enabled: boolean }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [, start] = useTransition();
   const [error, setError] = useState("");
+  const [enabled, setEnabled] = useState(initial); // flips at once; goes back if saving fails
   return (
     <div className="space-y-1">
-      <button type="button" role="switch" aria-checked={enabled} disabled={pending}
-        onClick={() => start(async () => { const r = await setHistoryEnabledAction(!enabled); if (r.ok) router.refresh(); else setError(r.error); })}
+      <button type="button" role="switch" aria-checked={enabled}
+        onClick={() => { const next = !enabled; setEnabled(next); setError(""); start(async () => { const r = await setHistoryEnabledAction(next); if (r.ok) router.refresh(); else { setEnabled(!next); setError(r.error); } }); }}
         className="card flex min-h-14 w-full items-center justify-between gap-3 p-4 text-left">
         <span><span className="block font-bold">Save my chats</span><span className="block text-sm text-ink-soft">{enabled ? "On: chats are kept for 30 days." : "Off: nothing is saved."}</span></span>
         <span className={`rounded-full px-3 py-1 text-sm font-extrabold ${enabled ? "bg-tint-mint" : "bg-field"}`}>{enabled ? "On" : "Off"}</span>

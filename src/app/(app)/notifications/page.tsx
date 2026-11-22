@@ -34,7 +34,7 @@ export default async function NotificationsPage() {
               const isNew = !n.readAt;
               const body = (
                 <>
-                  <span aria-hidden="true" className={`h-2.5 w-2.5 shrink-0 rounded-full ${isNew ? "bg-brand" : "bg-transparent"}`} />
+                  <span aria-hidden="true" className={`h-2.5 w-2.5 shrink-0 rounded-full ${isNew ? "unread-dot bg-brand" : "bg-transparent"}`} />
                   <span className="min-w-0 flex-1">
                     <span className={`block break-words ${isNew ? "font-bold" : ""}`}>{n.body}</span>
                     <span className="row-sub block">{timeAgo(n.createdAt, now)}{isNew ? " · New" : ""}</span>

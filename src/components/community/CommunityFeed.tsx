@@ -62,6 +62,8 @@ function PostCard({ p, isReply, onChanged }: { p: FeedPost; isReply?: boolean; o
   const [replying, setReplying] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [msg, setMsg] = useState<Msg>({ ok: true, text: "" });
+  const [hidden, setHidden] = useState(false);
+  if (hidden) return null;
 
   const head = (
     <div className="flex items-center gap-3">
@@ -82,8 +84,14 @@ function PostCard({ p, isReply, onChanged }: { p: FeedPost; isReply?: boolean; o
       <p className={`whitespace-pre-wrap break-words leading-relaxed ${isReply ? "" : "text-lg"}`}>{p.body}</p>
       <div className={`flex flex-wrap items-center gap-1 ${isReply ? "" : "border-t border-line pt-2"}`}>
         {!p.isMine && !p.held && (
-          <button type="button" aria-pressed={helpful.mine} disabled={pending} className={`${action} ${helpful.mine ? "bg-tint-mint text-ink" : "text-ink-soft"}`}
-            onClick={() => start(async () => { const r = await setHelpfulAction({ postId: p.id, on: !helpful.mine }); if (r.ok) setHelpful({ count: r.count, mine: !helpful.mine }); else setMsg({ ok: false, text: r.error }); })}>
+          <button type="button" aria-pressed={helpful.mine} className={`${action} ${helpful.mine ? "bg-tint-mint text-ink" : "text-ink-soft"}`}
+            onClick={() => {
+              // Shows the change at once; settles on the server's count, or goes back if saving fails.
+              const before = helpful;
+              const on = !before.mine;
+              setHelpful({ mine: on, count: Math.max(0, before.count + (on ? 1 : -1)) });
+              void setHelpfulAction({ postId: p.id, on }).then((r) => { if (r.ok) setHelpful({ count: r.count, mine: on }); else { setHelpful(before); setMsg({ ok: false, text: r.error }); } });
+            }}>
             <HandHeart size={18} aria-hidden="true" /> Helpful{helpful.count > 0 ? ` · ${helpful.count}` : ""}
           </button>
         )}
@@ -95,7 +103,7 @@ function PostCard({ p, isReply, onChanged }: { p: FeedPost; isReply?: boolean; o
         )}
         <span className="flex-1" />
         {!p.isMine && <button type="button" aria-label="Report this post" aria-expanded={reporting} className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-soft hover:bg-cream" onClick={() => setReporting((v) => !v)}><Flag size={18} aria-hidden="true" /></button>}
-        {p.isMine && <button type="button" aria-label="Delete my post" disabled={pending} className="inline-flex h-11 w-11 items-center justify-center rounded-full text-coral-dark hover:bg-tint-coral" onClick={() => start(async () => { const r = await deletePostAction(p.id); if (r.ok) onChanged(); else setMsg({ ok: false, text: r.error }); })}><Trash2 size={18} aria-hidden="true" /></button>}
+        {p.isMine && <button type="button" aria-label="Delete my post" className="inline-flex h-11 w-11 items-center justify-center rounded-full text-coral-dark hover:bg-tint-coral" onClick={() => { setHidden(true); void deletePostAction(p.id).then((r) => { if (r.ok) onChanged(); else { setHidden(false); setMsg({ ok: false, text: r.error }); } }); }}><Trash2 size={18} aria-hidden="true" /></button>}
       </div>
       {reporting && (
         <div role="group" aria-label="Report reason" className="flex flex-wrap gap-2 rounded-2xl bg-cream p-3">

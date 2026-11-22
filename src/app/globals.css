@@ -283,3 +283,8 @@ dialog.sheet.sheet-bottom { margin: auto 0 0; max-width: 100%; border-radius: 24
   .composer-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 5px; background: var(--ribbon); }
   .post-card { background: #fff; border-radius: 1.5rem; padding: 1.1rem; border: 1px solid var(--color-line); box-shadow: 0 10px 26px -20px rgba(55,47,74,.4); }
 }
+
+/* Taps act at once: no double-tap-to-zoom wait on buttons, links and form controls. */
+@layer base {
+  a, button, input, label, select, summary, textarea, [role="button"], [role="tab"], [role="switch"] { touch-action: manipulation; }
+}
