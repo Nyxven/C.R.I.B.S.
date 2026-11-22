@@ -52,6 +52,7 @@ export const profile = pgTable("profile", {
   onboardingStep: integer("onboarding_step").notNull().default(0), // next quiz step to show (resume)
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   chatHistoryEnabled: boolean("chat_history_enabled").notNull().default(true), // false = Ask conversations are not saved
+  homeLayout: jsonb("home_layout").$type<{ id: string; visible: boolean }[]>(), // Home sections in the person's order; null = default
 });
 export const child = pgTable("child", {
   id: text("id").primaryKey(),
@@ -101,6 +102,8 @@ export const article = pgTable("article", {
   reviewStatus: text("review_status").notNull().default("draft"), // prototype-content | draft | expert-reviewed
   sources: jsonb("sources").$type<string[]>().notNull().default([]),
   sortOrder: integer("sort_order").notNull().default(0),
+  titleFil: text("title_fil"), // Filipino translation (draft); null = show English
+  htmlFil: text("html_fil"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (t) => [index("article_module_idx").on(t.moduleId)]);
 
@@ -204,3 +207,36 @@ export const notification = pgTable("notification", {
   readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => [index("notification_user_idx").on(t.userId, t.createdAt)]);
+
+// ---------- Parent logs (private to the account; deleted with it) ----------
+// Behavior log: an ABC record (antecedent, behavior, consequence) plus setting, intensity, duration and context.
+export const behaviorLog = pgTable("behavior_log", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  occurredAt: timestamp("occurred_at").notNull(),
+  setting: text("setting"), // home | school | community | other
+  antecedent: text("antecedent").notNull(),
+  behavior: text("behavior").notNull(),
+  consequence: text("consequence"),
+  intensity: integer("intensity"), // 1 (mild) to 5 (severe)
+  durationMin: integer("duration_min"),
+  context: jsonb("context").$type<string[]>().notNull().default([]), // sleep | sensory | schedule | hunger | unwell | new_place
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [index("behavior_log_user_idx").on(t.userId, t.occurredAt)]);
+
+// Communication log: how the child communicated, who started it, what for, and whether it was understood.
+export const communicationLog = pgTable("communication_log", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  occurredAt: timestamp("occurred_at").notNull(),
+  mode: text("mode").notNull(), // speech | aac | sign | gesture | picture | other
+  initiation: text("initiation").notNull(), // child | prompted
+  purpose: text("purpose").notNull(), // request | reject | comment | greet | other
+  understood: boolean("understood").notNull(),
+  setting: text("setting"),
+  example: text("example"), // what was said or shown, e.g. "AAC device, 3 messages"
+  context: jsonb("context").$type<string[]>().notNull().default([]),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [index("communication_log_user_idx").on(t.userId, t.occurredAt)]);
