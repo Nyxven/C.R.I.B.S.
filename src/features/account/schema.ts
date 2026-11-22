@@ -1,3 +1,4 @@
+import { HOME_SECTIONS } from "@/lib/domain/homeLayout";
 import { z } from "zod";
 import { RELATIONSHIPS } from "@/lib/domain/onboarding";
 import { passwordSchema } from "@/server/auth/validation";
@@ -14,6 +15,7 @@ export const settingsInput = z.object({
   textSize: z.number().int().min(85).max(140).optional(),
   sensoryMode: z.boolean().optional(),
   notifOn: z.boolean().optional(),
+  homeLayout: z.array(z.object({ id: z.enum(HOME_SECTIONS), visible: z.boolean() }).strict()).max(HOME_SECTIONS.length).optional(),
 }).strict().refine((o) => Object.keys(o).length > 0, "Nothing to change.");
 
 export const changePasswordInput = z.object({ current: z.string().min(1).max(128), next: passwordSchema }).strict();

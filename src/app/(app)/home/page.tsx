@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { Baby, Bell, BookOpen, Bookmark, ChevronRight, ShieldCheck, Users } from "lucide-react";
+import { Baby, Bell, BookOpen, Bookmark, ChevronRight, ClipboardList, Plus, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
+import { DEFAULT_LAYOUT, visibleSections, type HomeSection } from "@/lib/domain/homeLayout";
+import { getPreferences } from "@/server/account/service";
+import { getLogs } from "@/server/logs/service";
+import { summarizeBehavior, summarizeCommunication } from "@/lib/domain/logs";
 import { capitalizeFirst } from "@/lib/domain/names";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getSession } from "@/server/auth/session";
@@ -31,28 +35,19 @@ export default async function Home() {
     uid ? getProgress(uid) : [],
     uid ? getRecommendations(uid) : { child: "", guides: [] },
   ]);
-  const unread = uid ? await countUnread(uid).catch(() => 0) : 0;
+  const [unread, prefs, logs] = await Promise.all([
+    uid ? countUnread(uid).catch(() => 0) : 0,
+    uid ? getPreferences(uid) : null,
+    uid ? getLogs(uid).catch(() => ({ behavior: [], communication: [] })) : { behavior: [], communication: [] },
+  ]);
+  const layout = prefs?.homeLayout ?? DEFAULT_LAYOUT;
+  const now = new Date();
+  const weekB = summarizeBehavior(logs.behavior, now).count, weekC = summarizeCommunication(logs.communication, now).count;
   const first = capitalizeFirst((g.parent || session?.user.name || "friend").trim().split(" ")[0] ?? "friend");
   const child = capitalizeFirst(g.child);
-  return (
-    <div className="space-y-8">
-      <header className="rise flex items-start justify-between gap-4">
-        <div className="min-w-0 space-y-2">
-          <h1 className="h-page">{t("home.hello", { name: first })}</h1>
-          <p className="text-lg font-bold text-coral-dark">{child ? t("home.youAnd", { child }) : t("home.youAndDefault")}</p>
-          <div className="ribbon-bar w-24" aria-hidden="true" />
-        </div>
-        <Link href="/notifications" className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm"
-          aria-label={unread > 0 ? t("home.notifNew", { n: unread }) : t("home.notifNone")}>
-          <Bell size={22} aria-hidden="true" />
-          {unread > 0 && <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-1 text-xs font-extrabold text-white" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
-        </Link>
-      </header>
-
-      {/* Its own layer, so the suggestion list opens over the cards below it. */}
-      <div data-tour="search" className="relative z-20"><SearchBox suggestions={suggestions} /></div>
-
-      {/* Child safety first: the research found wandering is parents' sharpest worry. */}
+  const sections: Record<HomeSection, React.ReactNode> = {
+    // Child safety first: the research found wandering is parents' sharpest worry.
+    safety: (
       <Link href="/find" className="find-card rise" data-tour="find-card">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-coral-dark" aria-hidden="true"><ShieldCheck size={22} /></span>
         <span className="min-w-0 flex-1">
@@ -61,8 +56,9 @@ export default async function Home() {
         </span>
         <ChevronRight size={20} className="shrink-0 text-coral-dark" aria-hidden="true" />
       </Link>
-
-      {rec.guides.length > 0 && (
+    ),
+    recommended: (
+      rec.guides.length > 0 ? (
         <section aria-labelledby="rec-title" className="rise">
           <h2 id="rec-title" className="mb-3 text-xl font-bold">{rec.child ? t("home.recFor", { child: capitalizeFirst(rec.child) }) : t("home.recDefault")}</h2>
           <ul className="stagger space-y-3">
@@ -80,8 +76,24 @@ export default async function Home() {
             ))}
           </ul>
         </section>
-      )}
-
+      ) : null
+    ),
+    logs: (
+      <section aria-labelledby="logs-title" className="find-card rise flex-col items-stretch !bg-white" style={{ borderColor: "var(--color-line)" }}>
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-tint-coral text-ink" aria-hidden="true"><ClipboardList size={22} /></span>
+            <div className="min-w-0 flex-1">
+              <h2 id="logs-title" className="font-display text-base font-bold leading-tight"><Link href="/logs" className="hover:underline">{t("home.logsTitle")}</Link></h2>
+              <p className="text-sm text-ink-soft">{weekB + weekC > 0 ? t("home.logsWeek", { b: weekB, c: weekC }) : t("home.logsNone")}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Link href="/logs?add=behavior" className="btn-secondary min-h-11 px-3 text-sm"><Plus size={16} aria-hidden="true" /> {t("home.addBehavior")}</Link>
+            <Link href="/logs?add=communication" className="btn-secondary min-h-11 px-3 text-sm"><Plus size={16} aria-hidden="true" /> {t("home.addComm")}</Link>
+          </div>
+        </section>
+    ),
+    guides: (
       <section aria-labelledby="guides-title" data-tour="guides">
         <h2 id="guides-title" className="mb-3 text-xl font-bold">{t("home.yourGuides")}</h2>
         {modules.length === 0 && <EmptyState icon={BookOpen} title={t("home.guidesSetup")}>{t("home.guidesSetupBody")}</EmptyState>}
@@ -102,7 +114,8 @@ export default async function Home() {
           })}
         </ul>
       </section>
-
+    ),
+    help: (
       <section aria-labelledby="space-title">
         <h2 id="space-title" className="mb-3 text-xl font-bold">{t("home.help")}</h2>
         <div className="list-group">
@@ -115,6 +128,30 @@ export default async function Home() {
           ))}
         </div>
       </section>
+    ),
+  };
+  return (
+    <div className="space-y-8">
+      <header className="rise flex items-start justify-between gap-4">
+        <div className="min-w-0 space-y-2">
+          <h1 className="h-page">{t("home.hello", { name: first })}</h1>
+          <p className="text-lg font-bold text-coral-dark">{child ? t("home.youAnd", { child }) : t("home.youAndDefault")}</p>
+          <div className="ribbon-bar w-24" aria-hidden="true" />
+        </div>
+        <Link href="/notifications" className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm"
+          aria-label={unread > 0 ? t("home.notifNew", { n: unread }) : t("home.notifNone")}>
+          <Bell size={22} aria-hidden="true" />
+          {unread > 0 && <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-brand px-1 text-xs font-extrabold text-white" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
+        </Link>
+      </header>
+
+      {/* Its own layer, so the suggestion list opens over the cards below it. */}
+      <div data-tour="search" className="relative z-20"><SearchBox suggestions={suggestions} /></div>
+
+      {/* The person's own order and choice of sections (Settings > Customize Home). */}
+      {visibleSections(layout).map((id) => <div key={id}>{sections[id]}</div>)}
+
+      <Link href="/settings/home" className="mx-auto flex min-h-11 w-fit items-center gap-2 rounded-full px-4 text-sm font-bold text-brand hover:bg-white"><SlidersHorizontal size={16} aria-hidden="true" /> {t("home.customize")}</Link>
     </div>
   );
 }
