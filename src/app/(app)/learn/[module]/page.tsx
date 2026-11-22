@@ -9,6 +9,8 @@ import { getProgress } from "@/server/progress/service";
 import { moduleProgress, readSlugs } from "@/lib/domain/progress";
 import { ProgressBar } from "@/components/content/ProgressBar";
 import { moduleLook } from "@/components/content/moduleStyle";
+import { localTitle } from "@/lib/domain/content";
+import { getLocale } from "@/lib/i18n/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ module: string }> }) {
   const { module } = await params;
@@ -17,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ module: s
 
 export default async function ModulePage({ params }: { params: Promise<{ module: string }> }) {
   const { module } = await params;
-  const [m, session] = await Promise.all([getModule(module), getSession()]);
+  const [m, session, locale] = await Promise.all([getModule(module), getSession(), getLocale()]);
   if (!m || !session) notFound();
   const entries = await getProgress(session.user.id);
   const read = readSlugs(entries);
@@ -40,7 +42,7 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
         <ol className="list-group stagger">
           {m.articles.map((a, i) => (
             <li key={a.slug}>
-              <LinkRow href={`/learn/${m.id}/${a.slug}`} title={a.title} sub={`${a.readTime}${read.has(a.slug) ? " · Read" : ""}`}
+              <LinkRow href={`/learn/${m.id}/${a.slug}`} title={localTitle(a, locale)} sub={`${a.readTime}${read.has(a.slug) ? " · Read" : ""}`}
                 lead={<span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display text-lg font-bold text-ink ${read.has(a.slug) ? "bg-tint-mint" : "bg-tint-purple"}`} aria-hidden="true">{read.has(a.slug) ? <Check size={20} /> : i + 1}</span>} />
             </li>
           ))}

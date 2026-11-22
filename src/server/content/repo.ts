@@ -14,7 +14,7 @@ export const listModules = (): Promise<ModuleRow[]> => db.select().from(contentM
 export const listArticleSummaries = () =>
   db.select({
     slug: article.slug, moduleId: article.moduleId, title: article.title, readTime: article.readTime,
-    reviewStatus: article.reviewStatus, sortOrder: article.sortOrder,
+    reviewStatus: article.reviewStatus, sortOrder: article.sortOrder, titleFil: article.titleFil,
   }).from(article).orderBy(asc(article.moduleId), asc(article.sortOrder));
 
 export const listArticles = (): Promise<ArticleRow[]> => db.select().from(article).orderBy(asc(article.moduleId), asc(article.sortOrder));

@@ -24,7 +24,7 @@ export const getModule = async (id: string) => (await getModules()).find((m) => 
 export async function getArticleBySlug(moduleId: string, slug: string): Promise<ArticleFull | null> {
   const [row, mod] = await Promise.all([repo.getArticle(slug), getModule(moduleId)]);
   if (!row || !mod || row.moduleId !== mod.id) return null;
-  return { slug: row.slug, moduleId: row.moduleId, title: row.title, readTime: row.readTime, reviewStatus: row.reviewStatus, html: row.html, moduleName: mod.name, moduleShortName: mod.shortName };
+  return { slug: row.slug, moduleId: row.moduleId, title: row.title, readTime: row.readTime, reviewStatus: row.reviewStatus, html: row.html, moduleName: mod.name, moduleShortName: mod.shortName, titleFil: row.titleFil, htmlFil: row.htmlFil };
 }
 
 /** Every guide with its full text (used by search). Small data set, so one query is fine. */

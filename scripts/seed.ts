@@ -27,7 +27,7 @@ async function main() {
   });
   await db.insert(article).values(rows.articles).onConflictDoUpdate({
     target: article.slug,
-    set: { moduleId: sql`excluded.module_id`, title: sql`excluded.title`, readTime: sql`excluded.read_time`, html: sql`excluded.html`, sortOrder: sql`excluded.sort_order`, updatedAt: sql`now()` },
+    set: { moduleId: sql`excluded.module_id`, title: sql`excluded.title`, readTime: sql`excluded.read_time`, html: sql`excluded.html`, sortOrder: sql`excluded.sort_order`, titleFil: sql`excluded.title_fil`, htmlFil: sql`excluded.html_fil`, updatedAt: sql`now()` },
   });
   await db.insert(faq).values(rows.faqs).onConflictDoUpdate({
     target: faq.id,

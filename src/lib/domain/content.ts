@@ -2,8 +2,12 @@
 
 export type ReviewStatus = "prototype-content" | "draft" | "expert-reviewed";
 
-export type ArticleSummary = { slug: string; title: string; readTime: string; reviewStatus: string; moduleId: string };
-export type ArticleFull = ArticleSummary & { html: string; moduleName: string; moduleShortName: string };
+export type ArticleSummary = { slug: string; title: string; readTime: string; reviewStatus: string; moduleId: string; titleFil?: string | null };
+export type ArticleFull = ArticleSummary & { html: string; moduleName: string; moduleShortName: string; htmlFil?: string | null };
+
+/** The Filipino title or text when the person chose Filipino and a translation exists; English otherwise. */
+export const localTitle = (a: { title: string; titleFil?: string | null }, locale: string): string => (locale === "fil" && a.titleFil ? a.titleFil : a.title);
+export const localHtml = (a: { html: string; htmlFil?: string | null }, locale: string): string => (locale === "fil" && a.htmlFil ? a.htmlFil : a.html);
 export type ModuleWithArticles = { id: string; name: string; shortName: string; description: string; articles: ArticleSummary[] };
 export type FaqItem = { id: string; question: string; answer: string };
 export type Professional = { id: string; name: string; role: string; location: string; note: string; verifiedAt: Date | null; source: string | null };
