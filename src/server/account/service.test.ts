@@ -27,6 +27,7 @@ vi.mock("@/server/onboarding/repo", () => ({
 vi.mock("@/server/notifications/service", () => ({ notify: async (to: string, type: string, body: string) => { s.notes.push(`${to}|${type}|${body.slice(0, 20)}`); } }));
 vi.mock("@/server/community/repo", () => ({ listByAuthor: async () => [{ body: "Bedtime tip", isReply: false, status: "visible", createdAt: new Date("2026-11-08T00:00:00Z") }] }));
 vi.mock("@/server/progress/repo", () => ({ listProgress: async () => [{ slug: "a", saved: true, read: true }] }));
+vi.mock("@/server/logs/repo", () => ({ listBehavior: async () => [{ id: "b1", occurredAt: new Date("2026-11-09T08:00:00Z"), setting: "home", antecedent: "Loud blender", behavior: "Covered ears", consequence: null, intensity: 3, durationMin: 5, context: ["sensory"], notes: null }], listCommunication: async () => [] }));
 vi.mock("@/server/chat/repo", () => ({
   listThreads: async () => [{ id: "t1", title: "Bedtime", updatedAt: new Date("2026-11-09T00:00:00Z") }],
   listMessages: async () => [{ id: "m1", role: "user", content: "Q", sources: [], feedback: null, createdAt: new Date("2026-11-09T00:00:00Z") }],
@@ -106,6 +107,8 @@ describe("exportData", () => {
     expect(data.account.email).toBe("ana@example.com");
     expect(data.child).toEqual({ nickname: "Bunso", ageYears: 4 });
     expect(data.askChats[0].messages[0].text).toBe("Q");
+    expect(data.logs.behavior[0]).toMatchObject({ at: "2026-11-09T08:00:00.000Z", antecedent: "Loud blender", context: ["sensory"] });
+    expect(data.logs.behavior[0].id).toBeUndefined();
     expect(data.ifFoundTag).toMatchObject({ enabled: true, timesOpened: 2 });
     expect(data.communityPosts[0].text).toBe("Bedtime tip");
     for (const leak of ["passwordHash", "H:old-password", "tag1", "userId", '"id"']) expect(r.json).not.toContain(leak);

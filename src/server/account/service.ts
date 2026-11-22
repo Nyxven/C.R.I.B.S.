@@ -8,9 +8,11 @@ import * as chat from "@/server/chat/repo";
 import * as community from "@/server/community/repo";
 import * as found from "@/server/found/repo";
 import { texts } from "@/lib/notifications/rules";
+import { normalizeLayout, type HomeLayout } from "@/lib/domain/homeLayout";
 import { notify } from "@/server/notifications/service";
 import * as onboarding from "@/server/onboarding/repo";
 import * as progress from "@/server/progress/repo";
+import * as logs from "@/server/logs/repo";
 
 export type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 const TRY_LATER = "Too many tries. Please wait a while and try again.";
@@ -57,7 +59,7 @@ export async function exportData(userId: string, guard: AbuseGuard): Promise<Res
   if (!(await guard.consume(`acct:export:${userId}`, 1, 3, 3600)).allowed) return { ok: false, error: TRY_LATER };
   const u = await auth.findUserById(userId);
   if (!u) return { ok: false, error: GENERIC };
-  const [prof, kid, entries, threads, posts] = await Promise.all([onboarding.getProfile(userId), onboarding.getChild(userId), progress.listProgress(userId), chat.listThreads(userId, 100), community.listByAuthor(userId, 500)]);
+  const [prof, kid, entries, threads, posts, behaviorLogs, communicationLogs] = await Promise.all([onboarding.getProfile(userId), onboarding.getChild(userId), progress.listProgress(userId), chat.listThreads(userId, 100), community.listByAuthor(userId, 500), logs.listBehavior(userId, 5000), logs.listCommunication(userId, 5000)]);
   const [contact, tag] = kid ? await Promise.all([onboarding.getContact(kid.id), found.activeTag(kid.id)]) : [undefined, undefined];
   const chats = await Promise.all(threads.map(async (t) => ({ title: t.title, updatedAt: t.updatedAt, messages: await chat.listMessages(userId, t.id, 200) })));
   const now = new Date();
@@ -71,6 +73,7 @@ export async function exportData(userId: string, guard: AbuseGuard): Promise<Res
     chats: chats.map((c) => ({ title: c.title, updatedAt: c.updatedAt, messages: c.messages.map((m) => ({ role: m.role, content: m.content, feedback: m.feedback, createdAt: m.createdAt })) })),
     tag: tag ? { enabled: tag.enabled, createdAt: tag.createdAt, accessCount: tag.accessCount } : null,
     posts,
+    logs: { behavior: behaviorLogs, communication: communicationLogs },
   });
   return { ok: true, fileName: exportFileName(now), json: JSON.stringify(data, null, 2) };
 }
@@ -91,7 +94,7 @@ export async function updateSettings(userId: string, input: unknown): Promise<Re
 }
 
 /** What the Settings screen needs to show: the current switches. */
-export async function getPreferences(userId: string): Promise<{ notifOn: boolean; displayName: string; relationship: string; textSize: number }> {
+export async function getPreferences(userId: string): Promise<{ notifOn: boolean; displayName: string; relationship: string; textSize: number; homeLayout: HomeLayout }> {
   const prof = await onboarding.getProfile(userId);
-  return { notifOn: prof?.notifOn ?? true, displayName: prof?.displayName ?? "", relationship: prof?.relationship ?? "", textSize: prof?.textSize ?? 100 };
+  return { notifOn: prof?.notifOn ?? true, displayName: prof?.displayName ?? "", relationship: prof?.relationship ?? "", textSize: prof?.textSize ?? 100, homeLayout: normalizeLayout(prof?.homeLayout) };
 }

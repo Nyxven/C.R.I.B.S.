@@ -10,9 +10,12 @@ export type ExportInput = {
   chats: { title: string; updatedAt: Date; messages: { role: string; content: string; feedback: string | null; createdAt: Date }[] }[];
   tag: { enabled: boolean; createdAt: Date; accessCount: number } | null;
   posts: { body: string; isReply: boolean; status: string; createdAt: Date }[];
+  logs?: { behavior: ({ occurredAt: Date } & Record<string, unknown>)[]; communication: ({ occurredAt: Date } & Record<string, unknown>)[] };
 };
 
 const iso = (d: Date) => d.toISOString();
+/** A log row for the file: no internal id, readable time. */
+const withoutId = ({ id: _id, occurredAt, ...rest }: { occurredAt: Date } & Record<string, unknown>) => { void _id; return { at: iso(new Date(occurredAt)), ...rest }; };
 
 export function buildExport(i: ExportInput) {
   return {
@@ -25,6 +28,7 @@ export function buildExport(i: ExportInput) {
     guides: { saved: i.progress.filter((p) => p.saved).map((p) => p.slug), read: i.progress.filter((p) => p.read).map((p) => p.slug) },
     askChats: i.chats.map((c) => ({ title: c.title, lastMessageAt: iso(c.updatedAt), messages: c.messages.map((m) => ({ role: m.role, text: m.content, feedback: m.feedback, at: iso(m.createdAt) })) })),
     communityPosts: i.posts.map((p) => ({ text: p.body, isReply: p.isReply, status: p.status, at: iso(p.createdAt) })),
+    logs: { behavior: (i.logs?.behavior ?? []).map(withoutId), communication: (i.logs?.communication ?? []).map(withoutId) },
     ifFoundTag: i.tag ? { enabled: i.tag.enabled, madeAt: iso(i.tag.createdAt), timesOpened: i.tag.accessCount } : null,
   };
 }
