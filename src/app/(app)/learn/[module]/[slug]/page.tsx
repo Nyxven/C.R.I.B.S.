@@ -8,6 +8,7 @@ import { getSession } from "@/server/auth/session";
 import { getEntryFor } from "@/server/progress/service";
 import { ArticleActions } from "@/components/content/ArticleActions";
 import { isExpertReviewed, localHtml, localTitle } from "@/lib/domain/content";
+import { localModuleShort, localReadTime } from "@/lib/domain/localize";
 import { moduleLook } from "@/components/content/moduleStyle";
 import { getLocale, getT } from "@/lib/i18n/server";
 import { Logo } from "@/components/Logo";
@@ -29,16 +30,16 @@ export default async function Article({ params }: { params: Promise<{ module: st
   const { box, Icon } = moduleLook(a.moduleId);
   return (
     <article className="space-y-7">
-      <BackLink href={`/learn/${a.moduleId}`}>{a.moduleShortName}</BackLink>
+      <BackLink href={`/learn/${a.moduleId}`}>{localModuleShort(a.moduleId, a.moduleShortName, locale)}</BackLink>
       <header className={`rise space-y-3 rounded-3xl p-5 ${box}`}>
         <p className="flex items-center gap-2 font-bold text-ink">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-sm" aria-hidden="true"><Icon size={20} /></span>
-          {a.moduleShortName}
+          {localModuleShort(a.moduleId, a.moduleShortName, locale)}
         </p>
         <h1 className="h-page" lang={locale === "fil" && a.titleFil ? "fil" : "en"}>{localTitle(a, locale)}</h1>
         <div className="flex flex-wrap gap-2">
           {at >= 0 && <p className="chip bg-white">{t("article.guideOf", { n: at + 1, total: list.length })}</p>}
-          <p className="chip bg-white">{a.readTime}</p>{isExpertReviewed(a) && <p className="chip bg-white">{t("article.reviewed")}</p>}</div>
+          <p className="chip bg-white">{localReadTime(a.readTime, locale)}</p>{isExpertReviewed(a) && <p className="chip bg-white">{t("article.reviewed")}</p>}</div>
       </header>
       <div className="prose-cribs" lang={locale === "fil" && a.htmlFil ? "fil" : "en"} dangerouslySetInnerHTML={{ __html: localHtml(a, locale) }} />
       <ArticleActions slug={a.slug} initial={entry} />
@@ -46,11 +47,11 @@ export default async function Article({ params }: { params: Promise<{ module: st
       {next && (
         <section aria-labelledby="next-title">
           <h2 id="next-title" className="section-label">{t("article.upNext")}</h2>
-          <div className="list-group"><LinkRow href={`/learn/${a.moduleId}/${next.slug}`} title={localTitle(next, locale)} sub={next.readTime} /></div>
+          <div className="list-group"><LinkRow href={`/learn/${a.moduleId}/${next.slug}`} title={localTitle(next, locale)} sub={localReadTime(next.readTime, locale)} /></div>
         </section>
       )}
       <p className="notice notice-warn text-sm"><Info size={20} className="mt-0.5 shrink-0 text-amber-dark" aria-hidden="true" /><span>{t("article.note")}</span></p>
-      {!next && <Link href={`/learn/${a.moduleId}`} className="btn-secondary w-full">{t("article.backTo", { module: a.moduleShortName })}</Link>}
+      {!next && <Link href={`/learn/${a.moduleId}`} className="btn-secondary w-full">{t("article.backTo", { module: localModuleShort(a.moduleId, a.moduleShortName, locale) })}</Link>}
     </article>
   );
 }

@@ -12,10 +12,13 @@ import { getModules, getSuggestIndex } from "@/server/content/service";
 import { getRecommendations } from "@/server/content/recommendations";
 import { countUnread } from "@/server/notifications/service";
 import { getProgress } from "@/server/progress/service";
-import { moduleProgress, progressLabel } from "@/lib/domain/progress";
+import { moduleProgress } from "@/lib/domain/progress";
+import { localModule, localModuleShort, localProgress, localReadTime, localReason } from "@/lib/domain/localize";
+
 import { SearchBox } from "@/components/content/SearchBox";
 import { moduleLook } from "@/components/content/moduleStyle";
-import { getT } from "@/lib/i18n/server";
+import { getLocale, getT } from "@/lib/i18n/server";
+import { localTitle } from "@/lib/domain/content";
 import type { Key } from "@/lib/i18n/en";
 
 export const metadata = { title: "Home" };
@@ -28,7 +31,7 @@ const space = [
 ] as const satisfies readonly { href: string; title: Key; sub: Key; Icon: unknown; tint: string; tour?: string }[];
 
 export default async function Home() {
-  const [session, modules, t, suggestions] = await Promise.all([getSession(), getModules(), getT(), getSuggestIndex()]);
+  const [session, modules, t, suggestions, locale] = await Promise.all([getSession(), getModules(), getT(), getSuggestIndex(await getLocale()), getLocale()]);
   const uid = session?.user.id;
   const [g, entries, rec] = await Promise.all([
     uid ? getGreeting(uid) : { parent: "", child: "" },
@@ -66,9 +69,9 @@ export default async function Home() {
               <li key={a.slug}>
                 <Link href={`/learn/${a.moduleId}/${a.slug}`} className="card flex min-h-20 items-center gap-4 p-4 transition-transform duration-150 active:scale-[.99]">
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-bold text-coral-dark">{a.reason}</span>
-                    <span className="block font-display text-lg font-bold leading-tight">{a.title}</span>
-                    <span className="block text-sm text-ink-soft">{a.moduleShortName} · {a.readTime}</span>
+                    <span className="block text-sm font-bold text-coral-dark">{localReason(a.reason, locale)}</span>
+                    <span className="block font-display text-lg font-bold leading-tight">{localTitle(a, locale)}</span>
+                    <span className="block text-sm text-ink-soft">{localModuleShort(a.moduleId, a.moduleShortName, locale)} · {localReadTime(a.readTime, locale)}</span>
                   </span>
                   <ChevronRight size={22} className="shrink-0 text-ink-soft" aria-hidden="true" />
                 </Link>
@@ -105,8 +108,8 @@ export default async function Home() {
                 <Link href={`/learn/${m.id}`} className={`flex h-full min-h-40 flex-col justify-between rounded-3xl p-4 shadow-sm transition-transform duration-150 active:scale-[.98] ${box}`}>
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ink shadow-sm"><Icon size={22} aria-hidden="true" /></span>
                   <span>
-                    <span className="block font-display text-lg font-bold leading-tight">{m.shortName}</span>
-                    <span className="mt-1 block text-sm font-semibold text-ink-soft">{progressLabel(moduleProgress(m.articles.map((a) => a.slug), entries))}</span>
+                    <span className="block font-display text-lg font-bold leading-tight">{localModule(m, locale).shortName}</span>
+                    <span className="mt-1 block text-sm font-semibold text-ink-soft">{localProgress(moduleProgress(m.articles.map((a) => a.slug), entries), locale)}</span>
                   </span>
                 </Link>
               </li>

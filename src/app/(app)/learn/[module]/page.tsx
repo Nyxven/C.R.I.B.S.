@@ -10,6 +10,7 @@ import { moduleProgress, readSlugs } from "@/lib/domain/progress";
 import { ProgressBar } from "@/components/content/ProgressBar";
 import { moduleLook } from "@/components/content/moduleStyle";
 import { localTitle } from "@/lib/domain/content";
+import { localModule, localReadTime } from "@/lib/domain/localize";
 import { getLocale } from "@/lib/i18n/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ module: string }> }) {
@@ -30,9 +31,9 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
       <BackLink href="/home">Home</BackLink>
       <header className={`rise space-y-3 rounded-3xl p-5 ${box}`}>
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-ink shadow-sm"><Icon size={24} aria-hidden="true" /></span>
-        <h1 className="h-page">{m.name}</h1>
-        <p className="text-ink-soft">{m.description}</p>
-        <ProgressBar progress={progress} />
+        <h1 className="h-page">{localModule(m, locale).name}</h1>
+        <p className="text-ink-soft">{localModule(m, locale).description}</p>
+        <ProgressBar progress={progress} locale={locale} />
       </header>
       {m.articles.length === 0 ? (
         <EmptyState icon={BookOpen} title="Guides are on the way" actionHref="/home" actionLabel="Back to Home">
@@ -42,7 +43,7 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
         <ol className="list-group stagger">
           {m.articles.map((a, i) => (
             <li key={a.slug}>
-              <LinkRow href={`/learn/${m.id}/${a.slug}`} title={localTitle(a, locale)} sub={`${a.readTime}${read.has(a.slug) ? " · Read" : ""}`}
+              <LinkRow href={`/learn/${m.id}/${a.slug}`} title={localTitle(a, locale)} sub={`${localReadTime(a.readTime, locale)}${read.has(a.slug) ? (locale === "fil" ? " · Nabasa na" : " · Read") : ""}`}
                 lead={<span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display text-lg font-bold text-ink ${read.has(a.slug) ? "bg-tint-mint" : "bg-tint-purple"}`} aria-hidden="true">{read.has(a.slug) ? <Check size={20} /> : i + 1}</span>} />
             </li>
           ))}

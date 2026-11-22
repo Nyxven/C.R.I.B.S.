@@ -1,10 +1,11 @@
-import { progressLabel, type ModuleProgress } from "@/lib/domain/progress";
+import type { ModuleProgress } from "@/lib/domain/progress";
+import { localProgress } from "@/lib/domain/localize";
 
 /** A small bar plus words ("2 of 3 read"). The words carry the meaning, the bar is only decoration. */
-export function ProgressBar({ progress }: { progress: ModuleProgress }) {
+export function ProgressBar({ progress, locale = "en" }: { progress: ModuleProgress; locale?: string }) {
   return (
     <div>
-      <p className="text-sm font-bold">{progressLabel(progress)}</p>
+      <p className="text-sm font-bold">{localProgress(progress, locale)}</p>
       <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/70" aria-hidden="true">
         <div className="h-full rounded-full transition-[width] duration-200" style={{ width: `${progress.percent}%`, background: "var(--ribbon)" }} />
       </div>
