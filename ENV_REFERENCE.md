@@ -19,7 +19,8 @@ Names only. **Never put real values in this repo.** Template: `.env.example`. Pr
 | `AI_MAX_OUTPUT_TOKENS`, `AI_RATE_LIMIT_PER_HOUR`, `AI_USER_PER_DAY`, `AI_USER_TOKENS_PER_DAY`, `AI_GLOBAL_PER_MIN`, `AI_GLOBAL_PER_DAY`, `AI_GLOBAL_TOKENS_PER_DAY` | Optional (defaults exist) | No | `src/lib/ai/policy.ts` |
 | `TRUST_PROXY` | Optional (`vercel` default) | No | `src/lib/net/clientIp.ts` |
 | `MAIL_DAILY_CAP` | Optional (250) | No | auth service |
-| `CRON_SECRET` | Yes for the daily cleanup | **Yes** | `src/app/api/cron/cleanup/route.ts` |
+| `CRON_SECRET` | Yes for the daily cleanup and reminders | **Yes** | `src/app/api/cron/cleanup/route.ts`, `reminders/route.ts` |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | For phone notifications (without both, Settings says "not set up yet") | Private key: **Yes** | `src/server/push/service.ts`. Make a pair with `npx web-push generate-vapid-keys`. Changing them turns phone notifications off for everyone until they turn them on again. |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Optional (bot check) | secret key: **Yes** | `src/server/security/turnstile.ts`, widget |
 | `MODERATOR_EMAILS` | Optional (nobody can moderate if empty) | No | community moderation |
 | `COMMUNITY_REPORT_HIDE_AT` | Optional (2) | No | community rules |
