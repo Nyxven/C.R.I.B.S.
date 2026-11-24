@@ -106,3 +106,18 @@ export function getCommunityConfig(env: Record<string, string | undefined> = pro
   const d = lenient(communityShape, env);
   return { moderatorEmails: d.MODERATOR_EMAILS, reportHideAt: d.COMMUNITY_REPORT_HIDE_AT };
 }
+
+// ---------- Phone notifications (Web Push). Optional: without both keys, CRIBS says "not set up yet" and sends nothing. ----------
+const pushShape = {
+  VAPID_PUBLIC_KEY: z.preprocess(blank, z.string().regex(/^[A-Za-z0-9_-]{80,100}$/).optional()),
+  VAPID_PRIVATE_KEY: z.preprocess(blank, z.string().regex(/^[A-Za-z0-9_-]{40,50}$/).optional()),
+  NEXT_PUBLIC_APP_URL: z.preprocess(blank, z.string().url().optional()),
+};
+export type PushConfig = { publicKey: string; privateKey: string; subject: string } | null;
+/** Never throws. The subject is the app's https address (push services use it to reach the sender), never a person's email. */
+export function getPushConfig(env: Record<string, string | undefined> = process.env): PushConfig {
+  const d = lenient(pushShape, env);
+  if (!d.VAPID_PUBLIC_KEY || !d.VAPID_PRIVATE_KEY) return null;
+  const subject = d.NEXT_PUBLIC_APP_URL?.startsWith("https://") ? d.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "") : "https://cribs.example";
+  return { publicKey: d.VAPID_PUBLIC_KEY, privateKey: d.VAPID_PRIVATE_KEY, subject };
+}

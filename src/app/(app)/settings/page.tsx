@@ -1,4 +1,4 @@
-import { Baby, FileText, History, Languages, LifeBuoy, Lock, ScrollText, SlidersHorizontal, Type, User } from "lucide-react";
+import { Baby, BellRing, FileText, History, Languages, LifeBuoy, Lock, ScrollText, SlidersHorizontal, Type, User } from "lucide-react";
 import { getT } from "@/lib/i18n/server";
 import { getLocale } from "@/lib/i18n/server";
 import { LOCALES } from "@/lib/i18n/core";
@@ -28,6 +28,7 @@ export default async function Page() {
 
       <SettingsGroup id="grp-prefs" label={t("settings.preferences")}>
         <NotificationsSwitch initial={prefs.notifOn} />
+        <RowLink href="/settings/notifications" icon={BellRing} title={t("settings.push")} sub={t("settings.pushSub")} />
         <RowLink href="/settings/home" icon={SlidersHorizontal} title={t("settings.layout")} sub={t("settings.layoutSub")} />
         <RowLink href="/settings/appearance" icon={Type} title={t("settings.textSize")} sub={TEXT_SIZES.find((s) => s.value === normalizeTextSize(prefs.textSize))?.label} />
         <RowLink href="/settings/language" icon={Languages} title={t("lang.title")} sub={LOCALES.find((l) => l.value === locale)?.native} />

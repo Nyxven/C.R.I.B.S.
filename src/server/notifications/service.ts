@@ -1,6 +1,7 @@
 import { safeLink, shouldNotify, type NotificationType } from "@/lib/notifications/rules";
 import { isUuid } from "@/lib/chat/history";
 import { getProfile } from "@/server/onboarding/repo";
+import { sendToUser } from "@/server/push/service";
 import * as repo from "./repo";
 
 export type { NotificationRow } from "./repo";
@@ -12,6 +13,7 @@ export async function notify(userId: string, type: NotificationType, body: strin
     const prof = await getProfile(userId);
     if (!shouldNotify(type, prof?.notifOn ?? true)) return;
     await repo.insert(userId, { type, body: body.slice(0, 300), link: safeLink(link) });
+    await sendToUser(userId, { title: "CRIBS", body: body.slice(0, 240), link: safeLink(link) ?? "/notifications", tag: type }); // also to their phone, if they turned that on
   } catch (e) {
     console.error("[notify] failed:", e instanceof Error ? e.name : "unknown"); // a failed notice must never break what caused it
   }
