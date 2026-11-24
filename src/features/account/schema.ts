@@ -15,6 +15,8 @@ export const settingsInput = z.object({
   textSize: z.number().int().min(85).max(140).optional(),
   sensoryMode: z.boolean().optional(),
   notifOn: z.boolean().optional(),
+  remindRead: z.boolean().optional(),
+  remindLog: z.boolean().optional(),
   homeLayout: z.array(z.object({ id: z.enum(HOME_SECTIONS), visible: z.boolean() }).strict()).max(HOME_SECTIONS.length).optional(),
 }).strict().refine((o) => Object.keys(o).length > 0, "Nothing to change.");
 

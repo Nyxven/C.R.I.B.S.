@@ -3,7 +3,7 @@
 export type ExportInput = {
   now: Date;
   account: { name: string; email: string; createdAt: Date };
-  settings: { displayName: string | null; relationship: string | null; language: string; theme: string; textSize: number; sensoryMode: boolean; notifOn: boolean; chatHistoryEnabled: boolean } | null;
+  settings: { displayName: string | null; relationship: string | null; language: string; theme: string; textSize: number; sensoryMode: boolean; notifOn: boolean; remindRead: boolean; remindLog: boolean; findMyLink: string | null; findMyAddedAt: Date | null; chatHistoryEnabled: boolean } | null;
   child: Record<string, unknown> | null;
   contact: { name: string; phone: string; isPublic: boolean } | null;
   progress: { slug: string; saved: boolean; read: boolean }[];

@@ -66,7 +66,7 @@ export async function exportData(userId: string, guard: AbuseGuard): Promise<Res
   const data = buildExport({
     now,
     account: { name: u.name, email: u.email, createdAt: u.createdAt },
-    settings: prof ? { displayName: prof.displayName, relationship: prof.relationship, language: prof.language, theme: prof.theme, textSize: prof.textSize, sensoryMode: prof.sensoryMode, notifOn: prof.notifOn, chatHistoryEnabled: prof.chatHistoryEnabled } : null,
+    settings: prof ? { displayName: prof.displayName, relationship: prof.relationship, language: prof.language, theme: prof.theme, textSize: prof.textSize, sensoryMode: prof.sensoryMode, notifOn: prof.notifOn, remindRead: prof.remindRead, remindLog: prof.remindLog, findMyLink: prof.findMyUrl, findMyAddedAt: prof.findMyAddedAt, chatHistoryEnabled: prof.chatHistoryEnabled } : null,
     child: kid ? stripIds(kid) : null,
     contact: contact ? { name: contact.name, phone: contact.phone, isPublic: contact.isPublic } : null,
     progress: entries,
@@ -94,7 +94,7 @@ export async function updateSettings(userId: string, input: unknown): Promise<Re
 }
 
 /** What the Settings screen needs to show: the current switches. */
-export async function getPreferences(userId: string): Promise<{ notifOn: boolean; displayName: string; relationship: string; textSize: number; homeLayout: HomeLayout }> {
+export async function getPreferences(userId: string): Promise<{ notifOn: boolean; remindRead: boolean; remindLog: boolean; displayName: string; relationship: string; textSize: number; homeLayout: HomeLayout }> {
   const prof = await onboarding.getProfile(userId);
-  return { notifOn: prof?.notifOn ?? true, displayName: prof?.displayName ?? "", relationship: prof?.relationship ?? "", textSize: prof?.textSize ?? 100, homeLayout: normalizeLayout(prof?.homeLayout) };
+  return { notifOn: prof?.notifOn ?? true, remindRead: prof?.remindRead ?? true, remindLog: prof?.remindLog ?? true, displayName: prof?.displayName ?? "", relationship: prof?.relationship ?? "", textSize: prof?.textSize ?? 100, homeLayout: normalizeLayout(prof?.homeLayout) };
 }

@@ -53,6 +53,11 @@ export const profile = pgTable("profile", {
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   chatHistoryEnabled: boolean("chat_history_enabled").notNull().default(true), // false = Ask conversations are not saved
   homeLayout: jsonb("home_layout").$type<{ id: string; visible: boolean }[]>(), // Home sections in the person's order; null = default
+  findMyUrl: text("find_my_url"), // Apple Find My "Share Item Location" link the parent pasted; works for about 7 days
+  findMyAddedAt: timestamp("find_my_added_at"),
+  remindRead: boolean("remind_read").notNull().default(true), // phone reminders: a guide to read
+  remindLog: boolean("remind_log").notNull().default(true), // phone reminders: add today's log
+  lastReminderAt: timestamp("last_reminder_at"),
 });
 export const child = pgTable("child", {
   id: text("id").primaryKey(),
@@ -240,3 +245,14 @@ export const communicationLog = pgTable("communication_log", {
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (t) => [index("communication_log_user_idx").on(t.userId, t.occurredAt)]);
+
+// ---------- Phone notifications (Web Push). One row per device that said yes; deleted with the account. ----------
+export const pushSubscription = pgTable("push_subscription", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  locale: text("locale").notNull().default("en"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [index("push_subscription_user_idx").on(t.userId)]);

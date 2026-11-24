@@ -4,7 +4,7 @@ import { buildExport, exportFileName, type ExportInput } from "./export";
 const input: ExportInput = {
   now: new Date("2026-11-10T08:00:00Z"),
   account: { name: "Ana", email: "ana@example.com", createdAt: new Date("2026-11-01T00:00:00Z") },
-  settings: { displayName: "Ana", relationship: "mother", language: "en", theme: "sunrise", textSize: 100, sensoryMode: false, notifOn: true, chatHistoryEnabled: true },
+  settings: { displayName: "Ana", relationship: "mother", language: "en", theme: "sunrise", textSize: 100, sensoryMode: false, notifOn: true, remindRead: true, remindLog: true, findMyLink: null, findMyAddedAt: null, chatHistoryEnabled: true },
   child: { nickname: "Bunso", ageYears: 4 },
   contact: { name: "Ate Rose", phone: "09171234567", isPublic: true },
   progress: [{ slug: "a", saved: true, read: false }, { slug: "b", saved: false, read: true }, { slug: "c", saved: true, read: true }],
